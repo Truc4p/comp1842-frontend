@@ -68,7 +68,7 @@ const viewDetails = (id) => {
           <tr v-for="product in products" :key="product._id">
             <td class="py-2 px-4 border-b">{{ product._id }}</td>
             <td class="py-2 px-4 border-b">{{ product.name }}</td>
-            <td class="py-2 px-4 border-b">{{ product.category.name }}</td>
+            <td class="py-2 px-4 border-b">{{ product.category ? product.category.name : 'No Category' }}</td>
             <td class="py-2 px-4 border-b">
               
                 <router-link :to="`/products/edit/${product._id}`">

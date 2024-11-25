@@ -1,4 +1,4 @@
-<!-- src/layout/AppLayout.vue -->
+<!-- src/layout/PublicLayout.vue -->
 <template>
   <div class="min-h-screen h-screen flex flex-col bg-gray-100">
     <Navbar />
@@ -15,5 +15,5 @@
 </template>
 
 <script setup>
-import Navbar from "./Navbar.vue";
+import Navbar from "./Customer-Navbar.vue";
 </script>

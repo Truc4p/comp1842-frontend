@@ -74,7 +74,7 @@
         },
       });
       console.log('Category updated successfully'); // Debugging log
-      router.push('/categories');
+      router.push('/admin/categories');
     } catch (error) {
       console.error('Error updating category:', error);
     }

@@ -1,9 +1,9 @@
 # List all categories
 
-Update the `AppLayout.vue` again to make the app really full screen
+Update the `PublicLayout.vue` again to make the app really full screen
 
 ```vue
-<!-- src/layout/AppLayout.vue -->
+<!-- src/layout/PublicLayout.vue -->
 <template>
   <div class="min-h-screen h-screen flex flex-col bg-gray-100">
     <Navbar />

@@ -39,7 +39,7 @@ const handleSubmit = async () => {
       },
     });
     console.log('Category created:', response.data);
-    router.push('/categories');
+    router.push('/admin/categories');
   } catch (error) {
     console.error('Error creating category:', error);
   }

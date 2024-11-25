@@ -39,7 +39,7 @@
         },
       });
       console.log('Category deleted successfully');
-      router.push('/categories');
+      router.push('/admin/categories');
     } catch (error) {
       console.error('Error deleting category:', error);
     }

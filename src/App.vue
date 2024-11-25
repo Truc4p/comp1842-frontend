@@ -1,7 +1,7 @@
 <script setup>
-import AppLayout from "./layout/AppLayout.vue";
+import PublicLayout from "./layout/PublicLayout.vue";
 </script>
 
 <template>
-  <AppLayout />
+  <PublicLayout />
 </template>

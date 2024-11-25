@@ -75,7 +75,7 @@ try {
     },
     });
     console.log('Product created:', response.data);
-    router.push('/products');
+    router.push('/admin/products');
 } catch (error) {
     console.error('Error creating product:', error);
 }

@@ -6,8 +6,11 @@
         <router-link to="/admin/admin-page" class="text-white font-bold text-xl">MyApp</router-link>
       </div>
       <div>
+        <router-link to="/products" class="text-white mr-4">Products</router-link>
+        <router-link to="/categories" class="text-white mr-4">Categories</router-link>
+        <router-link to="/orders" class="text-white mr-4">Orders</router-link>
+        <router-link to="/users" class="text-white mr-4">Users</router-link>
         <router-link to="/logout" class="text-white mr-4">Logout</router-link>
-
       </div>
     </div>
   </nav>

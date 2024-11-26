@@ -44,55 +44,57 @@ const viewDetails = (id) => {
 </script>
 
 <template>
-  <div class="container mx-auto p-4">
-    <h1>Admin Page</h1>
-    <!-- Create Category Button -->
-    <div class="flex mb-4">
-      <router-link to="/create-category">
-        <button class="btn-primary" @click="createCategory">
-          Create Category
-        </button>
-      </router-link>  
-    </div>
+  <div>
+    <div class="container mx-auto p-4">
+      <h1>Admin Page</h1>
+      <!-- Create Category Button -->
+      <div class="flex mb-4">
+        <router-link to="/admin/create-category">
+          <button class="btn-primary" @click="createCategory">
+            Create Category
+          </button>
+        </router-link>  
+      </div>
 
-    <!-- Categories Table -->
-    <div class="overflow-x-auto">
-      <table class="min-w-full bg-white border border-gray-300">
-        <thead>
-          <tr>
-            <th class="py-2 px-4 border-b">ID</th>
-            <th class="py-2 px-4 border-b">Name</th>
-            <th class="py-2 px-4 border-b">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="category in categories" :key="category._id">
-            <td class="py-2 px-4 border-b">{{ category._id }}</td>
-            <td class="py-2 px-4 border-b">{{ category.name }}</td>
-            <td class="py-2 px-4 border-b">
-              
-              <router-link :to="`/categories/edit/${category._id}`">
-                <button class="btn-edit" @click="editCategory(category._id)">
-                  Edit
-                </button>
-              </router-link>    
+      <!-- Categories Table -->
+      <div class="overflow-x-auto">
+        <table class="min-w-full bg-white border border-gray-300">
+          <thead>
+            <tr>
+              <th class="py-2 px-4 border-b">ID</th>
+              <th class="py-2 px-4 border-b">Name</th>
+              <th class="py-2 px-4 border-b">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="category in categories" :key="category._id">
+              <td class="py-2 px-4 border-b">{{ category._id }}</td>
+              <td class="py-2 px-4 border-b">{{ category.name }}</td>
+              <td class="py-2 px-4 border-b">
+                
+                <router-link :to="`/admin/categories/edit/${category._id}`">
+                  <button class="btn-edit" @click="editCategory(category._id)">
+                    Edit
+                  </button>
+                </router-link>    
 
-              <router-link :to="`/categories/delete/${category._id}`">
-                <button class="btn-delete" @click="deleteCategory(category._id)">
-                  Delete
-                </button>
-              </router-link>
+                <router-link :to="`/admin/categories/delete/${category._id}`">
+                  <button class="btn-delete" @click="deleteCategory(category._id)">
+                    Delete
+                  </button>
+                </router-link>
 
-              <router-link :to="`/categories/${category._id}`">
-                <button class="btn-details" @click="viewDetails(category._id)">
-                  Details
-                </button>
-              </router-link>
+                <router-link :to="`/admin/categories/${category._id}`">
+                  <button class="btn-details" @click="viewDetails(category._id)">
+                    Details
+                  </button>
+                </router-link>
 
-            </td>
-          </tr>
-        </tbody>
-      </table>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </template>

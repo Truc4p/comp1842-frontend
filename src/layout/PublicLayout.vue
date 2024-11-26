@@ -1,7 +1,7 @@
 <!-- src/layout/PublicLayout.vue -->
 <template>
   <div class="min-h-screen h-screen flex flex-col bg-gray-100">
-    <Navbar />
+    <PublicNavbar />
     <div class="flex-grow flex items-center justify-center">
       <!-- Make content full screen by removing max width constraint -->
       <div class="w-full h-full">
@@ -15,5 +15,5 @@
 </template>
 
 <script setup>
-import Navbar from "./Public-Navbar.vue";
+import PublicNavbar from "./Public-Navbar.vue";
 </script>

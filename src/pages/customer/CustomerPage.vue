@@ -39,10 +39,6 @@ const updateCart = (id) => {
   cart.value.push(id);
 };
 
-const viewDetails = (id) => {
-  console.log("View details");
-};
-
 onMounted(() => {
   fetchProducts();
 });
@@ -50,46 +46,30 @@ onMounted(() => {
 
 <template>
   <div class="container mx-auto p-4">
-    <h1>Customer Page</h1>
-    <!-- Products Table -->
-    <div class="overflow-x-auto">
-      <table class="min-w-full bg-white border border-gray-300">
-        <thead>
-          <tr>
-            <th class="py-2 px-4 border-b">Name</th>
-            <th class="py-2 px-4 border-b">Image</th>
-            <th class="py-2 px-4 border-b">Category</th>
-            <th class="py-2 px-4 border-b">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="product in products" :key="product._id">
-            <td class="py-2 px-4 border-b">{{ product.name }}</td>
-            <td class="py-2 px-4 border-b">
-              <img :src="product.image ? getImageUrl(product.image) : '/images/fallback-image.jpg'" alt="Product Image" class="w-64 h-64 object-cover" @error="onImageError" />
-            </td>
-            <td class="py-2 px-4 border-b">{{ product.category ? product.category.name : 'No Category' }}</td>
-            <td class="py-2 px-4 border-b">
-            <router-link :to="`/products/${product._id}`">
-              <button class="btn-details" @click="viewDetails(product._id)">
+    <h1 class="text-2xl font-bold mb-4">Customer Page</h1>
+    <!-- Cart -->
+    <div class="cart">Cart({{ cart.length }})</div>
+
+    <!-- Products Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      <div v-for="product in products" :key="product._id"
+        class="bg-white border border-gray-300 rounded-lg overflow-hidden shadow-md">
+        <img :src="product.image ? getImageUrl(product.image) : '/images/fallback-image.jpg'" alt="Product Image"
+          class="w-full h-48 object-cover" @error="onImageError" />
+        <div class="p-4">
+          <h2 class="text-lg font-bold mb-2">{{ product.name }}</h2>
+          <p class="text-gray-700 mb-2">{{ product.category ? product.category.name : 'No Category' }}</p>
+          <p class="text-gray-900 font-bold mb-4">${{ product.price }}</p>
+          <div class="flex justify-between">
+            <router-link :to="`/customer/products/${product._id}`">
+              <button class="btn-details">
                 Details
               </button>
             </router-link>
-
             <button class="btn-primary" @click="updateCart(product._id)">Add to Cart</button>
-            </td>
-
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Cart -->
-    <div>
-      <h2>Cart</h2>
-      <ul>
-        <li v-for="item in cart" :key="item">{{ item }}</li>
-      </ul>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>

@@ -46,7 +46,7 @@ const viewDetails = (id) => {
   <div class="container mx-auto p-4">
     <!-- Create Category Button -->
     <div class="flex mb-4">
-      <router-link to="/create-category">
+      <router-link to="/admin/create-category">
         <button class="btn-primary" @click="createCategory">
           Create Category
         </button>
@@ -69,19 +69,19 @@ const viewDetails = (id) => {
             <td class="py-2 px-4 border-b">{{ category.name }}</td>
             <td class="py-2 px-4 border-b">
               
-              <router-link :to="`/categories/edit/${category._id}`">
+              <router-link :to="`/admin/categories/edit/${category._id}`">
                 <button class="btn-edit" @click="editCategory(category._id)">
                   Edit
                 </button>
               </router-link>    
 
-              <router-link :to="`/categories/delete/${category._id}`">
+              <router-link :to="`/admin/categories/delete/${category._id}`">
                 <button class="btn-delete" @click="deleteCategory(category._id)">
                   Delete
                 </button>
               </router-link>
 
-              <router-link :to="`/categories/${category._id}`">
+              <router-link :to="`/admin/categories/${category._id}`">
                 <button class="btn-details" @click="viewDetails(category._id)">
                   Details
                 </button>

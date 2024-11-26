@@ -4,8 +4,25 @@ import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
-
 const products = ref([]);
+
+onMounted(async () => {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    alert("You need to login first");
+    router.push("/login");
+  }
+
+  // Make the api request with axios with token in header
+  const res = await axios.get("http://localhost:3000/products", {
+    headers: {
+      "x-auth-token": `${token}`,
+    },
+  });
+
+  console.log("Products response:", res.data);
+  products.value = res.data;
+});
 
 </script>
 
@@ -38,15 +55,15 @@ const products = ref([]);
 
 <style scoped>
 .btn-primary {
-  @apply bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600;
+  @apply bg-blue-400 text-white px-4 py-2 rounded hover:bg-blue-500;
 }
 .btn-edit {
-  @apply bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600 mx-1;
+  @apply bg-yellow-400 text-white px-2 py-1 rounded hover:bg-yellow-500 mx-1;
 }
 .btn-delete {
-  @apply bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 mx-1;
+  @apply bg-red-400 text-white px-2 py-1 rounded hover:bg-red-500 mx-1;
 }
 .btn-details {
-  @apply bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600 mx-1;
+  @apply bg-green-400 text-white px-2 py-1 rounded hover:bg-green-500 mx-1;
 }
 </style>

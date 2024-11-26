@@ -88,7 +88,7 @@ const register = async () => {
       </div>
       <div class="flex items-center justify-between">
         <button
-          class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+          class="bg-blue-400 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
           type="button"
           @click.prevent="register"
         >
@@ -96,7 +96,7 @@ const register = async () => {
         </button>
         <router-link
           to="/login"
-          class="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800"
+          class="inline-block align-baseline font-bold text-sm text-blue-400 hover:text-blue-800"
         >
           Login
         </router-link>

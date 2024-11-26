@@ -4,14 +4,14 @@
       <p>Are you sure you want to delete this category?</p>
       <div class="flex items-center justify-between mt-4">
         <button
-          class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+          class="bg-red-400 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
           @click="deleteCategory"
         >
           Delete
         </button>
         <router-link to="/categories">
           <button
-            class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            class="bg-gray-400 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
             type="button"
           >
             Cancel

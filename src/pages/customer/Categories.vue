@@ -97,15 +97,15 @@ const viewDetails = (id) => {
 
 <style scoped>
 .btn-primary {
-  @apply bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600;
+  @apply bg-blue-400 text-white px-4 py-2 rounded hover:bg-blue-500;
 }
 .btn-edit {
-  @apply bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600 mx-1;
+  @apply bg-yellow-400 text-white px-2 py-1 rounded hover:bg-yellow-500 mx-1;
 }
 .btn-delete {
-  @apply bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 mx-1;
+  @apply bg-red-400 text-white px-2 py-1 rounded hover:bg-red-500 mx-1;
 }
 .btn-details {
-  @apply bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600 mx-1;
+  @apply bg-green-400 text-white px-2 py-1 rounded hover:bg-green-500 mx-1;
 }
 </style>

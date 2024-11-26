@@ -1,6 +1,6 @@
 <!-- src/components/Navbar.vue -->
 <template>
-  <nav class="bg-blue-500 p-4">
+  <nav class="bg-blue-400 p-4">
     <div class="container mx-auto flex justify-between items-center">
       <div>
         <router-link to="/public-page" class="text-white font-bold text-xl">MyApp</router-link>

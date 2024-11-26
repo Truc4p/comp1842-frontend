@@ -17,7 +17,8 @@ import DeleteCategory from '../pages/admin/DeleteCategory.vue';
 
 import Products from '../pages/admin/Products.vue';
 import CreateProduct from '@/pages/admin/CreateProduct.vue';
-// import DetailProduct from '@/pages/DetailProduct.vue';
+
+import DetailProduct from '@/pages/customer/DetailProduct.vue';
 // import EditProduct from '@/pages/EditProduct.vue';
 import DeleteProduct from '../pages/admin/DeleteProduct.vue';
 
@@ -40,7 +41,7 @@ const routes = [
 
   { path: "/admin/products", component: Products },
   { path: '/create-product', component: CreateProduct },
-  // { path: '/products/:id', component: DetailProduct },
+  { path: '/products/:id', component: DetailProduct },
   // { path: '/products/edit/:id', component: EditProduct },
   { path: '/products/delete/:id', component: DeleteProduct },
 

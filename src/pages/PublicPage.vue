@@ -28,6 +28,7 @@ onMounted(async () => {
 
 <template>
   <div class="container mx-auto p-4">
+    <h1>Public Page</h1>
     <!-- Products Table -->
     <div class="overflow-x-auto">
       <table class="min-w-full bg-white border border-gray-300">
@@ -36,7 +37,6 @@ onMounted(async () => {
             <th class="py-2 px-4 border-b">ID</th>
             <th class="py-2 px-4 border-b">Name</th>
             <th class="py-2 px-4 border-b">Category</th>
-            <th class="py-2 px-4 border-b">Actions</th>
           </tr>
         </thead>
         <tbody>

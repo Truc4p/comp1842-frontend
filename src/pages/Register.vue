@@ -1,23 +1,31 @@
-<!-- src/pages/Register.vue -->
 <script setup>
 import axios from "axios";
 import { ref } from "vue";
 
 const username = ref("");
 const password = ref("");
-const role = ref("admin"); // Default role is admin
+const role = ref("customer"); // Default role is customer
+const adminKey = ref(""); // Admin key for admin registration
 
 const register = async () => {
   try {
-    const response = await axios.post("http://localhost:3000/auth/register", {
+    const data = {
       username: username.value,
       password: password.value,
       role: role.value,
-    });
+    };
+
+    // Include adminKey if the role is admin
+    if (role.value === "admin") {
+      data.adminKey = adminKey.value;
+    }
+
+    const response = await axios.post("http://localhost:3000/auth/register", data);
     console.log("Registration successful:", response.data);
     alert("Registration successful!");
   } catch (error) {
-    console.error("Error during registration:", error);
+    console.error("Error during registration:", error.response.data.msg);
+    alert(`Registration failed: ${error.response.data.msg}`);
   }
 };
 </script>
@@ -64,6 +72,19 @@ const register = async () => {
           <option value="admin">Admin</option>
           <option value="customer">Customer</option>
         </select>
+      </div>
+      <!-- Conditionally render the adminKey input field -->
+      <div v-if="role === 'admin'" class="mb-6">
+        <label class="block text-gray-700 text-sm font-bold mb-2" for="adminKey">
+          Admin Key
+        </label>
+        <input
+          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          v-model="adminKey"
+          id="adminKey"
+          type="text"
+          placeholder="Admin Key"
+        />
       </div>
       <div class="flex items-center justify-between">
         <button

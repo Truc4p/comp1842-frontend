@@ -25,6 +25,14 @@ onMounted(async () => {
   products.value = res.data;
 });
 
+const getImageUrl = (relativePath) => {
+  return `http://localhost:3000/${relativePath}`; // Adjust the base URL as needed
+};
+
+const onImageError = (event) => {
+  event.target.src = '/images/fallback-image.jpg'; // Provide a fallback image URL
+};
+
 const createProduct = () => {
   console.log("Create product");
 };
@@ -46,7 +54,7 @@ const viewDetails = (id) => {
   <div class="container mx-auto p-4">
     <!-- Create Product Button -->
     <div class="flex mb-4">
-      <router-link to="/create-product">
+      <router-link to="/admin/create-product">
         <button class="btn-primary" @click="createProduct">
           Create Product
         </button>
@@ -60,6 +68,7 @@ const viewDetails = (id) => {
           <tr>
             <th class="py-2 px-4 border-b">ID</th>
             <th class="py-2 px-4 border-b">Name</th>
+            <th class="py-2 px-4 border-b">Imgage</th>
             <th class="py-2 px-4 border-b">Category</th>
             <th class="py-2 px-4 border-b">Actions</th>
           </tr>
@@ -68,22 +77,25 @@ const viewDetails = (id) => {
           <tr v-for="product in products" :key="product._id">
             <td class="py-2 px-4 border-b">{{ product._id }}</td>
             <td class="py-2 px-4 border-b">{{ product.name }}</td>
+            <td class="py-2 px-4 border-b">
+              <img :src="product.image ? getImageUrl(product.image) : '/images/fallback-image.jpg'" alt="Product Image" class="w-32 h-32 object-cover" @error="onImageError" />
+            </td>
             <td class="py-2 px-4 border-b">{{ product.category ? product.category.name : 'No Category' }}</td>
             <td class="py-2 px-4 border-b">
               
-                <router-link :to="`/products/edit/${product._id}`">
+                <router-link :to="`/admin/products/edit/${product._id}`">
                     <button class="btn-edit" @click="editProduct(product._id)">
                     Edit
                     </button>
                 </router-link>    
 
-                <router-link :to="`/products/delete/${product._id}`">
+                <router-link :to="`/admin/products/delete/${product._id}`">
                     <button class="btn-delete" @click="deleteProduct(product._id)">
                         Delete
                     </button>
                 </router-link>
 
-                <router-link :to="`/products/${product._id}`">
+                <router-link :to="`/admin/products/${product._id}`">
                     <button class="btn-details" @click="viewDetails(product._id)">
                     Details
                     </button>

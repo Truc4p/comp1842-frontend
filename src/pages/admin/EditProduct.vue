@@ -44,6 +44,19 @@
         </div>
 
         <div class="mb-4">
+          <label class="block text-gray-700 text-sm font-bold mb-2" for="stockQuantity">
+            Stock Quantity
+          </label>
+          <input
+            v-model="product.stockQuantity"
+            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            id="stockQuantity"
+            type="number"
+            placeholder="Stock Quantity"
+          />
+        </div>
+
+        <div class="mb-4">
           <label class="block text-gray-700 text-sm font-bold mb-2" for="description">
             Description
           </label>
@@ -67,7 +80,6 @@
           />
           <div v-if="product.image" class="mt-2">
             <img :src="getImageUrl(product.image)" alt="Product Image" class="w-64 h-64 object-cover" />
-            <p class="text-gray-600 mt-2">Current Image</p>
           </div>
         </div>
 
@@ -120,7 +132,20 @@ const fetchCategories = async () => {
   }
 };
 
+const fetchProduct = async () => {
+  const productId = route.params.id;
+  try {
+    const response = await axios.get(`http://localhost:3000/products/${productId}`);
+    product.value = response.data;
+    console.log('Category ID:', product.value.category._id); // Log the categoryId
+  } catch (error) {
+    console.error('Error fetching product:', error);
+  }
+};
+
 onMounted(async () => {
+  fetchProduct();
+
   const productId = route.params.id;
   console.log('Fetching product with ID:', productId); // Debugging log
   try {
@@ -145,11 +170,13 @@ const handleImageUpload = (event) => {
 const updateProduct = async () => {
   const productId = route.params.id;
   console.log('Updating product with ID:', productId); // Debugging log
+  console.log('Category ID:', product.value.categoryId); // Log the categoryId
   try {
     const formData = new FormData();
     formData.append('name', product.value.name);
-    formData.append('categoryId', product.value.categoryId);
+    formData.append('categoryId', product.value.category._id);
     formData.append('price', product.value.price);
+    formData.append('stockQuantity', product.value.stockQuantity);
     formData.append('description', product.value.description);
     if (image.value) {
       formData.append('image', image.value);

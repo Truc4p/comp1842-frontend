@@ -38,6 +38,17 @@
       </div>
 
       <div class="mb-4">
+        <label for="stockQuantity" class="block text-gray-700 text-sm font-bold mb-2">Stock Quantity:</label>
+        <input
+          type="number"
+          id="stockQuantity"
+          v-model="stockQuantity"
+          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          required
+        />
+      </div>
+
+      <div class="mb-4">
         <label for="description" class="block text-gray-700 text-sm font-bold mb-2">Product Description:</label>
         <textarea
           id="description"
@@ -76,6 +87,7 @@ import { useRouter } from 'vue-router';
 const name = ref('');
 const category = ref('');
 const price = ref('');
+const stockQuantity = ref('');
 const description = ref('');
 const image = ref(null);
 const categories = ref([]);
@@ -111,6 +123,7 @@ const handleSubmit = async () => {
     formData.append('name', name.value);
     formData.append('categoryId', category.value);
     formData.append('price', price.value);
+    formData.append('stockQuantity', stockQuantity.value);
     formData.append('description', description.value);
     formData.append('image', image.value);
 

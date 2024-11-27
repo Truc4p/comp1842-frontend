@@ -70,6 +70,7 @@ const viewDetails = (id) => {
             <th class="py-2 px-4 border-b">Name</th>
             <th class="py-2 px-4 border-b">Imgage</th>
             <th class="py-2 px-4 border-b">Category</th>
+            <th class="py-2 px-4 border-b">Stock Quantity</th>
             <th class="py-2 px-4 border-b">Actions</th>
           </tr>
         </thead>
@@ -81,6 +82,7 @@ const viewDetails = (id) => {
               <img :src="product.image ? getImageUrl(product.image) : '/images/fallback-image.jpg'" alt="Product Image" class="w-32 h-32 object-cover" @error="onImageError" />
             </td>
             <td class="py-2 px-4 border-b">{{ product.category ? product.category.name : 'No Category' }}</td>
+            <td class="py-2 px-4 border-b">{{ product.stockQuantity }}</td>
             <td class="py-2 px-4 border-b">
               
                 <router-link :to="`/admin/products/edit/${product._id}`">

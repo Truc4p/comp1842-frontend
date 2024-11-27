@@ -10,6 +10,7 @@ import PublicLayout from "@/layout/PublicLayout.vue";
 import AdminLayout from "@/layout/AdminLayout.vue";
 import AdminPage from "@/pages/admin/AdminPage.vue";
 import CustomerPage from "@/pages/customer/CustomerPage.vue";
+
 import Categories from "@/pages/admin/Categories.vue";
 import CreateCategory from '@/pages/admin/CreateCategory.vue';
 import DetailCategory from '@/pages/admin/DetailCategory.vue';
@@ -23,6 +24,7 @@ import DeleteProduct from '@/pages/admin/DeleteProduct.vue';
 
 import CustomerLayout from "@/layout/CustomerLayout.vue";
 import DetailProduct from '@/pages/customer/DetailProduct.vue';
+import Cart from '@/pages/customer/Cart.vue';
 
 const routes = [
   { path: "/", 
@@ -60,6 +62,7 @@ const routes = [
     children: [
       { path: "", component: CustomerPage },
       { path: "products/:id", component: DetailProduct },
+      { path: "cart", component: Cart },
 
     ],
   },

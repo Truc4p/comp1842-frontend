@@ -23,6 +23,7 @@ const handleLogin = async () => {
 
     localStorage.setItem("token", res.data.token); // Save token to local storage for future requests
     localStorage.setItem("username", username.value); // Save username to local storage for future requests
+    localStorage.setItem("role", res.data.role); // Save role to local storage
 
     // Check if the user is an admin
     if (res.data.role === "admin") {
@@ -32,9 +33,6 @@ const handleLogin = async () => {
       // Redirect to /categories page with vue-router
       router.push("/customer");
     }
-
-    // // Redirect to /Categories page with vue-router
-    // router.push("/admin/categories");
 
   } catch (error) {
     console.error("Error during login:", error);

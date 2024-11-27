@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
+import { getUserRole } from '../utils/auth';
 
 import Login from "@/pages/public/Login.vue";
 import Register from "@/pages/public/Register.vue";
@@ -36,7 +37,7 @@ const routes = [
 
   {
     path: "/admin",
-    component: AdminLayout,
+    component: AdminLayout,  meta: { requiresAuth: true, role: 'admin' } ,
     children: [
       { path: "", component: AdminPage },
       { path: "categories", component: Categories },
@@ -54,7 +55,7 @@ const routes = [
 
   {
     path: "/customer",
-    component: CustomerLayout,
+    component: CustomerLayout, meta: { requiresAuth: true, role: 'customer' } ,
     children: [
       { path: "", component: CustomerPage },
       { path: "products/:id", component: DetailProduct },
@@ -67,6 +68,26 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
+});
+
+router.beforeEach((to, from, next) => {
+  const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
+  const userRole = getUserRole();
+
+  if (requiresAuth) {
+    if (!userRole) {
+      next('/login');
+    } else {
+      const routeRole = to.meta.role;
+      if (routeRole && routeRole !== userRole) {
+        next('/login');
+      } else {
+        next();
+      }
+    }
+  } else {
+    next();
+  }
 });
 
 export default router;

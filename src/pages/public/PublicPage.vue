@@ -1,29 +1,22 @@
 <script setup>
 import axios from "axios";
-import { onMounted, ref } from "vue";
-import { useRouter } from "vue-router";
+import { ref, onMounted } from "vue";
 
-const router = useRouter();
 const products = ref([]);
 
-onMounted(async () => {
-  const token = localStorage.getItem("token");
-  if (!token) {
-    alert("You need to login first");
-    router.push("/login");
+const fetchProducts = async () => {
+  try {
+    const res = await axios.get("http://localhost:3000/products");
+    console.log("Products response:", res.data);
+    products.value = res.data;
+  } catch (error) {
+    console.error("Error fetching products:", error);
   }
+};
 
-  // Make the api request with axios with token in header
-  const res = await axios.get("http://localhost:3000/products", {
-    headers: {
-      "x-auth-token": `${token}`,
-    },
-  });
-
-  console.log("Products response:", res.data);
-  products.value = res.data;
+onMounted(() => {
+  fetchProducts();
 });
-
 </script>
 
 <template>

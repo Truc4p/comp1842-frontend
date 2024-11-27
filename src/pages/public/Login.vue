@@ -27,10 +27,10 @@ const handleLogin = async () => {
     // Check if the user is an admin
     if (res.data.role === "admin") {
       // Redirect to /admin/categories page with vue-router
-      router.push("/admin/admin-page");
+      router.push("/admin");
     } else {
       // Redirect to /categories page with vue-router
-      router.push("/customer/customer-page");
+      router.push("/customer");
     }
 
     // // Redirect to /Categories page with vue-router

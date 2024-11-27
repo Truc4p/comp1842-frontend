@@ -14,7 +14,7 @@
     <div v-else>
       <p>Loading...</p>
     </div>
-    <router-link to="/customer/customer-page">
+    <router-link to="/customer">
       <button class="bg-blue-400 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
         Back to products
       </button>

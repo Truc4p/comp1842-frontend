@@ -24,15 +24,10 @@ import DeleteProduct from '@/pages/admin/DeleteProduct.vue';
 import CustomerLayout from "@/layout/CustomerLayout.vue";
 
 const routes = [
-  // { path: "/", component: PublicPage },
-  // { path: "/login", component: Login },
-  // { path: "/register", component: Register },
-  // { path: "/logout", component: Logout },
-
   { path: "/", 
     component: PublicLayout,
     children: [
-      { path: "public-page", component: PublicPage },
+      { path: "", component: PublicPage },
       { path: "login", component: Login },
       { path: "register", component: Register },
       { path: "logout", component: Logout },
@@ -43,7 +38,7 @@ const routes = [
     path: "/admin",
     component: AdminLayout,
     children: [
-      { path: "admin-page", component: AdminPage },
+      { path: "", component: AdminPage },
       { path: "categories", component: Categories },
       { path: "create-category", component: CreateCategory },
       { path: "categories/:id", component: DetailCategory },
@@ -61,7 +56,7 @@ const routes = [
     path: "/customer",
     component: CustomerLayout,
     children: [
-      { path: "customer-page", component: CustomerPage },
+      { path: "", component: CustomerPage },
       { path: "products/:id", component: DetailProduct },
 
     ],

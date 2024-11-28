@@ -28,10 +28,13 @@ onMounted(async () => {
 });
 
 const getImageUrl = (relativePath) => {
-  return `http://localhost:3000/${relativePath}`; // Adjust the base URL as needed
+  const url = `http://localhost:3000/${relativePath}`; // Adjust the base URL as needed
+  console.log('Image URL:', url); // Log the image URL
+  return url;
 };
 
 const onImageError = (event) => {
+  console.log('Image failed to load, using fallback image.');
   event.target.src = '/images/fallback-image.jpg'; // Provide a fallback image URL
 };
 
@@ -79,7 +82,7 @@ const viewDetails = (id) => {
         <tbody>
           <tr v-for="product in products" :key="product._id">
             <td class="py-2 px-4 border-b">{{ product._id }}</td>
-            <td class="py-2 px-4 border-b">{{ product.name[locale] }}</td>
+            <td class="py-2 px-4 border-b">{{ product.name }}</td>
             <td class="py-2 px-4 border-b">
               <img :src="product.image ? getImageUrl(product.image) : '/images/fallback-image.jpg'" alt="Product Image" class="w-32 h-32 object-cover" @error="onImageError" />
             </td>

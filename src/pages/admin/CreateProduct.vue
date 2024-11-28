@@ -3,16 +3,10 @@
     <h2 class="text-2xl font-bold mb-4">{{ t('createProduct') }}</h2>
     <form @submit.prevent="handleSubmit">
       <div class="mb-4">
-        <label for="name-en" class="block text-gray-700 text-sm font-bold mb-2">{{ t('productNameEn') }}:</label>
-        <input type="text" id="name-en" v-model="name.en"
+        <label for="name" class="block text-gray-700 text-sm font-bold mb-2">{{ t('productName') }}:</label>
+        <input type="text" id="name" v-model="name"
           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
           required />
-      </div>
-      <div class="mb-4">
-        <label for="name-vi" class="block text-gray-700 text-sm font-bold mb-2">{{ t('productNameVi') }}:</label>
-        <input type="text" id="name-vi" v-model="name.vi"
-          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-          />
       </div>
 
       <div class="mb-4">
@@ -40,16 +34,9 @@
       </div>
 
       <div class="mb-4">
-        <label for="description-en" class="block text-gray-700 text-sm font-bold mb-2">{{ t('productDescriptionEn')
+        <label for="description" class="block text-gray-700 text-sm font-bold mb-2">{{ t('productDescription')
           }}:</label>
-        <textarea id="description-en" v-model="description.en"
-          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-          ></textarea>
-      </div>
-      <div class="mb-4">
-        <label for="description-vi" class="block text-gray-700 text-sm font-bold mb-2">{{ t('productDescriptionVi')
-          }}:</label>
-        <textarea id="description-vi" v-model="description.vi"
+        <textarea id="description" v-model="description"
           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
           ></textarea>
       </div>
@@ -58,7 +45,7 @@
         <label for="image" class="block text-gray-700 text-sm font-bold mb-2">{{ t('productImage') }}:</label>
         <input type="file" id="image" @change="handleImageUpload"
           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-          required />
+         />
       </div>
 
       <button type="submit"
@@ -77,11 +64,11 @@ import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
 
-const name = ref({ en: '', vi: '' });
+const name = ref('');
 const category = ref('');
 const price = ref('');
 const stockQuantity = ref('');
-const description = ref({ en: '', vi: '' });
+const description = ref('');
 const image = ref(null);
 const categories = ref([]);
 const router = useRouter();
@@ -107,6 +94,7 @@ onMounted(() => {
 const handleImageUpload = (event) => {
   const file = event.target.files[0];
   image.value = file;
+  console.log('Image was uploaded:', file);
 };
 
 const handleSubmit = async () => {
@@ -114,23 +102,11 @@ const handleSubmit = async () => {
     const token = localStorage.getItem('token');
     const formData = new FormData();
 
-    // Log the values of name.en and name.vi
-    console.log('name.en:', name.value.en);
-    console.log('name.vi:', name.value.vi);
-
-    formData.append('name[en]', name.value.en);
-    formData.append('name[vi]', name.value.vi);
+    formData.append('name', name.value);
     formData.append('categoryId', category.value);
     formData.append('price', price.value);
     formData.append('stockQuantity', stockQuantity.value);
-
-    if (description.value.en) {
-      formData.append('description[en]', description.value.en);
-    }
-    if (description.value.vi) {
-      formData.append('description[vi]', description.value.vi);
-    }
-    
+    formData.append('description', description.value);
     formData.append('image', image.value);
 
     // Log the contents of formData

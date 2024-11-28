@@ -3,28 +3,21 @@
     <h2 class="text-2xl font-bold mb-4">Edit Product</h2>
     <div v-if="product">
       <form @submit.prevent="updateProduct">
-
         <div class="mb-4">
-          <label for="name-en" class="block text-gray-700 text-sm font-bold mb-2">Name:</label>
-          <input type="text" id="name-en" v-model="name.en"
+          <label for="name" class="block text-gray-700 text-sm font-bold mb-2">Name:</label>
+          <input type="text" id="name" v-model="name"
             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             required />
-        </div>
-        <div class="mb-4">
-          <label for="name-vi" class="block text-gray-700 text-sm font-bold mb-2">Tên:</label>
-          <input type="text" id="name-vi" v-model="name.vi"
-            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
         </div>
 
         <div class="mb-4">
           <label class="block text-gray-700 text-sm font-bold mb-2" for="category">
             Category
           </label>
-          <select v-model="product.categoryId"
+          <select v-model="category"
             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             id="category">
-            <option :value="product.categoryId" selected>{{ product.category ? product.category.name : 'No Category' }}
-            </option>
+            <option :value="product.categoryId" selected>{{ product.category ? product.category.name : 'No Category' }}</option>
             <option v-for="cat in categories" :key="cat._id" :value="cat._id">{{ cat.name }}</option>
           </select>
         </div>
@@ -33,7 +26,7 @@
           <label class="block text-gray-700 text-sm font-bold mb-2" for="price">
             Price
           </label>
-          <input v-model="product.price"
+          <input v-model="price"
             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             id="price" type="number" placeholder="Product Price" />
         </div>
@@ -42,19 +35,14 @@
           <label class="block text-gray-700 text-sm font-bold mb-2" for="stockQuantity">
             Stock Quantity
           </label>
-          <input v-model="product.stockQuantity"
+          <input v-model="stockQuantity"
             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             id="stockQuantity" type="number" placeholder="Stock Quantity" />
         </div>
 
         <div class="mb-4">
-          <label for="description-en" class="block text-gray-700 text-sm font-bold mb-2">Description:</label>
-          <textarea id="description-en" v-model="description.en"
-            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
-        </div>
-        <div class="mb-4">
-          <label for="description-vi" class="block text-gray-700 text-sm font-bold mb-2">Mô tả:</label>
-          <textarea id="description-vi" v-model="description.vi"
+          <label for="description" class="block text-gray-700 text-sm font-bold mb-2">Description:</label>
+          <textarea id="description" v-model="description"
             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
         </div>
 
@@ -75,7 +63,7 @@
             type="submit">
             Save
           </button>
-          <router-link to="/admin/products">
+          <router-link to="../">
             <button
               class="bg-gray-400 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
               type="button">
@@ -92,15 +80,20 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useRoute, useRouter } from 'vue-router';
 
 const product = ref(null);
+const name = ref('');
+const category = ref('');
+const price = ref('');
+const stockQuantity = ref('');
+const description = ref('');
+const image = ref(null);
 const categories = ref([]);
 const route = useRoute();
 const router = useRouter();
-const image = ref(null);
 
 const fetchCategories = async () => {
   try {
@@ -121,30 +114,15 @@ const fetchProduct = async () => {
   try {
     const response = await axios.get(`http://localhost:3000/products/${productId}`);
     product.value = response.data;
-    console.log('Category ID:', product.value.category._id); // Log the categoryId
-  } catch (error) {
-    console.error('Error fetching product:', error);
-  }
-};
-
-onMounted(async () => {
-  fetchProduct();
-
-  const productId = route.params.id;
-  console.log('Fetching product with ID:', productId); // Debugging log
-  try {
-    const response = await axios.get(`http://localhost:3000/products/${productId}`, {
-      headers: {
-        'x-auth-token': localStorage.getItem('token'),
-      },
-    });
-    console.log('API response:', response.data); // Debugging log
-    product.value = response.data;
-    await fetchCategories();
+    name.value = product.value.name;
+    category.value = product.value.category._id;
+    price.value = product.value.price;
+    stockQuantity.value = product.value.stockQuantity;
+    description.value = product.value.description;
   } catch (error) {
     console.error('Error fetching product details:', error);
   }
-});
+};
 
 const handleImageUpload = (event) => {
   const file = event.target.files[0];
@@ -153,31 +131,15 @@ const handleImageUpload = (event) => {
 
 const updateProduct = async () => {
   const productId = route.params.id;
-  console.log('Updating product with ID:', productId); // Debugging log
-  console.log('Category ID:', product.value.categoryId); // Log the categoryId
   try {
     const formData = new FormData();
-    formData.append('name[en]', product.value.en);
-    formData.append('name[vi]', product.value.vi);
-
-    formData.append('categoryId', product.value.category._id);
-    formData.append('price', product.value.price);
-    formData.append('stockQuantity', product.value.stockQuantity);
-
-    if (description.value.en) {
-      formData.append('description[en]', description.value.en);
-    }
-    if (description.value.vi) {
-      formData.append('description[vi]', description.value.vi);
-    }
-    
+    formData.append('name', name.value);
+    formData.append('categoryId', category.value);
+    formData.append('price', price.value);
+    formData.append('stockQuantity', stockQuantity.value);
+    formData.append('description', description.value);
     if (image.value) {
       formData.append('image', image.value);
-    }
-
-    // Log FormData entries
-    for (let pair of formData.entries()) {
-      console.log(pair[0] + ': ' + pair[1]);
     }
 
     const response = await axios.put(`http://localhost:3000/products/${productId}`, formData, {
@@ -186,21 +148,19 @@ const updateProduct = async () => {
         'Content-Type': 'multipart/form-data',
       },
     });
-    console.log('Product updated successfully:', response.data); // Debugging log
+    console.log('Product updated successfully:', response.data);
     router.push('/admin/products');
   } catch (error) {
     console.error('Error updating product:', error);
-    if (error.response) {
-      console.error('Error response data:', error.response.data); // Debugging log
-    }
   }
 };
+
+onMounted(() => {
+  fetchCategories();
+  fetchProduct();
+});
 
 const getImageUrl = (relativePath) => {
   return `http://localhost:3000/${relativePath}`; // Adjust the base URL as needed
 };
 </script>
-
-<style scoped>
-/* Add your styles here */
-</style>

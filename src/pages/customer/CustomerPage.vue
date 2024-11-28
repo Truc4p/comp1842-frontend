@@ -78,7 +78,7 @@ onMounted(() => {
         <img :src="product.image ? getImageUrl(product.image) : '/images/fallback-image.jpg'" alt="Product Image"
           class="w-full h-48 object-cover" @error="onImageError" />
         <div class="p-4">
-          <h2 class="text-lg font-bold mb-2">{{ product.name[locale] }}</h2>
+          <h2 class="text-lg font-bold mb-2">{{ product.name }}</h2>
           <p class="text-gray-700 mb-2">{{ product.category ? product.category.name : 'No Category' }}</p>
           <p class="text-gray-900 font-bold mb-4">${{ product.price }}</p>
           <div class="flex justify-between items-center">

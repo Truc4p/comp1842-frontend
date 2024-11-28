@@ -3,9 +3,9 @@
     <h2 class="text-2xl font-bold mb-4">{{ t('details') }}</h2>
     <div v-if="product">
       <p><strong>ID:</strong> {{ product._id }}</p>
-      <p><strong>{{ t('productName') }}:</strong> {{ product.name[locale] }}</p>
+      <p><strong>{{ t('productName') }}:</strong> {{ product.name }}</p>
       <p><strong>{{ t('productCategory') }}:</strong> {{ product.category ? product.category.name : t('noCategory') }}</p>
-      <p><strong>{{ t('productDescription') }}:</strong> {{ product.description[locale] }}</p>
+      <p><strong>{{ t('productDescription') }}:</strong> {{ product.description }}</p>
       <p><strong>{{ t('productPrice') }}:</strong> ${{ product.price }}</p>
       <div>
         <img :src="product.image ? getImageUrl(product.image) : '/images/fallback-image.jpg'" alt="Product Image" class="w-64 h-64 object-cover" @error="onImageError" />

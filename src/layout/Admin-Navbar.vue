@@ -8,8 +8,8 @@
       <div>
         <router-link to="/admin/products" class="text-white mr-4">{{ t('products') }}</router-link>
         <router-link to="/admin/categories" class="text-white mr-4">{{ t('categories') }}</router-link>
-        <router-link to="/admin/orders" class="text-white mr-4">{{ t('orders') }}</router-link>
-        <router-link to="/admin/users" class="text-white mr-4">{{ t('users') }}</router-link>
+        <!-- <router-link to="/admin/orders" class="text-white mr-4">{{ t('orders') }}</router-link>
+        <router-link to="/admin/users" class="text-white mr-4">{{ t('users') }}</router-link> -->
         <router-link to="/logout" class="text-white mr-4">{{ t('logout') }}</router-link>
       </div>
     </div>

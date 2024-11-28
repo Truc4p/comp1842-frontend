@@ -7,7 +7,7 @@
       <div class="absolute top-4 right-4">
         <select @change="changeLanguage" v-model="currentLocale">
           <option value="en">English</option>
-          <option value="vi">Vietnamese</option>
+          <option value="vi">Tiếng Việt</option>
         </select>
       </div>
       <div class="w-full h-full">

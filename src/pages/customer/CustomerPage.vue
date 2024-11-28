@@ -2,7 +2,9 @@
 import axios from "axios";
 import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
+import { useI18n } from 'vue-i18n';
 
+const { t } = useI18n();
 const router = useRouter();
 const products = ref([]);
 const cart = ref(JSON.parse(localStorage.getItem('cart')) || []);
@@ -10,7 +12,7 @@ const cart = ref(JSON.parse(localStorage.getItem('cart')) || []);
 const fetchProducts = async () => {
   const token = localStorage.getItem("token");
   if (!token) {
-    alert("You need to login first");
+    alert(t('login'));
     router.push("/login");
     return;
   }
@@ -38,13 +40,13 @@ const updateCart = (product, quantity) => {
   const cartItem = cart.value.find(item => item._id === product._id);
   if (cartItem) {
     if (cartItem.quantity + quantity > product.stockQuantity) {
-      alert('You have reached the maximum stock quantity for this product.');
+      alert(t('registerFail') + 'You have reached the maximum stock quantity for this product.');
       return;
     }
     cartItem.quantity += quantity;
   } else {
     if (quantity > product.stockQuantity) {
-      alert('You have reached the maximum stock quantity for this product.');
+      alert(t('registerFail') + 'You have reached the maximum stock quantity for this product.');
       return;
     }
     cart.value.push({ ...product, quantity });
@@ -65,9 +67,9 @@ onMounted(() => {
 
 <template>
   <div class="container mx-auto p-4">
-    <h1 class="text-2xl font-bold mb-4">Customer Page</h1>
+    <h1 class="text-2xl font-bold mb-4">{{ t('customerPage') }}</h1>
     <!-- Cart -->
-    <router-link to="/customer/cart" class="cart">Cart({{ cart.length }})</router-link>
+    <router-link to="/customer/cart" class="cart">{{ t('cart') }}({{ cart.length }})</router-link>
 
     <!-- Products Grid -->
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -82,7 +84,7 @@ onMounted(() => {
           <div class="flex justify-between items-center">
             <router-link :to="`/customer/products/${product._id}`">
               <button class="btn-details">
-                Details
+                {{ t('details') }}
               </button>
             </router-link>
             <input type="number" 
@@ -90,7 +92,7 @@ onMounted(() => {
               min="1" :max="product.stockQuantity" 
               class="quantity-input" 
               @input="validateQuantity(product)" />
-            <button class="btn-primary" @click="updateCart(product, product.quantity || 1)">Add to Cart</button>
+            <button class="btn-primary" @click="updateCart(product, product.quantity || 1)">{{ t('addToCart') }}</button>
           </div>
         </div>
       </div>

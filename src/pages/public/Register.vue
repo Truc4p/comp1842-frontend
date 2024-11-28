@@ -1,6 +1,9 @@
 <script setup>
 import axios from "axios";
 import { ref } from "vue";
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const username = ref("");
 const password = ref("");
@@ -22,21 +25,21 @@ const register = async () => {
 
     const response = await axios.post("http://localhost:3000/auth/register", data);
     console.log("Registration successful:", response.data);
-    alert("Registration successful!");
+    alert(t('registerSuccess'));
   } catch (error) {
     console.error("Error during registration:", error.response.data.msg);
-    alert(`Registration failed: ${error.response.data.msg}`);
+    alert(`${t('registerFail')}${error.response.data.msg}`);
   }
 };
 </script>
 
 <template>
   <div>
-    <h1 class="text-2xl font-bold mb-4">Register</h1>
+    <h1 class="text-2xl font-bold mb-4">{{ t('register') }}</h1>
     <form>
       <div class="mb-4">
         <label class="block text-gray-700 text-sm font-bold mb-2" for="email">
-          Username
+          {{ t('username') }}
         </label>
         <input
           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -50,7 +53,7 @@ const register = async () => {
           class="block text-gray-700 text-sm font-bold mb-2"
           for="password"
         >
-          Password
+          {{ t('password') }}
         </label>
         <input
           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -62,21 +65,21 @@ const register = async () => {
       </div>
       <div class="mb-6">
         <label class="block text-gray-700 text-sm font-bold mb-2" for="role">
-          Role
+          {{ t('role') }}
         </label>
         <select
           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
           v-model="role"
           id="role"
         >
-          <option value="admin">Admin</option>
-          <option value="customer">Customer</option>
+          <option value="admin">{{ t('admin') }}</option>
+          <option value="customer">{{ t('customer') }}</option>
         </select>
       </div>
       <!-- Conditionally render the adminKey input field -->
       <div v-if="role === 'admin'" class="mb-6">
         <label class="block text-gray-700 text-sm font-bold mb-2" for="adminKey">
-          Admin Key
+          {{ t('adminKey') }}
         </label>
         <input
           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -92,13 +95,13 @@ const register = async () => {
           type="button"
           @click.prevent="register"
         >
-          Register
+          {{ t('register') }}
         </button>
         <router-link
           to="/login"
           class="inline-block align-baseline font-bold text-sm text-blue-400 hover:text-blue-800"
         >
-          Login
+          {{ t('login') }}
         </router-link>
       </div>
     </form>

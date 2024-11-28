@@ -3,7 +3,7 @@
   <nav class="bg-blue-400 p-4">
     <div class="container mx-auto flex justify-between items-center">
       <div>
-        <router-link to="/admin" class="text-white font-bold text-xl">MyApp</router-link>
+        <router-link to="/admin" class="text-white font-bold text-xl">WrenCos</router-link>
       </div>
       <div>
         <router-link to="/admin/products" class="text-white mr-4">{{ t('products') }}</router-link>

@@ -3,28 +3,29 @@
     <h2 class="text-2xl font-bold mb-4">Edit Product</h2>
     <div v-if="product">
       <form @submit.prevent="updateProduct">
-
         <div class="mb-4">
-          <label for="name-en" class="block text-gray-700 text-sm font-bold mb-2">Name:</label>
-          <input type="text" id="name-en" v-model="name.en"
+          <label class="block text-gray-700 text-sm font-bold mb-2" for="name">
+            Name
+          </label>
+          <input
+            v-model="product.name"
             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            required />
-        </div>
-        <div class="mb-4">
-          <label for="name-vi" class="block text-gray-700 text-sm font-bold mb-2">Tên:</label>
-          <input type="text" id="name-vi" v-model="name.vi"
-            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
+            id="name"
+            type="text"
+            placeholder="Product Name"
+          />
         </div>
 
         <div class="mb-4">
           <label class="block text-gray-700 text-sm font-bold mb-2" for="category">
             Category
           </label>
-          <select v-model="product.categoryId"
+          <select
+            v-model="product.categoryId"
             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            id="category">
-            <option :value="product.categoryId" selected>{{ product.category ? product.category.name : 'No Category' }}
-            </option>
+            id="category"
+          >
+            <option :value="product.categoryId" selected>{{ product.category ? product.category.name : 'No Category' }}</option>
             <option v-for="cat in categories" :key="cat._id" :value="cat._id">{{ cat.name }}</option>
           </select>
         </div>
@@ -33,37 +34,50 @@
           <label class="block text-gray-700 text-sm font-bold mb-2" for="price">
             Price
           </label>
-          <input v-model="product.price"
+          <input
+            v-model="product.price"
             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            id="price" type="number" placeholder="Product Price" />
+            id="price"
+            type="number"
+            placeholder="Product Price"
+          />
         </div>
 
         <div class="mb-4">
           <label class="block text-gray-700 text-sm font-bold mb-2" for="stockQuantity">
             Stock Quantity
           </label>
-          <input v-model="product.stockQuantity"
+          <input
+            v-model="product.stockQuantity"
             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            id="stockQuantity" type="number" placeholder="Stock Quantity" />
+            id="stockQuantity"
+            type="number"
+            placeholder="Stock Quantity"
+          />
         </div>
 
         <div class="mb-4">
-          <label for="description-en" class="block text-gray-700 text-sm font-bold mb-2">Description:</label>
-          <textarea id="description-en" v-model="description.en"
-            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
-        </div>
-        <div class="mb-4">
-          <label for="description-vi" class="block text-gray-700 text-sm font-bold mb-2">Mô tả:</label>
-          <textarea id="description-vi" v-model="description.vi"
-            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
+          <label class="block text-gray-700 text-sm font-bold mb-2" for="description">
+            Description
+          </label>
+          <textarea
+            v-model="product.description"
+            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            id="description"
+            placeholder="Product Description"
+          ></textarea>
         </div>
 
         <div class="mb-4">
           <label class="block text-gray-700 text-sm font-bold mb-2" for="image">
             Image
           </label>
-          <input type="file" id="image" @change="handleImageUpload"
-            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
+          <input
+            type="file"
+            id="image"
+            @change="handleImageUpload"
+            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          />
           <div v-if="product.image" class="mt-2">
             <img :src="getImageUrl(product.image)" alt="Product Image" class="w-64 h-64 object-cover" />
           </div>
@@ -72,13 +86,15 @@
         <div class="flex items-center justify-between">
           <button
             class="bg-blue-400 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-            type="submit">
+            type="submit"
+          >
             Save
           </button>
           <router-link to="/admin/products">
             <button
               class="bg-gray-400 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-              type="button">
+              type="button"
+            >
               Cancel
             </button>
           </router-link>
@@ -157,20 +173,11 @@ const updateProduct = async () => {
   console.log('Category ID:', product.value.categoryId); // Log the categoryId
   try {
     const formData = new FormData();
-    formData.append('name[en]', product.value.en);
-    formData.append('name[vi]', product.value.vi);
-
+    formData.append('name', product.value.name);
     formData.append('categoryId', product.value.category._id);
     formData.append('price', product.value.price);
     formData.append('stockQuantity', product.value.stockQuantity);
-
-    if (description.value.en) {
-      formData.append('description[en]', description.value.en);
-    }
-    if (description.value.vi) {
-      formData.append('description[vi]', description.value.vi);
-    }
-    
+    formData.append('description', product.value.description);
     if (image.value) {
       formData.append('image', image.value);
     }

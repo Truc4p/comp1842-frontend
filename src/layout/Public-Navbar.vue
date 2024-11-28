@@ -1,12 +1,12 @@
 <template>
-  <nav class="bg-blue-400 p-4">
+  <nav class="bg-lime-100 p-4">
     <div class="container mx-auto flex justify-between items-center">
       <div>
-        <router-link to="/" class="text-white font-bold text-xl">MyApp</router-link>
+        <router-link to="/" class="text-lime-700 font-bold text-xl">WrenCos</router-link>
       </div>
       <div>
-        <router-link to="/login" class="text-white mr-4">{{ t('login') }}</router-link>
-        <router-link to="/register" class="text-white mr-8">{{ t('register') }}</router-link>
+        <router-link to="/login" class="text-lime-700 mr-4">{{ t('login') }}</router-link>
+        <router-link to="/register" class="text-lime-700 mr-8">{{ t('register') }}</router-link>
       </div>
     </div>
   </nav>

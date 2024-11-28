@@ -25,15 +25,18 @@ const messages = {
     customerPage: 'Customer Page',
     cart: 'Cart',
     createProduct: 'Create Product',
+    productName: 'Product Name',
     productNameEn: 'Product Name (English)',
     productNameVi: 'Product Name (Vietnamese)',
     productCategory: 'Product Category',
     selectCategory: 'Select a category',
     productPrice: 'Product Price',
     stockQuantity: 'Stock Quantity',
+    productDescription: 'Product Description',
     productDescriptionEn: 'Product Description (English)',
     productDescriptionVi: 'Product Description (Vietnamese)',
-    productImage: 'Product Image'
+    productImage: 'Product Image',
+    editProduct: 'Edit Product',
   },
   vi: {
     welcomeMessage: 'Chào mừng bạn đến với trang web của chúng tôi!',
@@ -58,15 +61,18 @@ const messages = {
     customerPage: 'Trang khách hàng',
     cart: 'Giỏ hàng',
     createProduct: 'Tạo sản phẩm',
+    productName: 'Tên sản phẩm',
     productNameEn: 'Tên sản phẩm (Tiếng Anh)',
     productNameVi: 'Tên sản phẩm (Tiếng Việt)',
     productCategory: 'Danh mục sản phẩm',
     selectCategory: 'Chọn danh mục',
     productPrice: 'Giá sản phẩm',
     stockQuantity: 'Số lượng tồn kho',
+    productDescription: 'Mô tả sản phẩm',
     productDescriptionEn: 'Mô tả sản phẩm (Tiếng Anh)',
     productDescriptionVi: 'Mô tả sản phẩm (Tiếng Việt)',
-    productImage: 'Hình ảnh sản phẩm'
+    productImage: 'Hình ảnh sản phẩm',
+    editProduct: 'Chỉnh sửa sản phẩm',
   }
 };
 

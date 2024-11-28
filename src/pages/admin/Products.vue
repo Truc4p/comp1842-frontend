@@ -2,7 +2,9 @@
 import axios from "axios";
 import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
+import { useI18n } from 'vue-i18n';
 
+const { t, locale } = useI18n();
 const router = useRouter();
 
 const products = ref([]);
@@ -67,9 +69,9 @@ const viewDetails = (id) => {
         <thead>
           <tr>
             <th class="py-2 px-4 border-b">ID</th>
-            <th class="py-2 px-4 border-b">Name</th>
-            <th class="py-2 px-4 border-b">Imgage</th>
-            <th class="py-2 px-4 border-b">Category</th>
+            <th class="py-2 px-4 border-b">{{ t('productName') }}</th>
+            <th class="py-2 px-4 border-b">Image</th>
+            <th class="py-2 px-4 border-b">{{ t('productCategory') }}</th>
             <th class="py-2 px-4 border-b">Stock Quantity</th>
             <th class="py-2 px-4 border-b">Actions</th>
           </tr>
@@ -77,7 +79,7 @@ const viewDetails = (id) => {
         <tbody>
           <tr v-for="product in products" :key="product._id">
             <td class="py-2 px-4 border-b">{{ product._id }}</td>
-            <td class="py-2 px-4 border-b">{{ product.name }}</td>
+            <td class="py-2 px-4 border-b">{{ product.name[locale] }}</td>
             <td class="py-2 px-4 border-b">
               <img :src="product.image ? getImageUrl(product.image) : '/images/fallback-image.jpg'" alt="Product Image" class="w-32 h-32 object-cover" @error="onImageError" />
             </td>

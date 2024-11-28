@@ -1,18 +1,18 @@
 <template>
   <div class="container mx-auto p-4">
-    <h2 class="text-2xl font-bold mb-4">Product Details</h2>
+    <h2 class="text-2xl font-bold mb-4">{{ t('details') }}</h2>
     <div v-if="product">
       <p><strong>ID:</strong> {{ product._id }}</p>
-      <p><strong>Name:</strong> {{ product.name }}</p>
-      <p><strong>Category:</strong> {{ product.category ? product.category.name : 'No Category' }}</p>
-      <p><strong>Description:</strong> {{ product.description }}</p>
-      <p><strong>Price:</strong> ${{ product.price }}</p>
+      <p><strong>{{ t('productName') }}:</strong> {{ product.name[locale] }}</p>
+      <p><strong>{{ t('productCategory') }}:</strong> {{ product.category ? product.category.name : t('noCategory') }}</p>
+      <p><strong>{{ t('productDescription') }}:</strong> {{ product.description[locale] }}</p>
+      <p><strong>{{ t('productPrice') }}:</strong> ${{ product.price }}</p>
       <div>
         <img :src="product.image ? getImageUrl(product.image) : '/images/fallback-image.jpg'" alt="Product Image" class="w-64 h-64 object-cover" @error="onImageError" />
       </div>
     </div>
     <div v-else>
-      <p>Loading...</p>
+      <p>{{ t('loading') }}</p>
     </div>
   </div>
 </template>
@@ -21,7 +21,9 @@
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 
+const { t, locale } = useI18n();
 const product = ref(null);
 const route = useRoute();
 

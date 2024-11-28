@@ -17,6 +17,15 @@
         </div>
 
         <div class="mb-4">
+          <label class="block text-gray-700 text-sm font-bold mb-2" for="name">
+            Name
+          </label>
+          <input v-model="product.name"
+            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            id="name" type="text" placeholder="Product Name" />
+        </div>
+
+        <div class="mb-4">
           <label class="block text-gray-700 text-sm font-bold mb-2" for="category">
             Category
           </label>
@@ -48,14 +57,12 @@
         </div>
 
         <div class="mb-4">
-          <label for="description-en" class="block text-gray-700 text-sm font-bold mb-2">Description:</label>
-          <textarea id="description-en" v-model="description.en"
-            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
-        </div>
-        <div class="mb-4">
-          <label for="description-vi" class="block text-gray-700 text-sm font-bold mb-2">Mô tả:</label>
-          <textarea id="description-vi" v-model="description.vi"
-            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
+          <label class="block text-gray-700 text-sm font-bold mb-2" for="description">
+            Description
+          </label>
+          <textarea v-model="product.description"
+            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            id="description" placeholder="Product Description"></textarea>
         </div>
 
         <div class="mb-4">
@@ -157,20 +164,11 @@ const updateProduct = async () => {
   console.log('Category ID:', product.value.categoryId); // Log the categoryId
   try {
     const formData = new FormData();
-    formData.append('name[en]', product.value.en);
-    formData.append('name[vi]', product.value.vi);
-
+    formData.append('name', product.value.name);
     formData.append('categoryId', product.value.category._id);
     formData.append('price', product.value.price);
     formData.append('stockQuantity', product.value.stockQuantity);
-
-    if (description.value.en) {
-      formData.append('description[en]', description.value.en);
-    }
-    if (description.value.vi) {
-      formData.append('description[vi]', description.value.vi);
-    }
-    
+    formData.append('description', product.value.description);
     if (image.value) {
       formData.append('image', image.value);
     }

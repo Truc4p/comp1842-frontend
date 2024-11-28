@@ -12,7 +12,7 @@
         <label for="name-vi" class="block text-gray-700 text-sm font-bold mb-2">{{ t('productNameVi') }}:</label>
         <input type="text" id="name-vi" v-model="name.vi"
           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-          required />
+          />
       </div>
 
       <div class="mb-4">
@@ -44,14 +44,14 @@
           }}:</label>
         <textarea id="description-en" v-model="description.en"
           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-          required></textarea>
+          ></textarea>
       </div>
       <div class="mb-4">
         <label for="description-vi" class="block text-gray-700 text-sm font-bold mb-2">{{ t('productDescriptionVi')
           }}:</label>
         <textarea id="description-vi" v-model="description.vi"
           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-          required></textarea>
+          ></textarea>
       </div>
 
       <div class="mb-4">
@@ -123,8 +123,14 @@ const handleSubmit = async () => {
     formData.append('categoryId', category.value);
     formData.append('price', price.value);
     formData.append('stockQuantity', stockQuantity.value);
-    formData.append('description[en]', description.value.en);
-    formData.append('description[vi]', description.value.vi);
+
+    if (description.value.en) {
+      formData.append('description[en]', description.value.en);
+    }
+    if (description.value.vi) {
+      formData.append('description[vi]', description.value.vi);
+    }
+    
     formData.append('image', image.value);
 
     // Log the contents of formData

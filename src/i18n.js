@@ -4,11 +4,17 @@ import { createI18n } from 'vue-i18n';
 const messages = {
   en: {
     welcomeMessage: 'Welcome to our website!',
-    // Add more translations here
+    details: 'Details',
+    addToCart: 'Add to Cart',
+    login: 'Login',
+    register: 'Register'
   },
   vi: {
     welcomeMessage: 'Chào mừng bạn đến với trang web của chúng tôi!',
-    // Add more translations here
+    details: 'Chi tiết',
+    addToCart: 'Thêm vào giỏ hàng',
+    login: 'Đăng nhập',
+    register: 'Đăng ký',
   }
 };
 

@@ -6,7 +6,6 @@ import { useRouter } from "vue-router";
 const router = useRouter();
 const products = ref([]);
 const cart = ref(JSON.parse(localStorage.getItem('cart')) || []);
-const premium = ref(true);
 
 const fetchProducts = async () => {
   const token = localStorage.getItem("token");

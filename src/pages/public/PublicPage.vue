@@ -3,7 +3,7 @@ import axios from "axios";
 import { ref, onMounted } from "vue";
 import { useI18n } from 'vue-i18n';
 
-const { t, locale } = useI18n();
+const { t } = useI18n();
 
 const products = ref([]);
 
@@ -17,40 +17,48 @@ const fetchProducts = async () => {
   }
 };
 
+const getImageUrl = (relativePath) => {
+  return `http://localhost:3000/${relativePath}`; // Adjust the base URL as needed
+};
+
+const onImageError = (event) => {
+  event.target.src = '/images/fallback-image.jpg'; // Provide a fallback image URL
+};
+
 onMounted(() => {
   fetchProducts();
 });
 
-const changeLanguage = (event) => {
-  locale.value = event.target.value;
-};
 </script>
 
 <template>
   <div class="container mx-auto p-4">
     <h1>{{ t('welcomeMessage') }}</h1>
-    <select @change="changeLanguage">
-      <option value="en">English</option>
-      <option value="vi">Vietnamese</option>
-    </select>
-    <!-- Products Table -->
-    <div class="overflow-x-auto">
-      <table class="min-w-full bg-white border border-gray-300">
-        <thead>
-          <tr>
-            <th class="py-2 px-4 border-b">ID</th>
-            <th class="py-2 px-4 border-b">Name</th>
-            <th class="py-2 px-4 border-b">Category</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="product in products" :key="product._id">
-            <td class="py-2 px-4 border-b">{{ product._id }}</td>
-            <td class="py-2 px-4 border-b">{{ product.name }}</td>
-            <td class="py-2 px-4 border-b">{{ product.category ? product.category.name : 'No Category' }}</td>
-          </tr>
-        </tbody>
-      </table>
+    <br />
+    <!-- Products Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      <div v-for="product in products" :key="product._id"
+        class="bg-white border border-gray-300 rounded-lg overflow-hidden shadow-md">
+        <img :src="product.image ? getImageUrl(product.image) : '/images/fallback-image.jpg'" alt="Product Image"
+          class="w-full h-48 object-cover" @error="onImageError" />
+        <div class="p-4">
+          <h2 class="text-lg font-bold mb-2">{{ product.name }}</h2>
+          <p class="text-gray-700 mb-2">{{ product.category ? product.category.name : 'No Category' }}</p>
+          <p class="text-gray-900 font-bold mb-4">${{ product.price }}</p>
+          <div class="flex justify-between items-center">
+            <router-link :to="`/login`">
+              <button class="btn-details">
+                {{ t('details') }}
+              </button>
+            </router-link>
+            <router-link :to="`/login`">
+              <button class="btn-primary">
+                {{ t('addToCart') }}
+              </button>
+            </router-link>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>

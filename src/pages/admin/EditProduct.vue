@@ -6,13 +6,13 @@
 
         <div class="mb-4">
           <label for="name-en" class="block text-gray-700 text-sm font-bold mb-2">Name:</label>
-          <input type="text" id="name-en" v-model="name.en"
+          <input type="text" id="name-en" v-model="product.name.en"
             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             required />
         </div>
         <div class="mb-4">
           <label for="name-vi" class="block text-gray-700 text-sm font-bold mb-2">Tên:</label>
-          <input type="text" id="name-vi" v-model="name.vi"
+          <input type="text" id="name-vi" v-model="product.name.vi"
             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
         </div>
 
@@ -49,12 +49,12 @@
 
         <div class="mb-4">
           <label for="description-en" class="block text-gray-700 text-sm font-bold mb-2">Description:</label>
-          <textarea id="description-en" v-model="description.en"
+          <textarea id="description-en" v-model="product.description.en"
             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
         </div>
         <div class="mb-4">
           <label for="description-vi" class="block text-gray-700 text-sm font-bold mb-2">Mô tả:</label>
-          <textarea id="description-vi" v-model="description.vi"
+          <textarea id="description-vi" v-model="product.description.vi"
             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
         </div>
 
@@ -92,7 +92,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -128,22 +128,8 @@ const fetchProduct = async () => {
 };
 
 onMounted(async () => {
-  fetchProduct();
-
-  const productId = route.params.id;
-  console.log('Fetching product with ID:', productId); // Debugging log
-  try {
-    const response = await axios.get(`http://localhost:3000/products/${productId}`, {
-      headers: {
-        'x-auth-token': localStorage.getItem('token'),
-      },
-    });
-    console.log('API response:', response.data); // Debugging log
-    product.value = response.data;
-    await fetchCategories();
-  } catch (error) {
-    console.error('Error fetching product details:', error);
-  }
+  await fetchProduct();
+  await fetchCategories();
 });
 
 const handleImageUpload = (event) => {
@@ -154,22 +140,25 @@ const handleImageUpload = (event) => {
 const updateProduct = async () => {
   const productId = route.params.id;
   console.log('Updating product with ID:', productId); // Debugging log
-  console.log('Category ID:', product.value.categoryId); // Log the categoryId
+  console.log('Category ID:', product.value.category._id); // Log the categoryId
+
+  const token = localStorage.getItem('token');
+  if (!token) {
+    console.error('No token found in localStorage');
+    return;
+  }
+
   try {
     const formData = new FormData();
-    formData.append('name[en]', product.value.en);
-    formData.append('name[vi]', product.value.vi);
+    formData.append('name[en]', product.value.name.en);
+    formData.append('name[vi]', product.value.name.vi);
 
     formData.append('categoryId', product.value.category._id);
     formData.append('price', product.value.price);
     formData.append('stockQuantity', product.value.stockQuantity);
 
-    if (description.value.en) {
-      formData.append('description[en]', description.value.en);
-    }
-    if (description.value.vi) {
-      formData.append('description[vi]', description.value.vi);
-    }
+    formData.append('description[en]', product.value.description.en);
+    formData.append('description[vi]', product.value.description.vi);
     
     if (image.value) {
       formData.append('image', image.value);
@@ -182,7 +171,7 @@ const updateProduct = async () => {
 
     const response = await axios.put(`http://localhost:3000/products/${productId}`, formData, {
       headers: {
-        'x-auth-token': localStorage.getItem('token'),
+        'x-auth-token': token,
         'Content-Type': 'multipart/form-data',
       },
     });

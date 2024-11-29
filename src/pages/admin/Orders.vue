@@ -5,7 +5,7 @@ import { useRouter } from "vue-router";
 
 const router = useRouter();
 
-const categories = ref([]);
+const orders = ref([]);
 
 onMounted(async () => {
   const token = localStorage.getItem("token");
@@ -15,30 +15,30 @@ onMounted(async () => {
   }
 
   // Make the api request with axios with token in header
-  const res = await axios.get("http://localhost:3000/categories", {
+  const res = await axios.get("http://localhost:3000/orders", {
     headers: {
       "x-auth-token": `${token}`,
     },
   });
 
-  console.log("Categories response:", res.data);
-  categories.value = res.data;
+  console.log("Orders response:", res.data);
+  orders.value = res.data;
 });
 
 </script>
 
 <template>
   <div class="container mx-auto p-4">
-    <!-- Create Category Button -->
+    <!-- Create Order Button -->
     <div class="flex mb-4">
-      <router-link to="/admin/create-category">
-        <button class="btn-primary" @click="createCategory">
-          Create Category
+      <router-link to="/admin/create-order">
+        <button class="btn-primary" @click="createOrder">
+          Create Order
         </button>
       </router-link>  
     </div>
 
-    <!-- Categories Table -->
+    <!-- Orders Table -->
     <div class="overflow-x-auto">
       <table class="min-w-full bg-white border border-gray-300">
         <thead>
@@ -49,25 +49,25 @@ onMounted(async () => {
           </tr>
         </thead>
         <tbody>
-          <tr v-for="category in categories" :key="category._id">
-            <td class="py-2 px-4 border-b">{{ category._id }}</td>
-            <td class="py-2 px-4 border-b">{{ category.name }}</td>
+          <tr v-for="order in orders" :key="order._id">
+            <td class="py-2 px-4 border-b">{{ order._id }}</td>
+            <td class="py-2 px-4 border-b">{{ order.name }}</td>
             <td class="py-2 px-4 border-b">
               
-              <router-link :to="`/admin/categories/edit/${category._id}`">
-                <button class="btn-edit" @click="editCategory(category._id)">
+              <router-link :to="`/admin/orders/edit/${order._id}`">
+                <button class="btn-edit" @click="editOrder(order._id)">
                   Edit
                 </button>
               </router-link>    
 
-              <router-link :to="`/admin/categories/delete/${category._id}`">
-                <button class="btn-delete" @click="deleteCategory(category._id)">
+              <router-link :to="`/admin/orders/delete/${order._id}`">
+                <button class="btn-delete" @click="deleteOrder(order._id)">
                   Delete
                 </button>
               </router-link>
 
-              <router-link :to="`/admin/categories/${category._id}`">
-                <button class="btn-details" @click="viewDetails(category._id)">
+              <router-link :to="`/admin/orders/${order._id}`">
+                <button class="btn-details" @click="viewDetails(order._id)">
                   Details
                 </button>
               </router-link>

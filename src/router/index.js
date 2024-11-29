@@ -11,6 +11,7 @@ import AdminLayout from "@/layout/AdminLayout.vue";
 import AdminPage from "@/pages/admin/AdminPage.vue";
 import CustomerPage from "@/pages/customer/CustomerPage.vue";
 
+// Admin
 import Categories from "@/pages/admin/Categories.vue";
 import CreateCategory from '@/pages/admin/CreateCategory.vue';
 import DetailCategory from '@/pages/admin/DetailCategory.vue';
@@ -22,9 +23,18 @@ import CreateProduct from '@/pages/admin/CreateProduct.vue';
 import EditProduct from '@/pages/admin/EditProduct.vue';
 import DeleteProduct from '@/pages/admin/DeleteProduct.vue';
 
+import Users from '@/pages/admin/Users.vue';
+
+import Orders from '@/pages/admin/Orders.vue';
+
+
+// Customer
 import CustomerLayout from "@/layout/CustomerLayout.vue";
 import DetailProduct from '@/pages/customer/DetailProduct.vue';
 import Cart from '@/pages/customer/Cart.vue';
+import Checkout from '@/pages/customer/Checkout.vue';
+import OrderSuccess from '@/pages/customer/OrderSuccess.vue';
+import CustomerOrders from '@/pages/customer/CustomerOrders.vue';
 
 const routes = [
   { path: "/", 
@@ -53,6 +63,10 @@ const routes = [
       { path: "products/:id", component: DetailProduct },
       { path: "products/edit/:id", component: EditProduct },
       { path: "products/delete/:id", component: DeleteProduct },
+
+      { path: "users", component: Users },
+      { path: "orders", component: Orders },
+
     ],
   },
 
@@ -63,6 +77,9 @@ const routes = [
       { path: "", component: CustomerPage },
       { path: "products/:id", component: DetailProduct },
       { path: "cart", component: Cart },
+      { path: "checkout", component: Checkout },
+      { path: "order-success", component: OrderSuccess },
+      { path: "customer-orders", component: CustomerOrders },
 
     ],
   },

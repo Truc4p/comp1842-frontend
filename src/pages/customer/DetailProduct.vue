@@ -7,6 +7,7 @@
       <p><strong>{{ t('productCategory') }}:</strong> {{ product.category ? product.category.name : t('noCategory') }}</p>
       <p><strong>{{ t('productDescription') }}:</strong> {{ product.description }}</p>
       <p><strong>{{ t('productPrice') }}:</strong> ${{ product.price }}</p>
+      <p><strong>{{ t('productStockQuantity') }}:</strong> {{ product.stockQuantity }}</p>
       <div>
         <img :src="product.image ? getImageUrl(product.image) : '/images/fallback-image.jpg'" alt="Product Image" class="w-64 h-64 object-cover" @error="onImageError" />
       </div>

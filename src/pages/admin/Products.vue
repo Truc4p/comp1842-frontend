@@ -4,7 +4,7 @@ import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from 'vue-i18n';
 
-const { t, locale } = useI18n();
+const { t } = useI18n();
 const router = useRouter();
 
 const products = ref([]);
@@ -38,21 +38,6 @@ const onImageError = (event) => {
   event.target.src = '/images/fallback-image.jpg'; // Provide a fallback image URL
 };
 
-const createProduct = () => {
-  console.log("Create product");
-};
-
-const editProduct = (id) => {
-  console.log("Edit product");
-};
-
-const deleteProduct = (id) => {
-  console.log("Delete product");
-};
-
-const viewDetails = (id) => {
-  console.log("View details");
-};
 </script>
 
 <template>
@@ -71,23 +56,25 @@ const viewDetails = (id) => {
       <table class="min-w-full bg-white border border-gray-300">
         <thead>
           <tr>
-            <th class="py-2 px-4 border-b">ID</th>
+            <!-- <th class="py-2 px-4 border-b">ID</th> -->
             <th class="py-2 px-4 border-b">{{ t('productName') }}</th>
             <th class="py-2 px-4 border-b">Image</th>
             <th class="py-2 px-4 border-b">{{ t('productCategory') }}</th>
             <th class="py-2 px-4 border-b">Stock Quantity</th>
+            <th class="py-2 px-4 border-b">Price</th>
             <th class="py-2 px-4 border-b">Actions</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="product in products" :key="product._id">
-            <td class="py-2 px-4 border-b">{{ product._id }}</td>
+            <!-- <td class="py-2 px-4 border-b">{{ product._id }}</td> -->
             <td class="py-2 px-4 border-b">{{ product.name }}</td>
             <td class="py-2 px-4 border-b">
               <img :src="product.image ? getImageUrl(product.image) : '/images/fallback-image.jpg'" alt="Product Image" class="w-32 h-32 object-cover" @error="onImageError" />
             </td>
             <td class="py-2 px-4 border-b">{{ product.category ? product.category.name : 'No Category' }}</td>
             <td class="py-2 px-4 border-b">{{ product.stockQuantity }}</td>
+            <td class="py-2 px-4 border-b">${{ product.price }}</td>
             <td class="py-2 px-4 border-b">
               
                 <router-link :to="`/admin/products/edit/${product._id}`">

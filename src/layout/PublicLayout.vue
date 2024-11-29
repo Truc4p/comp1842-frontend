@@ -5,7 +5,7 @@
     <div class="flex-grow flex items-center justify-center">
       <!-- Language Switcher -->
       <div class="absolute top-4 right-4">
-        <select @change="changeLanguage" v-model="currentLocale">
+        <select @change="changeLanguage" v-model="currentLocale" class="custom-select">
           <option value="en">English</option>
           <option value="vi">Tiếng Việt</option>
         </select>
@@ -32,3 +32,9 @@ const changeLanguage = (event) => {
   locale.value = event.target.value;
 };
 </script>
+
+<style scoped>
+.custom-select {
+  color: #4D7C0F; /* Change this to your desired color */
+}
+</style>

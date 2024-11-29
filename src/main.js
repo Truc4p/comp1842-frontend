@@ -1,4 +1,5 @@
-import "./assets/index.css";
+import "./assets/index.css"; // Import Tailwind CSS
+import './assets/base.css'; // Import custom styles
 
 import { createApp } from "vue";
 import App from "./App.vue";

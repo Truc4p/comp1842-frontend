@@ -33,6 +33,7 @@ const messages = {
     productDescription: 'Product Description',
     productImage: 'Product Image',
     editProduct: 'Edit Product',
+    productStockQuantity: 'Stock Quantity',
   },
   vi: {
     welcomeMessage: 'Chào mừng bạn đến với trang web của chúng tôi!',
@@ -65,6 +66,7 @@ const messages = {
     productDescription: 'Mô tả sản phẩm',
     productImage: 'Hình ảnh sản phẩm',
     editProduct: 'Chỉnh sửa sản phẩm',
+    productStockQuantity: 'Số lượng tồn kho',
   }
 };
 

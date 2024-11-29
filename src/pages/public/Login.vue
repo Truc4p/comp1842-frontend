@@ -20,10 +20,12 @@ const handleLogin = async () => {
     console.log("Login response:", res.data); // Log the entire response
     console.log("Login successful:", res.data.token);
     console.log("User role:", res.data.role); // Debugging line to check the role
+    console.log("user ID:", res.data.userId); // Debugging line to check the customerId
 
     localStorage.setItem("token", res.data.token); // Save token to local storage for future requests
     localStorage.setItem("username", username.value); // Save username to local storage for future requests
     localStorage.setItem("role", res.data.role); // Save role to local storage
+    localStorage.setItem("userId", res.data.userId); // Save customerId to local storage
 
     // Check if the user is an admin
     if (res.data.role === "admin") {

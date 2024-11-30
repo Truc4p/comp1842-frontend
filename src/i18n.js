@@ -49,6 +49,7 @@ const messages = {
     phone: 'Phone',
     noPhone: 'No phone number',
     noAddress: 'No address',
+    orderHistory: 'Order History',
   },
   vi: {
     welcomeMessage: 'Chào mừng bạn đến với trang web của chúng tôi!',
@@ -97,6 +98,7 @@ const messages = {
     phone: 'Số điện thoại',
     noPhone: 'Không có số điện thoại',
     noAddress: 'Không có địa chỉ',
+    orderHistory: 'Lịch sử đơn hàng',
   }
 };
 

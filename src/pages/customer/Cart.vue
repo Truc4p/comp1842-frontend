@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 
@@ -79,10 +79,13 @@ const handleSubmitItem = async (event) => {
   }
 };
 
+const totalCost = computed(() => {
+  return cart.value.reduce((total, item) => total + item.price * item.quantity, 0);
+});
+
 onMounted(() => {
   fetchCartDetails();
 });
-
 </script>
 
 <template>
@@ -99,12 +102,13 @@ onMounted(() => {
           <h2 class="text-lg font-bold">{{ item.name }}</h2>
           <p class="text-gray-700">{{ item.category ? item.category.name : 'No Category' }}</p>
           <p class="text-gray-900 font-bold">${{ item.price }}</p>
-          
           <input type="number" v-model.number="item.quantity" min="1" :max="item.stockQuantity" class="quantity-input"
             @input="validateQuantity(item)" />
-          
-            <button class="btn-delete" @click="removeFromCart(item._id)">Remove</button>
+          <button class="btn-delete" @click="removeFromCart(item._id)">Remove</button>
         </div>
+      </div>
+      <div class="flex justify-end mt-4">
+        <p class="text-lg font-bold">Total Cost: ${{ totalCost }}</p>
       </div>
       <router-link :to="`/customer/checkout`">
         <div class="flex justify-end mt-4">

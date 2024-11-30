@@ -24,6 +24,7 @@ onMounted(async () => {
   console.log("Categories response:", res.data);
   categories.value = res.data;
 });
+
 </script>
 
 <template>

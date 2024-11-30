@@ -34,9 +34,8 @@ import CustomerLayout from "@/layout/CustomerLayout.vue";
 import DetailProduct from '@/pages/customer/DetailProduct.vue';
 import Cart from '@/pages/customer/Cart.vue';
 import Checkout from '@/pages/customer/Checkout.vue';
-import OrderSuccess from '@/pages/customer/OrderSuccess.vue';
 import OrderDetail from '@/pages/customer/OrderDetail.vue';
-import CustomerOrders from '@/pages/customer/CustomerOrders.vue';
+import OrderHistory from '@/pages/customer/OrderHistory.vue';
 import Profile from '@/pages/customer/Profile.vue';
 
 const routes = [
@@ -83,9 +82,8 @@ const routes = [
       { path: "products/:id", component: DetailProduct },
       { path: "cart", component: Cart },
       { path: "checkout", component: Checkout },
-      { path: "order-success", component: OrderSuccess },
       { path: "orders/order/:id", component: OrderDetail },
-      { path: "customer-orders", component: CustomerOrders },
+      { path: "order-history", component: OrderHistory },
       { path: "profile", component: Profile },
     ],
   },

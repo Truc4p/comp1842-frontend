@@ -7,6 +7,7 @@
       </div>
       <div>
         <router-link to="/customer/profile" class="text-lime-700 mr-4">{{ t('profile') }}</router-link>
+        <router-link to="/customer/order-history" class="text-lime-700 mr-4">{{ t('orderHistory') }}</router-link>
         <router-link to="/logout" class="text-lime-700 mr-4">{{ t('logout') }}</router-link>
       </div>
     </div>

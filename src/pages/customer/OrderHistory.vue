@@ -1,13 +1,33 @@
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import axios from 'axios';
+
+const router = useRouter();
+
 
 const orders = ref([]);
 
+// Get userId from localStorage
+const userId = localStorage.getItem('userId');
+if (!userId) {
+  console.error('userId is not found in localStorage');
+  // Handle the case where userId is not found, e.g., redirect to login page
+  router.push('/login');
+} else {
+  console.log('userId:', userId); // Add this line to check the value of userId
+}
+
 const fetchOrders = async () => {
   try {
-    const response = await axios.get('http://localhost:3000/orders');
+    console.log('Getting customer with ID:', userId); // Log userId
+    const response = await axios.get(`http://localhost:3000/orders/user/${userId}`, {
+      headers: {
+        'x-auth-token': localStorage.getItem('token'),
+      },
+    });
     orders.value = response.data;
+    console.log('Orders response:', response.data);
   } catch (error) {
     console.error('Error fetching orders:', error);
   }
@@ -27,7 +47,7 @@ onMounted(() => {
     <div v-else>
       <div v-for="order in orders" :key="order._id" class="order-item mb-4 p-4 border border-gray-300 rounded-lg">
         <h2 class="text-lg font-bold">Order #{{ order._id }}</h2>
-        <p class="text-gray-700">Date: {{ new Date(order.date).toLocaleDateString() }}</p>
+        <p class="text-gray-700">Date: {{ new Date(order.orderDate).toLocaleDateString() }}</p>
         <p class="text-gray-900 font-bold">Total: ${{ order.total }}</p>
         <div v-for="item in order.items" :key="item._id" class="order-product flex items-center mt-2">
           <img :src="item.image" alt="Product Image" class="w-16 h-16 object-cover mr-4" />

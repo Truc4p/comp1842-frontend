@@ -6,10 +6,13 @@ import axios from 'axios';
 const router = useRouter();
 const route = useRoute();
 
-const customerDetails = ref({
+const user = ref({
     phone: '',
     email: '',
-    address: '',
+    address: ''
+});
+
+const customerDetails = ref({
     paymentMethod: 'cash',
 });
 
@@ -36,14 +39,14 @@ if (!userId) {
 const updateUser = async () => {
     try {
         const formData = {
-            phone: customerDetails.value.phone,
-            email: customerDetails.value.email,
-            address: customerDetails.value.address,
+            phone: user.value.phone,
+            email: user.value.email,
+            address: user.value.address,
         };
 
-        console.log('Updating customer with phone:', customerDetails.value.phone); // Log userId
-        console.log('Updating customer with email:', customerDetails.value.email); // Log userId
-        console.log('Updating customer with address:', customerDetails.value.address); // Log userId
+        console.log('Updating customer with phone:', user.value.phone); // Log userId
+        console.log('Updating customer with email:', user.value.email); // Log userId
+        console.log('Updating customer with address:', user.value.address); // Log userId
         console.log('Updating customer with ID:', userId); // Log userId
 
         const response = await axios.put(`http://localhost:3000/users/${userId}`, formData, {
@@ -59,37 +62,6 @@ const updateUser = async () => {
     }
 };
 
-// const updateUser = async (userId, updateData) => {
-//   try {
-//     console.log('Updating customer with username:', updateData.username);
-
-//     console.log('Updating customer with phone:', updateData.phone);
-//     console.log('Updating customer with email:', updateData.email);
-//     console.log('Updating customer with address:', updateData.address);
-//     console.log('Updating customer with ID:', userId);
-
-//     const token = localStorage.getItem('token'); // Assuming the token is stored in localStorage
-//     const response = await axios.put(`http://localhost:3000/users/${userId}`, updateData, {
-//       headers: {
-//         'x-auth-token': token,
-//         'Content-Type': 'application/json',
-//       },
-//     });
-//     console.log('Customer updated successfully:', response.data);
-//   } catch (error) {
-//     console.error('Error updating customer:', error);
-//   }
-// };
-
-// // Example usage
-// const updateData = {
-//     username: 'newusername',
-//   email: 'newemail@example.com',
-//   phone: '123-456-7890',
-//   address: '123 Main St, Anytown, USA'
-// };
-// updateUser(userId, updateData);
-
 const getCustomer = async () => {
     try {
         console.log('Getting customer with ID:', userId); // Log userId
@@ -100,6 +72,7 @@ const getCustomer = async () => {
             },
         });
         console.log('Customer retrieved successfully:', response.data);
+        user.value = response.data;
     } catch (error) {
         console.error('Error retrieving customer:', error);
     }
@@ -151,6 +124,10 @@ const handleSubmit = async () => {
     await placeOrder();
 };
 
+onMounted(async () => {
+    await getCustomer();
+});
+
 </script>
 
 <template>
@@ -161,15 +138,17 @@ const handleSubmit = async () => {
             <form @submit.prevent="handleSubmit">
                 <div class="mb-2">
                     <label class="block mb-1">Phone</label>
-                    <input v-model="customerDetails.phone" type="tel" class="input" />
+                    <input v-model="user.phone"
+                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        id="phone" type="text" placeholder="User Phone" />
                 </div>
                 <div class="mb-2">
                     <label class="block mb-1">Email</label>
-                    <input v-model="customerDetails.email" type="text" class="input" />
+                    <input v-model="user.email" type="text" class="input" />
                 </div>
                 <div class="mb-2">
                     <label class="block mb-1">Address</label>
-                    <input v-model="customerDetails.address" type="text" class="input" />
+                    <input v-model="user.address" type="text" class="input" />
                 </div>
                 <div class="mb-2">
                     <label class="block mb-1">Payment Method</label>

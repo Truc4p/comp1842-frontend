@@ -1,6 +1,6 @@
 <script setup>
 import axios from "axios";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from 'vue-i18n';
 
@@ -8,6 +8,7 @@ const { t, locale } = useI18n();
 const router = useRouter();
 const products = ref([]);
 const cart = ref(JSON.parse(localStorage.getItem('cart')) || []);
+const searchQuery = ref('');
 
 const fetchProducts = async () => {
   const token = localStorage.getItem("token");
@@ -60,6 +61,13 @@ const validateQuantity = (product) => {
   }
 };
 
+const filteredProducts = computed(() => {
+  return products.value.filter(product => {
+    return product.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+           (product.category && product.category.name.toLowerCase().includes(searchQuery.value.toLowerCase()));
+  });
+});
+
 onMounted(() => {
   fetchProducts();
 });
@@ -68,12 +76,15 @@ onMounted(() => {
 <template>
   <div class="container mx-auto p-4">
     <h1 class="text-2xl font-bold mb-4">{{ t('customerPage') }}</h1>
+    <!-- Search -->
+    <input type="text" v-model="searchQuery" placeholder="Search products or categories" class="search-input mb-4" />
+
     <!-- Cart -->
     <router-link to="/customer/cart" class="cart">{{ t('cart') }}({{ cart.length }})</router-link>
 
     <!-- Products Grid -->
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-      <div v-for="product in products" :key="product._id"
+      <div v-for="product in filteredProducts" :key="product._id"
         class="bg-white border border-gray-300 rounded-lg overflow-hidden shadow-md">
         <img :src="product.image ? getImageUrl(product.image) : '/images/fallback-image.jpg'" alt="Product Image"
           class="w-full h-48 object-cover" @error="onImageError" />
@@ -119,5 +130,9 @@ onMounted(() => {
 
 .btn-details {
   @apply bg-green-400 text-white px-2 py-1 rounded hover:bg-green-500 mx-1;
+}
+
+.search-input {
+  @apply border border-gray-300 rounded px-4 py-2 w-full;
 }
 </style>

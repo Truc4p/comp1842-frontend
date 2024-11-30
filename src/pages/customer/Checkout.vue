@@ -36,13 +36,11 @@ if (!userId) {
 const updateUser = async () => {
     try {
         const formData = {
-            username: customerDetails.value.username,
             phone: customerDetails.value.phone,
             email: customerDetails.value.email,
             address: customerDetails.value.address,
         };
 
-        console.log('Updating customer with username:', customerDetails.value.username); // Log userId
         console.log('Updating customer with phone:', customerDetails.value.phone); // Log userId
         console.log('Updating customer with email:', customerDetails.value.email); // Log userId
         console.log('Updating customer with address:', customerDetails.value.address); // Log userId
@@ -60,8 +58,6 @@ const updateUser = async () => {
         console.error('Error response:', error.response); // Log the error response
     }
 };
-
-
 
 // const updateUser = async (userId, updateData) => {
 //   try {
@@ -128,7 +124,9 @@ const placeOrder = async () => {
         });
 
         console.log('Order placed successfully:', response.data);
-        router.push('/customer/order-success');
+        const orderId = response.data._id; // Assuming the response contains the order ID
+        router.push(`/customer/orders/order/${orderId}`);
+        //router.push(`/customer/order-success`);
     } catch (error) {
         console.error('Error placing order:', error);
         if (error.response) {
@@ -155,16 +153,12 @@ const handleSubmit = async () => {
             <h2 class="text-xl font-bold mb-2">Customer Details</h2>
             <form @submit.prevent="handleSubmit">
                 <div class="mb-2">
-                    <label class="block mb-1">username</label>
-                    <input v-model="customerDetails.username" type="text" class="input" />
-                </div>
-                <div class="mb-2">
                     <label class="block mb-1">Phone</label>
                     <input v-model="customerDetails.phone" type="tel" class="input" />
                 </div>
                 <div class="mb-2">
                     <label class="block mb-1">Email</label>
-                    <input v-model="customerDetails.email" type="text" class="input" />
+                    <input v-model="customerDetails.email" type="email" class="input" />
                 </div>
                 <div class="mb-2">
                     <label class="block mb-1">Address</label>
@@ -180,9 +174,6 @@ const handleSubmit = async () => {
                 </div>
                 <button type="submit" class="btn-primary">Place Order</button>
             </form>
-        </div>
-        <div class="flex justify-end mt-4">
-            <button type="button" class="btn-primary" @click="handleSubmit">Place Order</button>
         </div>
     </div>
 </template>

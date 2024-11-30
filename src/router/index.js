@@ -26,6 +26,7 @@ import DeleteProduct from '@/pages/admin/DeleteProduct.vue';
 import Users from '@/pages/admin/Users.vue';
 
 import Orders from '@/pages/admin/Orders.vue';
+import DetailOrder from '@/pages/admin/DetailOrder.vue';
 
 
 // Customer
@@ -34,6 +35,7 @@ import DetailProduct from '@/pages/customer/DetailProduct.vue';
 import Cart from '@/pages/customer/Cart.vue';
 import Checkout from '@/pages/customer/Checkout.vue';
 import OrderSuccess from '@/pages/customer/OrderSuccess.vue';
+import OrderDetail from '@/pages/customer/OrderDetail.vue';
 import CustomerOrders from '@/pages/customer/CustomerOrders.vue';
 
 const routes = [
@@ -65,7 +67,9 @@ const routes = [
       { path: "products/delete/:id", component: DeleteProduct },
 
       { path: "users", component: Users },
+
       { path: "orders", component: Orders },
+      { path: "orders/order/:id", component: DetailOrder },
 
     ],
   },
@@ -79,6 +83,7 @@ const routes = [
       { path: "cart", component: Cart },
       { path: "checkout", component: Checkout },
       { path: "order-success", component: OrderSuccess },
+      { path: "orders/order/:id", component: OrderDetail },
       { path: "customer-orders", component: CustomerOrders },
 
     ],

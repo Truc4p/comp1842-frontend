@@ -55,19 +55,19 @@ onMounted(async () => {
             <td class="py-2 px-4 border-b">
               
               <router-link :to="`/admin/categories/edit/${category._id}`">
-                <button class="btn-edit" @click="editCategory(category._id)">
+                <button class="btn-edit">
                   Edit
                 </button>
               </router-link>    
 
               <router-link :to="`/admin/categories/delete/${category._id}`">
-                <button class="btn-delete" @click="deleteCategory(category._id)">
+                <button class="btn-delete">
                   Delete
                 </button>
               </router-link>
 
               <router-link :to="`/admin/categories/${category._id}`">
-                <button class="btn-details" @click="viewDetails(category._id)">
+                <button class="btn-details">
                   Details
                 </button>
               </router-link>

@@ -34,22 +34,6 @@ const categories = ref([
   { _id: "66b1c0aa120562945addd2b4", name: "phone" },
   { _id: "66b23854841a9dca7bfb64ac", name: "tablet" },
 ]);
-
-const createCategory = () => {
-  console.log("Create category");
-};
-
-const editCategory = (id) => {
-  console.log("Edit category");
-};
-
-const deleteCategory = (id) => {
-  console.log("Delete category");
-};
-
-const viewDetails = (id) => {
-  console.log("View details");
-};
 </script>
 
 <template>
@@ -76,13 +60,13 @@ const viewDetails = (id) => {
             <td class="py-2 px-4 border-b">{{ category._id }}</td>
             <td class="py-2 px-4 border-b">{{ category.name }}</td>
             <td class="py-2 px-4 border-b">
-              <button class="btn-edit" @click="editCategory(category._id)">
+              <button class="btn-edit">
                 Edit
               </button>
-              <button class="btn-delete" @click="deleteCategory(category._id)">
+              <button class="btn-delete">
                 Delete
               </button>
-              <button class="btn-details" @click="viewDetails(category._id)">
+              <button class="btn-details">
                 Details
               </button>
             </td>

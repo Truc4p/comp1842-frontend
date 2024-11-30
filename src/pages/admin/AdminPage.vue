@@ -25,22 +25,6 @@ onMounted(async () => {
   console.log("Categories response:", res.data);
   categories.value = res.data;
 });
-
-const createCategory = () => {
-  console.log("Create category");
-};
-
-const editCategory = (id) => {
-  console.log("Edit category");
-};
-
-const deleteCategory = (id) => {
-  console.log("Delete category");
-};
-
-const viewDetails = (id) => {
-  console.log("View details");
-};
 </script>
 
 <template>
@@ -73,19 +57,19 @@ const viewDetails = (id) => {
               <td class="py-2 px-4 border-b">
                 
                 <router-link :to="`/admin/categories/edit/${category._id}`">
-                  <button class="btn-edit" @click="editCategory(category._id)">
+                  <button class="btn-edit">
                     Edit
                   </button>
                 </router-link>    
 
                 <router-link :to="`/admin/categories/delete/${category._id}`">
-                  <button class="btn-delete" @click="deleteCategory(category._id)">
+                  <button class="btn-delete">
                     Delete
                   </button>
                 </router-link>
 
                 <router-link :to="`/admin/categories/${category._id}`">
-                  <button class="btn-details" @click="viewDetails(category._id)">
+                  <button class="btn-details">
                     Details
                   </button>
                 </router-link>

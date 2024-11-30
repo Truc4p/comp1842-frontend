@@ -29,15 +29,6 @@ onMounted(async () => {
 
 <template>
   <div class="container mx-auto p-4">
-    <!-- Create Order Button -->
-    <div class="flex mb-4">
-      <router-link to="/admin/create-order">
-        <button class="btn-primary" @click="createOrder">
-          Create Order
-        </button>
-      </router-link>  
-    </div>
-
     <!-- Orders Table -->
     <div class="overflow-x-auto">
       <table class="min-w-full bg-white border border-gray-300">
@@ -55,19 +46,19 @@ onMounted(async () => {
             <td class="py-2 px-4 border-b">
               
               <router-link :to="`/admin/orders/edit/${order._id}`">
-                <button class="btn-edit" @click="editOrder(order._id)">
+                <button class="btn-edit">
                   Edit
                 </button>
               </router-link>    
 
               <router-link :to="`/admin/orders/delete/${order._id}`">
-                <button class="btn-delete" @click="deleteOrder(order._id)">
+                <button class="btn-delete">
                   Delete
                 </button>
               </router-link>
 
-              <router-link :to="`/admin/orders/${order._id}`">
-                <button class="btn-details" @click="viewDetails(order._id)">
+              <router-link :to="`/admin/orders/order/${order._id}`">
+                <button class="btn-details">
                   Details
                 </button>
               </router-link>

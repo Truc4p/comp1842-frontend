@@ -78,19 +78,19 @@ const onImageError = (event) => {
             <td class="py-2 px-4 border-b">
               
                 <router-link :to="`/admin/products/edit/${product._id}`">
-                    <button class="btn-edit" @click="editProduct(product._id)">
+                    <button class="btn-edit">
                     Edit
                     </button>
                 </router-link>    
 
                 <router-link :to="`/admin/products/delete/${product._id}`">
-                    <button class="btn-delete" @click="deleteProduct(product._id)">
+                    <button class="btn-delete">
                         Delete
                     </button>
                 </router-link>
 
                 <router-link :to="`/admin/products/${product._id}`">
-                    <button class="btn-details" @click="viewDetails(product._id)">
+                    <button class="btn-details">
                     Details
                     </button>
                 </router-link>

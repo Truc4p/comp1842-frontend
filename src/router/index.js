@@ -37,6 +37,7 @@ import Checkout from '@/pages/customer/Checkout.vue';
 import OrderSuccess from '@/pages/customer/OrderSuccess.vue';
 import OrderDetail from '@/pages/customer/OrderDetail.vue';
 import CustomerOrders from '@/pages/customer/CustomerOrders.vue';
+import Profile from '@/pages/customer/Profile.vue';
 
 const routes = [
   { path: "/", 
@@ -85,7 +86,7 @@ const routes = [
       { path: "order-success", component: OrderSuccess },
       { path: "orders/order/:id", component: OrderDetail },
       { path: "customer-orders", component: CustomerOrders },
-
+      { path: "profile", component: Profile },
     ],
   },
 

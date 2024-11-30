@@ -64,7 +64,7 @@ const validateQuantity = (product) => {
 const filteredProducts = computed(() => {
   return products.value.filter(product => {
     return product.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-           (product.category && product.category.name.toLowerCase().includes(searchQuery.value.toLowerCase()));
+      (product.category && product.category.name.toLowerCase().includes(searchQuery.value.toLowerCase()));
   });
 });
 
@@ -80,7 +80,9 @@ onMounted(() => {
     <input type="text" v-model="searchQuery" placeholder="Search products or categories" class="search-input mb-4" />
 
     <!-- Cart -->
-    <router-link to="/customer/cart" class="cart">{{ t('cart') }}({{ cart.length }})</router-link>
+    <router-link to="/customer/cart" class="cart-link mb-4">
+      <i class="fas fa-shopping-cart"></i> {{ t('cart') }} ({{ cart.length }})
+    </router-link>
 
     <!-- Products Grid -->
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -93,17 +95,18 @@ onMounted(() => {
           <p class="text-gray-700 mb-2">{{ product.category ? product.category.name : 'No Category' }}</p>
           <p class="text-gray-900 font-bold mb-4">${{ product.price }}</p>
           <div class="flex justify-between items-center">
+            
             <router-link :to="`/customer/products/${product._id}`">
               <button class="btn-details">
                 {{ t('details') }}
               </button>
             </router-link>
-            <input type="number" 
-              v-model.number="product.quantity" 
-              min="1" :max="product.stockQuantity" 
-              class="quantity-input" 
-              @input="validateQuantity(product)" />
+
+            <input type="number" v-model.number="product.quantity" min="1" :max="product.stockQuantity"
+              class="quantity-input" @input="validateQuantity(product)" />
+            
             <button class="btn-primary" @click="updateCart(product, product.quantity || 1)">{{ t('addToCart') }}</button>
+              
           </div>
         </div>
       </div>
@@ -134,5 +137,24 @@ onMounted(() => {
 
 .search-input {
   @apply border border-gray-300 rounded px-4 py-2 w-full;
+}
+
+.cart-link {
+  display: flex;
+  align-items: center;
+  font-size: 1.2em;
+  color: #333;
+  text-decoration: none;
+  padding: 0.5em 1em;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.cart-link:hover {
+  background-color: #dff8c5;
+}
+
+.cart-link i {
+  margin-right: 0.5em;
 }
 </style>

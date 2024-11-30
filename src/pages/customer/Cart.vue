@@ -99,9 +99,11 @@ onMounted(() => {
           <h2 class="text-lg font-bold">{{ item.name }}</h2>
           <p class="text-gray-700">{{ item.category ? item.category.name : 'No Category' }}</p>
           <p class="text-gray-900 font-bold">${{ item.price }}</p>
+          
           <input type="number" v-model.number="item.quantity" min="1" :max="item.stockQuantity" class="quantity-input"
             @input="validateQuantity(item)" />
-          <button class="btn-delete" @click="removeFromCart(item._id)">Remove</button>
+          
+            <button class="btn-delete" @click="removeFromCart(item._id)">Remove</button>
         </div>
       </div>
       <router-link :to="`/customer/checkout`">

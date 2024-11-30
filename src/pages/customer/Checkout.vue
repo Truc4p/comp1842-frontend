@@ -124,6 +124,7 @@ const placeOrder = async () => {
         });
 
         console.log('Order placed successfully:', response.data);
+        alert("Order placed successfully!");
         const orderId = response.data._id; // Assuming the response contains the order ID
         router.push(`/customer/orders/order/${orderId}`);
         //router.push(`/customer/order-success`);

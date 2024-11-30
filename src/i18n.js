@@ -45,6 +45,10 @@ const messages = {
     productId: 'Product ID',
     quantity: 'Quantity',
     loading: 'Loading...',
+    address: 'Address',
+    phone: 'Phone',
+    noPhone: 'No phone number',
+    noAddress: 'No address',
   },
   vi: {
     welcomeMessage: 'Chào mừng bạn đến với trang web của chúng tôi!',
@@ -89,6 +93,10 @@ const messages = {
     productId: 'ID sản phẩm',
     quantity: 'Số lượng',
     loading: 'Đang tải...',
+    address: 'Địa chỉ',
+    phone: 'Số điện thoại',
+    noPhone: 'Không có số điện thoại',
+    noAddress: 'Không có địa chỉ',
   }
 };
 

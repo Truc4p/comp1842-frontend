@@ -8,6 +8,7 @@
         <p><strong>{{ t('orderDate') }}:</strong> {{ new Date(order.orderDate).toLocaleString() }}</p>
         <p><strong>{{ t('paymentMethod') }}:</strong> {{ t(order.paymentMethod) }}</p>
       </div>
+      <br>
       <div>
         <h3 class="text-xl font-bold mb-2">{{ t('orderProducts') }}</h3>
         <table class="min-w-full bg-white">

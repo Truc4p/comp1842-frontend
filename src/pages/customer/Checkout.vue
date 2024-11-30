@@ -125,6 +125,12 @@ const placeOrder = async () => {
 
         console.log('Order placed successfully:', response.data);
         alert("Order placed successfully!");
+
+        // Remove the cart items in cart
+        console.log('localStorage:', localStorage.getItem('cart'));
+        localStorage.removeItem('cart');
+
+        // Redirect to the order details page
         const orderId = response.data._id; // Assuming the response contains the order ID
         router.push(`/customer/orders/order/${orderId}`);
         //router.push(`/customer/order-success`);
@@ -159,7 +165,7 @@ const handleSubmit = async () => {
                 </div>
                 <div class="mb-2">
                     <label class="block mb-1">Email</label>
-                    <input v-model="customerDetails.email" type="email" class="input" />
+                    <input v-model="customerDetails.email" type="text" class="input" />
                 </div>
                 <div class="mb-2">
                     <label class="block mb-1">Address</label>

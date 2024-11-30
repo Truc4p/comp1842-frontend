@@ -10,7 +10,18 @@ const password = ref("");
 const role = ref("customer"); // Default role is customer
 const adminKey = ref(""); // Admin key for admin registration
 
+const isPasswordStrong = (password) => {
+  // Example criteria: at least 8 characters, one uppercase, one lowercase, one number, and one special character
+  const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+  return strongPasswordRegex.test(password);
+};
+
 const register = async () => {
+  if (!isPasswordStrong(password.value)) {
+    alert(t('weakPassword'));
+    return;
+  }
+
   try {
     const data = {
       username: username.value,

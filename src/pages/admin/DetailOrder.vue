@@ -4,7 +4,7 @@
     <div v-if="order">
       <div class="mb-4">
         <p><strong>{{ t('orderId') }}:</strong> {{ order._id }}</p>
-        <p><strong>{{ t('orderUser') }}:</strong> {{ order.user.name }}</p>
+        <p><strong>{{ t('orderUser') }}:</strong> {{ order.user }}</p>
         <p><strong>{{ t('orderDate') }}:</strong> {{ new Date(order.orderDate).toLocaleString() }}</p>
         <p><strong>{{ t('paymentMethod') }}:</strong> {{ t(order.paymentMethod) }}</p>
       </div>

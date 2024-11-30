@@ -46,17 +46,19 @@ onMounted(() => {
     </div>
     <div v-else>
       <div v-for="order in orders" :key="order._id" class="order-item mb-4 p-4 border border-gray-300 rounded-lg">
-        <h2 class="text-lg font-bold">Order #{{ order._id }}</h2>
-        <p class="text-gray-700">Date: {{ new Date(order.orderDate).toLocaleDateString() }}</p>
-        <p class="text-gray-900 font-bold">Total: ${{ order.total }}</p>
-        <div v-for="item in order.items" :key="item._id" class="order-product flex items-center mt-2">
-          <img :src="item.image" alt="Product Image" class="w-16 h-16 object-cover mr-4" />
-          <div>
-            <h3 class="text-md font-bold">{{ item.name }}</h3>
-            <p class="text-gray-700">Quantity: {{ item.quantity }}</p>
-            <p class="text-gray-900 font-bold">Price: ${{ item.price }}</p>
+        <router-link :to="`/customer/orders/order/${order._id}`" class="block">
+          <h2 class="text-lg font-bold">Order #{{ order._id }}</h2>
+          <p class="text-gray-700">Date: {{ new Date(order.orderDate).toLocaleDateString() }}</p>
+          <p class="text-gray-900 font-bold">Total: ${{ order.totalPrice }}</p>
+          <div v-for="item in order.items" :key="item._id" class="order-product flex items-center mt-2">
+            <img :src="item.image" alt="Product Image" class="w-16 h-16 object-cover mr-4" />
+            <div>
+              <h3 class="text-md font-bold">{{ item.name }}</h3>
+              <p class="text-gray-700">Quantity: {{ item.quantity }}</p>
+              <p class="text-gray-900 font-bold">Price: ${{ item.price }}</p>
+            </div>
           </div>
-        </div>
+        </router-link>
       </div>
     </div>
   </div>

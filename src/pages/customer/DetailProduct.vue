@@ -1,22 +1,49 @@
 <template>
-  <div class="container mx-auto p-4">
-    <h2 class="text-2xl font-bold mb-4">{{ t('details') }}</h2>
-    <div v-if="product">
-      <p><strong>ID:</strong> {{ product._id }}</p>
-      <p><strong>{{ t('productName') }}:</strong> {{ product.name }}</p>
-      <p><strong>{{ t('productCategory') }}:</strong> {{ product.category ? product.category.name : t('noCategory') }}</p>
-      <p><strong>{{ t('productDescription') }}:</strong> {{ product.description }}</p>
-      <p><strong>{{ t('productPrice') }}:</strong> ${{ product.price }}</p>
-      <p><strong>{{ t('productStockQuantity') }}:</strong> {{ product.stockQuantity }}</p>
+  <div class="container mx-auto p-6 max-w-4xl bg-white shadow-lg rounded-lg border border-gray-200">
+    <!-- Title -->
+    <h2 class="text-3xl font-bold text-gray-800 mb-6">{{ t('details') }}</h2>
+
+    <!-- Product Details -->
+    <div v-if="product" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Text Details -->
       <div>
-        <img :src="product.image ? getImageUrl(product.image) : '/images/fallback-image.jpg'" alt="Product Image" class="w-64 h-64 object-cover" @error="onImageError" />
+        <p class="text-lg text-gray-700 mb-2">
+          <strong class="font-semibold">ID:</strong> {{ product._id }}
+        </p>
+        <p class="text-lg text-gray-700 mb-2">
+          <strong class="font-semibold">{{ t('productName') }}:</strong> {{ product.name }}
+        </p>
+        <p class="text-lg text-gray-700 mb-2">
+          <strong class="font-semibold">{{ t('productCategory') }}:</strong>
+          {{ product.category ? product.category.name : t('noCategory') }}
+        </p>
+        <p class="text-lg text-gray-700 mb-2">
+          <strong class="font-semibold">{{ t('productDescription') }}:</strong>
+          {{ product.description }}
+        </p>
+        <p class="text-lg text-gray-700 mb-2">
+          <strong class="font-semibold">{{ t('productPrice') }}:</strong> ${{ product.price }}
+        </p>
+        <p class="text-lg text-gray-700 mb-2">
+          <strong class="font-semibold">{{ t('productStockQuantity') }}:</strong>
+          {{ product.stockQuantity }}
+        </p>
       </div>
+      <!-- Product Image -->
+      <div class="flex justify-center items-center">
+        <img :src="product.image ? getImageUrl(product.image) : '/images/fallback-image.jpg'" alt="Product Image"
+          class="w-100 h-100 object-cover rounded-lg shadow-md border border-gray-300 md:w-96 md:h-96"
+          @error="onImageError" />
+      </div>
+
     </div>
-    <div v-else>
-      <p>{{ t('loading') }}</p>
+    <!-- Loading State -->
+    <div v-else class="text-center">
+      <p class="text-gray-500 text-lg">{{ t('loading') }}</p>
     </div>
   </div>
 </template>
+
 
 <script setup>
 import { ref, onMounted } from 'vue';

@@ -61,7 +61,8 @@ const handleSubmitItem = async (event) => {
   // Transform cart items to match ProductSchema
   const transformedCartItems = cart.value.map(item => ({
     productId: item._id,
-    quantity: item.quantity
+    quantity: item.quantity,
+    price: item.price,
   }));
 
   try {

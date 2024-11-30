@@ -88,26 +88,19 @@ onMounted(() => {
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
       <div v-for="product in filteredProducts" :key="product._id"
         class="bg-white border border-gray-300 rounded-lg overflow-hidden shadow-md">
-        <img :src="product.image ? getImageUrl(product.image) : '/images/fallback-image.jpg'" alt="Product Image"
-          class="w-full h-48 object-cover" @error="onImageError" />
-        <div class="p-4">
-          <h2 class="text-lg font-bold mb-2">{{ product.name }}</h2>
-          <p class="text-gray-700 mb-2">{{ product.category ? product.category.name : 'No Category' }}</p>
-          <p class="text-gray-900 font-bold mb-4">${{ product.price }}</p>
-          <div class="flex justify-between items-center">
-            
-            <router-link :to="`/customer/products/${product._id}`">
-              <button class="btn-details">
-                {{ t('details') }}
-              </button>
-            </router-link>
-
-            <input type="number" v-model.number="product.quantity" min="1" :max="product.stockQuantity"
-              class="quantity-input" @input="validateQuantity(product)" />
-            
-            <button class="btn-primary" @click="updateCart(product, product.quantity || 1)">{{ t('addToCart') }}</button>
-              
+        <router-link :to="`/customer/products/${product._id}`" class="block">
+          <img :src="product.image ? getImageUrl(product.image) : '/images/fallback-image.jpg'" alt="Product Image"
+            class="w-full h-48 object-cover" @error="onImageError" />
+          <div class="p-4">
+            <h2 class="text-lg font-bold mb-2">{{ product.name }}</h2>
+            <p class="text-gray-700 mb-2">{{ product.category ? product.category.name : 'No Category' }}</p>
+            <p class="text-gray-900 font-bold mb-4">${{ product.price }}</p>
           </div>
+        </router-link>
+        <div class="flex p-4 ml-12">
+          <input type="number" v-model.number="product.quantity" min="1" :max="product.stockQuantity"
+            class="quantity-input" @input="validateQuantity(product)" />
+          <button class="btn-primary" @click="updateCart(product, product.quantity || 1)">{{ t('addToCart') }}</button>
         </div>
       </div>
     </div>

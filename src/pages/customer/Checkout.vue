@@ -80,11 +80,14 @@ const getCustomer = async () => {
 
 const placeOrder = async () => {
     try {
+        const totalPrice = cartItems.value.reduce((total, item) => total + item.price * item.quantity, 0);
         const orderData = {
             user: userId,
             products: cartItems.value,
             paymentMethod: customerDetails.value.paymentMethod,
             orderDate: new Date(),
+            status: 'pending',
+            totalPrice: totalPrice,
         };
 
         console.log('Order data:', orderData); // Log order data

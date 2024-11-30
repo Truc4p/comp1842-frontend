@@ -4,8 +4,11 @@
     <div v-if="order">
       <div class="mb-4">
         <p><strong>{{ t('orderId') }}:</strong> {{ order._id }}</p>
+        <!-- <p><strong>{{ t('orderUser') }}:</strong> {{ username }}</p> -->
+        <p><strong>{{ t('orderUser') }}:</strong> {{ order.user }}</p>
         <p><strong>{{ t('orderDate') }}:</strong> {{ new Date(order.orderDate).toLocaleString() }}</p>
         <p><strong>{{ t('paymentMethod') }}:</strong> {{ t(order.paymentMethod) }}</p>
+        <p><strong>{{ t('totalPrice') }}:</strong> ${{ t(order.totalPrice) }}</p>
       </div>
       <br>
       <div>
@@ -51,6 +54,7 @@ import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 const order = ref(null);
 const route = useRoute();
+const username = ref('');
 
 const getImageUrl = (relativePath) => {
   const url = `http://localhost:3000/${relativePath}`; // Adjust the base URL as needed
@@ -77,6 +81,9 @@ onMounted(async () => {
   } catch (error) {
     console.error('Error fetching order details:', error);
   }
+
+  username.value = localStorage.getItem('username');
+  console.log('Username:', username.value);
 });
 </script>
 

@@ -35,7 +35,6 @@ onMounted(async () => {
         <thead>
           <tr>
             <th class="py-2 px-4 border-b">ID</th>
-            <th class="py-2 px-4 border-b">Name</th>
             <th class="py-2 px-4 border-b">Actions</th>
           </tr>
         </thead>

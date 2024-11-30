@@ -50,6 +50,10 @@ const messages = {
     noPhone: 'No phone number',
     noAddress: 'No address',
     orderHistory: 'Order History',
+    name: 'Name',
+    category: 'Category',
+    image: 'Image',
+    price: 'Price',
   },
   vi: {
     welcomeMessage: 'Chào mừng bạn đến với trang web của chúng tôi!',
@@ -99,6 +103,10 @@ const messages = {
     noPhone: 'Không có số điện thoại',
     noAddress: 'Không có địa chỉ',
     orderHistory: 'Lịch sử đơn hàng',
+    name: 'Tên',
+    category: 'Danh mục',
+    image: 'Hình ảnh',
+    price: 'Giá',
   }
 };
 

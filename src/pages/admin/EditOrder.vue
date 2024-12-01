@@ -4,16 +4,33 @@
     <div v-if="order">
       <div class="mb-4">
         <p><strong>{{ t('orderId') }}:</strong> {{ order._id }}</p>
-        <!-- <p><strong>{{ t('orderUser') }}:</strong> {{ username }}</p> -->
         <p><strong>{{ t('orderUser') }}:</strong> {{ order.user }}</p>
         <p><strong>{{ t('orderDate') }}:</strong> {{ new Date(order.orderDate).toLocaleString() }}</p>
         <p><strong>{{ t('paymentMethod') }}:</strong> {{ t(order.paymentMethod) }}</p>
-        <p><strong>{{ t('totalPrice') }}:</strong> ${{ t(order.totalPrice) }}</p>
-        <router-link :to="`/customer/orders/delete/${order._id}`">
-          <button class="btn-delete">
-            {{ t('deleteOrder') }}
-          </button>
-        </router-link>
+        <form @submit.prevent="updateOrder">
+          <p><strong>{{ t('orderStatus') }}:</strong> {{ t(order.status) }}</p>
+
+          <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2" for="status">
+              {{ t('orderStatus') }}
+            </label>
+            <select v-model="selectedStatus"
+              class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              id="status">
+              <option v-for="statusOption in statusOptions" :key="statusOption" :value="statusOption">
+                {{ t(statusOption) }}
+              </option>
+            </select>
+          </div>
+
+          <div class="flex items-center justify-between">
+            <button
+              class="bg-blue-400 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              type="submit">
+              Save
+            </button>
+          </div>
+        </form>
       </div>
       <br>
       <div>
@@ -23,22 +40,30 @@
             <tr>
               <th class="py-2">{{ t('productId') }}</th>
               <th class="py-2">{{ t('name') }}</th>
+              <th class="py-2">{{ t('category') }}</th>
               <th class="py-2">{{ t('image') }}</th>
               <th class="py-2">{{ t('price') }}</th>
+              <th class="py-2">{{ t('stockQuantity') }}</th>
               <th class="py-2">{{ t('quantity') }}</th>
+
+
             </tr>
           </thead>
           <tbody>
             <tr v-for="product in order.products" :key="product.productId" class="border-t">
               <td class="py-2">{{ product.productId._id }}</td>
               <td class="py-2">{{ product.productId.name }} </td>
+              <td class="py-2">{{ product.productId.category }}</td>
               <td class="py-2">
                 <img
                   :src="product.productId.image ? getImageUrl(product.productId.image) : '/images/fallback-image.jpg'"
                   alt="Product Image" class="w-32 h-32 object-cover" @error="onImageError" />
               </td>
               <td class="py-2">${{ product.productId.price }}</td>
+              <td class="py-2">{{ product.productId.stockQuantity }}</td>
               <td class="py-2">{{ product.quantity }}</td>
+
+
             </tr>
           </tbody>
         </table>
@@ -53,13 +78,16 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
 const order = ref(null);
 const route = useRoute();
-const username = ref('');
+const router = useRouter(); // Create a router instance
+
+const selectedStatus = ref('');
+const statusOptions = ['pending', 'processing', 'shipped', 'delivered'];
 
 const getImageUrl = (relativePath) => {
   const url = `http://localhost:3000/${relativePath}`; // Adjust the base URL as needed
@@ -86,13 +114,27 @@ onMounted(async () => {
   } catch (error) {
     console.error('Error fetching order details:', error);
   }
-
-  username.value = localStorage.getItem('username');
-  console.log('Username:', username.value);
 });
+
+const updateOrder = async () => {
+  const orderId = route.params.id;
+  console.log('Updating order status:', selectedStatus.value);
+
+  try {
+    const response = await axios.put(`http://localhost:3000/orders/${orderId}`, { status: selectedStatus.value }, {
+      headers: {
+        'x-auth-token': localStorage.getItem('token'),
+      },
+    });
+    console.log("Order status updated successfully:", response.data);
+    router.push('/admin/orders');
+  } catch (error) {
+    console.error("Error updating order status:", error);
+  }
+};
+
 </script>
 
 <style scoped>
-.btn-delete {
-  @apply bg-red-400 text-white px-2 py-1 rounded hover:bg-red-500 mx-1;
-}</style>
+/* Add your styles here */
+</style>

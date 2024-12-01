@@ -27,6 +27,8 @@ import Users from '@/pages/admin/Users.vue';
 
 import Orders from '@/pages/admin/Orders.vue';
 import DetailOrder from '@/pages/admin/DetailOrder.vue';
+import EditOrder from '@/pages/admin/EditOrder.vue';
+import DeleteOrderByAdmin from '@/pages/admin/DeleteOrderByAdmin.vue';
 
 
 // Customer
@@ -37,6 +39,7 @@ import Checkout from '@/pages/customer/Checkout.vue';
 import OrderDetail from '@/pages/customer/OrderDetail.vue';
 import OrderHistory from '@/pages/customer/OrderHistory.vue';
 import Profile from '@/pages/customer/Profile.vue';
+import DeleteOrder from '@/pages/customer/DeleteOrder.vue';
 
 const routes = [
   { path: "/", 
@@ -70,6 +73,9 @@ const routes = [
 
       { path: "orders", component: Orders },
       { path: "orders/order/:id", component: DetailOrder },
+      { path: "orders/order/edit/:id", component: EditOrder },
+      { path: "orders/delete/:id", component: DeleteOrderByAdmin },
+
 
     ],
   },
@@ -85,6 +91,8 @@ const routes = [
       { path: "orders/order/:id", component: OrderDetail },
       { path: "order-history", component: OrderHistory },
       { path: "profile", component: Profile },
+      { path: "orders/delete/:id", component: DeleteOrder },
+
     ],
   },
 

@@ -35,16 +35,30 @@ onMounted(async () => {
         <thead>
           <tr>
             <th class="py-2 px-4 border-b">ID</th>
+            <th class="py-2 px-4 border-b">Status</th>
             <th class="py-2 px-4 border-b">Actions</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="order in orders" :key="order._id">
-            <td class="py-2 px-4 border-b">{{ order._id }}</td>
-            <td class="py-2 px-4 border-b">{{ order.name }}</td>
+          <tr v-for="order in orders" :key="order._id"  class="hover:bg-gray-50">
+
+            <!-- Make the ID cell clickable -->
+            <td class="py-2 px-4 border">
+              <router-link :to="`/admin/orders/order/${order._id}`" class="block">
+                {{ order._id }}
+              </router-link>
+            </td>
+
+            <!-- Make the name cell clickable -->
+            <td class="py-2 px-4 border">
+              <router-link :to="`/admin/orders/order/${order._id}`" class="block">
+                {{ order.status }}
+              </router-link>
+            </td>
+
             <td class="py-2 px-4 border-b">
               
-              <router-link :to="`/admin/orders/edit/${order._id}`">
+              <router-link :to="`/admin/orders/order/edit/${order._id}`">
                 <button class="btn-edit">
                   Edit
                 </button>
@@ -53,12 +67,6 @@ onMounted(async () => {
               <router-link :to="`/admin/orders/delete/${order._id}`">
                 <button class="btn-delete">
                   Delete
-                </button>
-              </router-link>
-
-              <router-link :to="`/admin/orders/order/${order._id}`">
-                <button class="btn-details">
-                  Details
                 </button>
               </router-link>
 

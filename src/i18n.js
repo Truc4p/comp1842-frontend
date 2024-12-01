@@ -56,6 +56,8 @@ const messages = {
     price: 'Price',
     weakPassword: 'Password must be at least 8 characters, one uppercase, one lowercase, one number, and one special character (!@#$%^&*)',
     totalPrice: 'Total Price',
+    deleteOrder: 'Delete Order',
+    orderStatus: 'Order Status',
   },
   vi: {
     welcomeMessage: 'Chào mừng bạn đến với trang web của chúng tôi!',
@@ -111,6 +113,8 @@ const messages = {
     price: 'Giá',
     weakPassword: 'Mật khẩu phải có ít nhất 8 ký tự, một chữ hoa, một chữ thường, một số, và một ký tự đặc biệt (!@#$%^&*)',
     totalPrice: 'Tổng giá',
+    deleteOrder: 'Xóa đơn hàng',
+    orderStatus: 'Trạng thái đơn hàng',
   }
 };
 

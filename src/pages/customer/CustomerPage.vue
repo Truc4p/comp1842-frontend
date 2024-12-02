@@ -41,13 +41,13 @@ const updateCart = (product, quantity) => {
   const cartItem = cart.value.find(item => item._id === product._id);
   if (cartItem) {
     if (cartItem.quantity + quantity > product.stockQuantity) {
-      alert(t('registerFail') + 'You have reached the maximum stock quantity for this product.');
+      alert('You have reached the maximum stock quantity for this product.');
       return;
     }
     cartItem.quantity += quantity;
   } else {
     if (quantity > product.stockQuantity) {
-      alert(t('registerFail') + 'You have reached the maximum stock quantity for this product.');
+      alert('You have reached the maximum stock quantity for this product.');
       return;
     }
     cart.value.push({ ...product, quantity });

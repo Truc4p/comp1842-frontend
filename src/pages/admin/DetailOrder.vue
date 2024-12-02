@@ -7,6 +7,7 @@
         <p><strong>{{ t('orderUser') }}:</strong> {{ order.user }}</p>
         <p><strong>{{ t('orderDate') }}:</strong> {{ new Date(order.orderDate).toLocaleString() }}</p>
         <p><strong>{{ t('paymentMethod') }}:</strong> {{ t(order.paymentMethod) }}</p>
+        <p><strong>{{ t('totalPrice') }}:</strong> ${{ t(order.totalPrice) }}</p>
       </div>
       <br>
       <div>

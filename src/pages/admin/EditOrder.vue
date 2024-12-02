@@ -7,13 +7,15 @@
         <p><strong>{{ t('orderUser') }}:</strong> {{ order.user }}</p>
         <p><strong>{{ t('orderDate') }}:</strong> {{ new Date(order.orderDate).toLocaleString() }}</p>
         <p><strong>{{ t('paymentMethod') }}:</strong> {{ t(order.paymentMethod) }}</p>
+        <p><strong>{{ t('totalPrice') }}:</strong> ${{ t(order.totalPrice) }}</p>
+
         <form @submit.prevent="updateOrder">
           <p><strong>{{ t('orderStatus') }}:</strong> {{ t(order.status) }}</p>
 
           <div class="mb-4">
-            <label class="block text-gray-700 text-sm font-bold mb-2" for="status">
+            <!-- <label class="block text-gray-700 text-sm font-bold mb-2" for="status">
               {{ t('orderStatus') }}
-            </label>
+            </label> -->
             <select v-model="selectedStatus"
               class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               id="status">

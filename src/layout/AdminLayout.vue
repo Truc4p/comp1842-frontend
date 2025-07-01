@@ -1,22 +1,11 @@
 <!-- src/layout/AdminLayout.vue -->
 <template>
-  <div class="min-h-screen h-screen flex flex-col bg-gray-100">
+  <div class="min-h-screen h-screen flex flex-col">
     <AdminNavbar />
-    <div class="flex-grow flex items-center justify-center">
-      <!-- Language Switcher -->
-      <div class="absolute top-4 right-4">
-        <select @change="changeLanguage" v-model="currentLocale">
-          <option value="en">English</option>
-          <option value="vi">Tiếng Việt</option>
-        </select>
-      </div>
-      <div class="w-full h-full">
-        <!-- Main Content -->
-        <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 h-full">
-          <router-view />
-        </div>
-      </div>
-    </div>
+
+    <main class="flex-grow w-full">
+      <router-view />
+    </main>
   </div>
 </template>
 
@@ -32,3 +21,7 @@ const changeLanguage = (event) => {
   locale.value = event.target.value;
 };
 </script>
+
+<style scoped>
+/* Additional custom styles for enhanced layout */
+</style>

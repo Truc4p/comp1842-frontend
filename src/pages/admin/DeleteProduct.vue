@@ -23,6 +23,7 @@
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useRoute, useRouter } from 'vue-router';
+import { API_URL } from '../../utils/config';
 
 const route = useRoute();
 const router = useRouter();
@@ -31,7 +32,7 @@ const productId = ref(route.params.id);
 const deleteProduct = async () => {
   try {
     const token = localStorage.getItem('token');
-    await axios.delete(`http://localhost:3000/products/${productId.value}`, {
+    await axios.delete(`${API_URL}/products/${productId.value}`, {
       headers: {
         'x-auth-token': token,
       },

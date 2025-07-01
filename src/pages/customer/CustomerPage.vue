@@ -3,6 +3,7 @@ import axios from "axios";
 import { onMounted, ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from 'vue-i18n';
+import { API_URL } from '../../utils/config';
 
 const { t, locale } = useI18n();
 const router = useRouter();
@@ -19,7 +20,7 @@ const fetchProducts = async () => {
   }
 
   // Make the api request with axios with token in header
-  const res = await axios.get("http://localhost:3000/products", {
+  const res = await axios.get(`${API_URL}/products`, {
     headers: {
       "x-auth-token": `${token}`,
     },
@@ -30,7 +31,7 @@ const fetchProducts = async () => {
 };
 
 const getImageUrl = (relativePath) => {
-  return `http://localhost:3000/${relativePath}`; // Adjust the base URL as needed
+  return `${API_URL}/${relativePath}`; // Adjust the base URL as needed
 };
 
 const onImageError = (event) => {

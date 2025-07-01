@@ -16,10 +16,16 @@ import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import { API_URL } from '../../utils/config';
 
 const router = useRouter();
 const { t } = useI18n();
 const user = ref(null);
+const firstName = ref('');
+const lastName = ref('');
+const email = ref('');
+const phoneNumber = ref('');
+const address = ref('');
 
 // Get userId from localStorage
 const userId = localStorage.getItem('userId');
@@ -39,15 +45,22 @@ const getCustomer = async () => {
     }
 
     try {
-        const res = await axios.get(`http://localhost:3000/users/${userId}`, {
+        const res = await axios.get(`${API_URL}/users/${userId}`, {
             headers: {
                 "x-auth-token": token,
             },
         });
         console.log("User response:", res.data);
         user.value = res.data;
+        
+        // Populate form fields with existing data
+        firstName.value = user.value.firstName || '';
+        lastName.value = user.value.lastName || '';
+        email.value = user.value.email || '';
+        phoneNumber.value = user.value.phoneNumber || '';
+        address.value = user.value.address || '';
     } catch (error) {
-        console.error('Error retrieving customer:', error);
+        console.error("Error fetching user profile:", error);
     }
 };
 

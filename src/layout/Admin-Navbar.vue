@@ -1,16 +1,90 @@
 <!-- src/components/Admin-Navbar.vue -->
 <template>
-  <nav class="bg-lime-100 p-4">
-    <div class="container mx-auto flex justify-between items-center">
-      <div>
-        <router-link to="/admin" class="text-lime-700 font-bold text-xl">WrenCos</router-link>
+  <nav class="navbar sticky top-0 z-50">
+    <div class="container mx-auto px-6 py-4">
+      <div class="flex justify-between items-center">
+        <!-- Logo and Brand -->
+        <div class="flex items-center space-x-3">
+          <router-link to="/admin" class="navbar-brand">
+            <div class="flex items-center space-x-3">
+              <div class="footer-logo">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+              </div>
+              <span class="footer-brand-text">WrenCos Admin</span>
+            </div>
+          </router-link>
+        </div>
+        
+        <!-- Navigation Links -->
+        <div class="hidden md:flex items-center space-x-6">
+          <router-link :to="{ path: '/admin/products' }" exact-active-class="router-link-exact-active" class="navbar-link">
+            {{ t('products') }}
+          </router-link>
+          <router-link :to="{ path: '/admin/categories' }" exact-active-class="router-link-exact-active" class="navbar-link">
+            {{ t('categories') }}
+          </router-link>
+          <router-link :to="{ path: '/admin/orders' }" exact-active-class="router-link-exact-active" class="navbar-link">
+            {{ t('orders') }}
+          </router-link>
+          <router-link :to="{ path: '/admin/users' }" exact-active-class="router-link-exact-active" class="navbar-link">
+            {{ t('users') }}
+          </router-link>
+          
+          <!-- Language Switcher -->
+          <div class="language-selector">
+            <select @change="changeLanguage" v-model="currentLocale">
+              <option value="en">🇺🇸 EN</option>
+              <option value="vi">🇻🇳 VI</option>
+            </select>
+          </div>
+          
+          <router-link to="/logout" class="navbar-link">
+            {{ t('logout') }}
+          </router-link>
+        </div>
+        
+        <!-- Mobile Menu Button -->
+        <div class="md:hidden">
+          <button @click="toggleMobileMenu" class="p-2 rounded-lg text-secondary-600 hover:text-primary-600 hover:bg-secondary-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path v-if="!mobileMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+              <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
       </div>
-      <div>
-        <router-link to="/admin/products" class="text-lime-700 mr-4">{{ t('products') }}</router-link>
-        <router-link to="/admin/categories" class="text-lime-700 mr-4">{{ t('categories') }}</router-link>
-        <router-link to="/admin/orders" class="text-lime-700 mr-4">{{ t('orders') }}</router-link>
-        <router-link to="/admin/users" class="text-lime-700 mr-4">{{ t('users') }}</router-link>
-        <router-link to="/logout" class="text-lime-700 mr-4">{{ t('logout') }}</router-link>
+      
+      <!-- Mobile Menu -->
+      <div v-if="mobileMenuOpen" class="md:hidden mt-4 pb-4 space-y-3 border-t border-secondary-200 pt-4 animate-slide-up">
+        <router-link :to="{ path: '/admin/products' }" exact-active-class="router-link-exact-active" class="block navbar-link py-2 px-3 rounded-lg hover:bg-secondary-50 transition-colors duration-200">
+          {{ t('products') }}
+        </router-link>
+        <router-link :to="{ path: '/admin/categories' }" exact-active-class="router-link-exact-active" class="block navbar-link py-2 px-3 rounded-lg hover:bg-secondary-50 transition-colors duration-200">
+          {{ t('categories') }}
+        </router-link>
+        <router-link :to="{ path: '/admin/orders' }" exact-active-class="router-link-exact-active" class="block navbar-link py-2 px-3 rounded-lg hover:bg-secondary-50 transition-colors duration-200">
+          {{ t('orders') }}
+        </router-link>
+        <router-link :to="{ path: '/admin/users' }" exact-active-class="router-link-exact-active" class="block navbar-link py-2 px-3 rounded-lg hover:bg-secondary-50 transition-colors duration-200">
+          {{ t('users') }}
+        </router-link>
+        
+        <!-- Mobile Language Switcher -->
+        <div class="pt-3 border-t border-secondary-200">
+          <label class="block text-sm font-medium text-secondary-700 mb-2">{{ t('language') || 'Language' }}</label>
+          <div class="language-selector">
+            <select @change="changeLanguage" v-model="currentLocale" class="w-full">
+              <option value="en">🇺🇸 English</option>
+              <option value="vi">🇻🇳 Tiếng Việt</option>
+            </select>
+          </div>
+        </div>
+        
+        <router-link to="/logout" class="block navbar-link py-2 px-3 rounded-lg hover:bg-secondary-50 transition-colors duration-200">
+          {{ t('logout') }}
+        </router-link>
       </div>
     </div>
   </nav>
@@ -18,10 +92,26 @@
 
 <script setup>
 import { useI18n } from 'vue-i18n';
+import { ref } from 'vue';
 
-const { t } = useI18n();
+const { locale, t } = useI18n();
+const currentLocale = ref(locale.value);
+const mobileMenuOpen = ref(false);
+
+const toggleMobileMenu = () => {
+  mobileMenuOpen.value = !mobileMenuOpen.value;
+};
+
+const changeLanguage = (event) => {
+  locale.value = event.target.value;
+  currentLocale.value = event.target.value;
+};
 </script>
 
 <style scoped>
-/* Add your styles here */
+/* Additional custom styles for enhanced navbar */
+.navbar {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
 </style>

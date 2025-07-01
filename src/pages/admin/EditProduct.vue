@@ -83,6 +83,7 @@
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useRoute, useRouter } from 'vue-router';
+import { API_URL } from '../../utils/config';
 
 const product = ref(null);
 const name = ref('');
@@ -98,7 +99,7 @@ const router = useRouter();
 const fetchCategories = async () => {
   try {
     const token = localStorage.getItem('token');
-    const response = await axios.get('http://localhost:3000/categories', {
+    const response = await axios.get(`${API_URL}/categories`, {
       headers: {
         'x-auth-token': token,
       },
@@ -112,7 +113,7 @@ const fetchCategories = async () => {
 const fetchProduct = async () => {
   const productId = route.params.id;
   try {
-    const response = await axios.get(`http://localhost:3000/products/${productId}`);
+    const response = await axios.get(`${API_URL}/products/${productId}`);
     product.value = response.data;
     name.value = product.value.name;
     category.value = product.value.category._id;
@@ -142,7 +143,7 @@ const updateProduct = async () => {
       formData.append('image', image.value);
     }
 
-    const response = await axios.put(`http://localhost:3000/products/${productId}`, formData, {
+    const response = await axios.put(`${API_URL}/products/${productId}`, formData, {
       headers: {
         'x-auth-token': localStorage.getItem('token'),
         'Content-Type': 'multipart/form-data',
@@ -161,6 +162,6 @@ onMounted(() => {
 });
 
 const getImageUrl = (relativePath) => {
-  return `http://localhost:3000/${relativePath}`; // Adjust the base URL as needed
+  return `${API_URL}/${relativePath}`; // Adjust the base URL as needed
 };
 </script>

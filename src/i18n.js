@@ -103,6 +103,7 @@ const messages = {
     home: 'Home',
     noCategory: 'No Category',
     allRightsReserved: 'All rights reserved',
+    featuredProductsDesc: 'Explore our carefully curated collection of premium products',
   },
   vi: {
     welcomeMessage: 'Chào mừng bạn đến với trang web của chúng tôi!',
@@ -205,6 +206,7 @@ const messages = {
     home: 'Trang chủ',
     noCategory: 'Không có danh mục',
     allRightsReserved: 'Đã đăng ký bản quyền',
+    featuredProductsDesc: 'Khám phá bộ sưu tập sản phẩm chất lượng cao với giá cả phải chăng',
   }
 };
 

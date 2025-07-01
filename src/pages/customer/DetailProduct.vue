@@ -1,3 +1,40 @@
+<script setup>
+import { ref, onMounted } from 'vue';
+import axios from 'axios';
+import { useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+import { API_URL } from '../../utils/config';
+
+const { t, locale } = useI18n();
+const product = ref(null);
+const route = useRoute();
+
+const getImageUrl = (relativePath) => {
+  return `${API_URL}/${relativePath}`; // Adjust the base URL as needed
+};
+
+const onImageError = (event) => {
+  event.target.src = '/images/fallback-image.jpg'; // Provide a fallback image URL
+};
+
+onMounted(async () => {
+  const productId = route.params.id;
+  console.log('Fetching product with ID:', productId); // Debugging log
+  try {
+    const response = await axios.get(`${API_URL}/products/${productId}`, {
+      headers: {
+        'x-auth-token': localStorage.getItem('token'),
+      },
+    });
+    console.log('API response:', response.data); // Debugging log
+    product.value = response.data;
+    console.log('Product image URL:', getImageUrl(product.value.image)); // Log the full image URL
+  } catch (error) {
+    console.error('Error fetching product details:', error);
+  }
+});
+</script>
+
 <template>
   <div class="container mx-auto p-6 max-w-4xl bg-white shadow-lg rounded-lg border border-gray-200">
     <!-- Title -->
@@ -43,43 +80,6 @@
     </div>
   </div>
 </template>
-
-
-<script setup>
-import { ref, onMounted } from 'vue';
-import axios from 'axios';
-import { useRoute } from 'vue-router';
-import { useI18n } from 'vue-i18n';
-
-const { t, locale } = useI18n();
-const product = ref(null);
-const route = useRoute();
-
-const getImageUrl = (relativePath) => {
-  return `http://localhost:3000/${relativePath}`; // Adjust the base URL as needed
-};
-
-const onImageError = (event) => {
-  event.target.src = '/images/fallback-image.jpg'; // Provide a fallback image URL
-};
-
-onMounted(async () => {
-  const productId = route.params.id;
-  console.log('Fetching product with ID:', productId); // Debugging log
-  try {
-    const response = await axios.get(`http://localhost:3000/products/${productId}`, {
-      headers: {
-        'x-auth-token': localStorage.getItem('token'),
-      },
-    });
-    console.log('API response:', response.data); // Debugging log
-    product.value = response.data;
-    console.log('Product image URL:', getImageUrl(product.value.image)); // Log the full image URL
-  } catch (error) {
-    console.error('Error fetching product details:', error);
-  }
-});
-</script>
 
 <style scoped>
 /* Add your styles here */

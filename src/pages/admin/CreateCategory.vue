@@ -26,14 +26,17 @@
 import { ref } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+import { API_URL } from '../../utils/config';
 
+const { t } = useI18n();
 const name = ref('');
 const router = useRouter();
 
 const handleSubmit = async () => {
   try {
     const token = localStorage.getItem('token');
-    const response = await axios.post('http://localhost:3000/categories', { name: name.value }, {
+    const response = await axios.post(`${API_URL}/categories`, { name: name.value }, {
       headers: {
         'x-auth-token': token,
       },

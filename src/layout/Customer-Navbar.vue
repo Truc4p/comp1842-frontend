@@ -1,45 +1,63 @@
 <!-- src/components/Customer-Navbar.vue -->
 <template>
-  <nav class="bg-green-600 shadow-md">
-    <div class="container mx-auto px-4 py-3">
+  <nav class="navbar sticky top-0 z-50">
+    <div class="container mx-auto px-6 py-4">
       <div class="flex justify-between items-center">
         <!-- Logo and Brand -->
-        <div class="flex items-center space-x-2">
-          <router-link to="/customer" class="flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-            </svg>
-            <span class="text-white font-bold text-xl ml-2">WrenCos</span>
+        <div class="flex items-center space-x-3">
+          <router-link to="/customer" class="navbar-brand">
+            <div class="flex items-center space-x-3">
+              <div class="footer-logo">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+              </div>
+              <span class="footer-brand-text">WrenCos</span>
+            </div>
           </router-link>
         </div>
         
         <!-- Navigation Links -->
-        <div class="hidden md:flex items-center space-x-4">
-          <router-link to="/customer" class="text-white hover:text-green-200 transition-colors duration-200">
+        <div class="hidden md:flex items-center space-x-6">
+          <router-link :to="{ path: '/customer' }" exact-active-class="router-link-exact-active" class="navbar-link">
             {{ t('home') }}
           </router-link>
-          <router-link to="/customer/profile" class="text-white hover:text-green-200 transition-colors duration-200">
+          <router-link :to="{ path: '/customer/profile' }" exact-active-class="router-link-exact-active" class="navbar-link">
             {{ t('profile') }}
           </router-link>
-          <router-link to="/customer/order-history" class="text-white hover:text-green-200 transition-colors duration-200">
+          <router-link :to="{ path: '/customer/order-history' }" exact-active-class="router-link-exact-active" class="navbar-link">
             {{ t('orderHistory') }}
           </router-link>
-          <router-link to="/customer/cart" class="relative text-white hover:text-green-200 transition-colors duration-200">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-            </svg>
-            <span v-if="cartItemCount > 0" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-              {{ cartItemCount }}
-            </span>
+          <router-link :to="{ path: '/customer/cart' }" exact-active-class="router-link-exact-active" class="relative navbar-link group">
+            <div class="flex items-center space-x-2">
+              <div class="relative">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 transition-transform duration-200 group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                <span v-if="cartItemCount > 0" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center animate-bounce-gentle">
+                  {{ cartItemCount }}
+                </span>
+              </div>
+              <span class="hidden lg:block">{{ t('cart') }}</span>
+            </div>
           </router-link>
-          <router-link to="/logout" class="bg-white text-green-600 hover:bg-green-50 px-4 py-2 rounded-md font-medium transition-colors duration-200">
+          
+          <!-- Language Switcher -->
+          <div class="language-selector">
+            <select @change="changeLanguage" v-model="currentLocale">
+              <option value="en">🇺🇸 EN</option>
+              <option value="vi">🇻🇳 VI</option>
+            </select>
+          </div>
+          
+          <router-link to="/logout" class="navbar-link">
             {{ t('logout') }}
           </router-link>
         </div>
         
         <!-- Mobile Menu Button -->
         <div class="md:hidden">
-          <button @click="toggleMobileMenu" class="text-white focus:outline-none">
+          <button @click="toggleMobileMenu" class="p-2 rounded-lg text-secondary-600 hover:text-primary-600 hover:bg-secondary-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path v-if="!mobileMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
               <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -49,23 +67,35 @@
       </div>
       
       <!-- Mobile Menu -->
-      <div v-if="mobileMenuOpen" class="md:hidden mt-3 pb-3 space-y-1">
-        <router-link to="/customer" class="block text-white hover:bg-green-700 px-3 py-2 rounded-md">
+      <div v-if="mobileMenuOpen" class="md:hidden mt-4 pb-4 space-y-3 border-t border-secondary-200 pt-4 animate-slide-up">
+        <router-link :to="{ path: '/customer' }" exact-active-class="router-link-exact-active" class="block navbar-link py-2 px-3 rounded-lg hover:bg-secondary-50 transition-colors duration-200">
           {{ t('home') }}
         </router-link>
-        <router-link to="/customer/profile" class="block text-white hover:bg-green-700 px-3 py-2 rounded-md">
+        <router-link :to="{ path: '/customer/profile' }" exact-active-class="router-link-exact-active" class="block navbar-link py-2 px-3 rounded-lg hover:bg-secondary-50 transition-colors duration-200">
           {{ t('profile') }}
         </router-link>
-        <router-link to="/customer/order-history" class="block text-white hover:bg-green-700 px-3 py-2 rounded-md">
+        <router-link :to="{ path: '/customer/order-history' }" exact-active-class="router-link-exact-active" class="block navbar-link py-2 px-3 rounded-lg hover:bg-secondary-50 transition-colors duration-200">
           {{ t('orderHistory') }}
         </router-link>
-        <router-link to="/customer/cart" class="flex items-center text-white hover:bg-green-700 px-3 py-2 rounded-md">
+        <router-link :to="{ path: '/customer/cart' }" exact-active-class="router-link-exact-active" class="flex items-center justify-between navbar-link py-2 px-3 rounded-lg hover:bg-secondary-50 transition-colors duration-200">
           <span>{{ t('cart') }}</span>
-          <span v-if="cartItemCount > 0" class="ml-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+          <span v-if="cartItemCount > 0" class="bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
             {{ cartItemCount }}
           </span>
         </router-link>
-        <router-link to="/logout" class="block text-white hover:bg-green-700 px-3 py-2 rounded-md">
+        
+        <!-- Mobile Language Switcher -->
+        <div class="pt-3 border-t border-secondary-200">
+          <label class="block text-sm font-medium text-secondary-700 mb-2">{{ t('language') || 'Language' }}</label>
+          <div class="language-selector">
+            <select @change="changeLanguage" v-model="currentLocale" class="w-full">
+              <option value="en">🇺🇸 English</option>
+              <option value="vi">🇻🇳 Tiếng Việt</option>
+            </select>
+          </div>
+        </div>
+        
+        <router-link to="/logout" class="block navbar-link py-2 px-3 rounded-lg hover:bg-secondary-50 transition-colors duration-200">
           {{ t('logout') }}
         </router-link>
       </div>
@@ -77,7 +107,8 @@
 import { useI18n } from 'vue-i18n';
 import { ref, onMounted, computed } from 'vue';
 
-const { t } = useI18n();
+const { locale, t } = useI18n();
+const currentLocale = ref(locale.value);
 const mobileMenuOpen = ref(false);
 const cartItemCount = computed(() => {
   const cart = JSON.parse(localStorage.getItem('cart')) || [];
@@ -86,6 +117,11 @@ const cartItemCount = computed(() => {
 
 const toggleMobileMenu = () => {
   mobileMenuOpen.value = !mobileMenuOpen.value;
+};
+
+const changeLanguage = (event) => {
+  locale.value = event.target.value;
+  currentLocale.value = event.target.value;
 };
 
 onMounted(() => {
@@ -97,5 +133,9 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Add any additional custom styles here */
+/* Additional custom styles for enhanced navbar */
+.navbar {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
 </style>

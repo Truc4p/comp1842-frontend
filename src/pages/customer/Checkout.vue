@@ -1,10 +1,13 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import axios from 'axios';
+import { API_URL } from '../../utils/config';
 
 const router = useRouter();
 const route = useRoute();
+const t = useI18n().t;
 
 const user = ref({
     phone: '',
@@ -49,7 +52,7 @@ const updateUser = async () => {
         console.log('Updating customer with address:', user.value.address); // Log userId
         console.log('Updating customer with ID:', userId); // Log userId
 
-        const response = await axios.put(`http://localhost:3000/users/${userId}`, formData, {
+        const response = await axios.put(`${API_URL}/users/${userId}`, formData, {
             headers: {
                 'x-auth-token': localStorage.getItem('token'),
                 'Content-Type': 'application/json',
@@ -65,7 +68,7 @@ const updateUser = async () => {
 const getCustomer = async () => {
     try {
         console.log('Getting customer with ID:', userId); // Log userId
-        const response = await axios.get(`http://localhost:3000/users/${userId}`, {
+        const response = await axios.get(`${API_URL}/users/${userId}`, {
             headers: {
                 'x-auth-token': localStorage.getItem('token'),
                 'Content-Type': 'application/json',
@@ -92,7 +95,7 @@ const placeOrder = async () => {
 
         console.log('Order data:', orderData); // Log order data
 
-        const response = await axios.post('http://localhost:3000/orders', orderData, {
+        const response = await axios.post(`${API_URL}/orders`, orderData, {
             headers: {
                 'x-auth-token': localStorage.getItem('token'),
                 'Content-Type': 'application/json',

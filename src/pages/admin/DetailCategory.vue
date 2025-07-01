@@ -21,6 +21,7 @@
   import { ref, onMounted } from 'vue';
   import axios from 'axios';
   import { useRoute } from 'vue-router';
+  import { API_URL } from '../../utils/config';
   
   const category = ref(null);
   const route = useRoute();
@@ -29,7 +30,7 @@
     const categoryId = route.params.id;
     console.log('Fetching category with ID:', categoryId); // Debugging log
     try {
-      const response = await axios.get(`http://localhost:3000/categories/${categoryId}`, {
+      const response = await axios.get(`${API_URL}/categories/${categoryId}`, {
         headers: {
           'x-auth-token': localStorage.getItem('token'),
         },

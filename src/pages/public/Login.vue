@@ -5,6 +5,7 @@ import axios from "axios";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from 'vue-i18n';
+import { API_URL } from '../../utils/config';
 
 const { t } = useI18n();
 const username = ref("");
@@ -31,7 +32,7 @@ const handleLogin = async () => {
   };
 
   try {
-    const res = await axios.post("http://localhost:3000/auth/login", data);
+    const res = await axios.post(`${API_URL}/auth/login`, data);
     console.log("Login response:", res.data);
 
     localStorage.setItem("token", res.data.token);

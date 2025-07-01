@@ -55,6 +55,7 @@ import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import { API_URL } from '../../utils/config';
 
 const { t } = useI18n();
 const order = ref(null);
@@ -62,7 +63,7 @@ const route = useRoute();
 const username = ref('');
 
 const getImageUrl = (relativePath) => {
-  const url = `http://localhost:3000/${relativePath}`; // Adjust the base URL as needed
+  const url = `${API_URL}/${relativePath}`; // Adjust the base URL as needed
   console.log('Image URL:', url); // Log the image URL
   return url;
 };
@@ -76,7 +77,7 @@ onMounted(async () => {
   const orderId = route.params.id;
   console.log('Fetching order with ID:', orderId); // Debugging log
   try {
-    const response = await axios.get(`http://localhost:3000/orders/order/${orderId}`, {
+    const response = await axios.get(`${API_URL}/orders/order/${orderId}`, {
       headers: {
         'x-auth-token': localStorage.getItem('token'),
       },

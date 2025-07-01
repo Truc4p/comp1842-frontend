@@ -2,6 +2,7 @@
 import axios from "axios";
 import { ref } from "vue";
 import { useI18n } from 'vue-i18n';
+import { API_URL } from '../../utils/config';
 
 const { t } = useI18n();
 
@@ -34,7 +35,7 @@ const register = async () => {
       data.adminKey = adminKey.value;
     }
 
-    const response = await axios.post("http://localhost:3000/auth/register", data);
+    const response = await axios.post(`${API_URL}/auth/register`, data);
     console.log("Registration successful:", response.data);
     alert(t('registerSuccess'));
   } catch (error) {

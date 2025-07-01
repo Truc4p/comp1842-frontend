@@ -3,6 +3,7 @@ import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import axios from 'axios';
+import { API_URL } from '../../utils/config';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -11,7 +12,7 @@ const isLoading = ref(true);
 const isProcessing = ref(false);
 
 const getImageUrl = (relativePath) => {
-  return `http://localhost:3000/${relativePath}`;
+  return `${API_URL}/${relativePath}`;
 };
 
 const onImageError = (event) => {
@@ -40,7 +41,7 @@ const fetchCartDetails = async () => {
   
   try {
     for (const item of cart.value) {
-      const response = await axios.get(`http://localhost:3000/products/${item._id}`);
+      const response = await axios.get(`${API_URL}/products/${item._id}`);
       const product = response.data;
       item.name = product.name;
       item.category = product.category;

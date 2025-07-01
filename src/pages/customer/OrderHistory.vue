@@ -2,9 +2,11 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
+import { useI18n } from 'vue-i18n';
+import { API_URL } from '../../utils/config';
 
 const router = useRouter();
-
+const { t } = useI18n();
 
 const orders = ref([]);
 
@@ -21,9 +23,14 @@ if (!userId) {
 const fetchOrders = async () => {
   try {
     console.log('Getting customer with ID:', userId); // Log userId
-    const response = await axios.get(`http://localhost:3000/orders/user/${userId}`, {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert(t('login'));
+      return;
+    }
+    const response = await axios.get(`${API_URL}/orders/user/${userId}`, {
       headers: {
-        'x-auth-token': localStorage.getItem('token'),
+        "x-auth-token": token,
       },
     });
     orders.value = response.data;

@@ -28,7 +28,10 @@
 import axios from "axios";
 import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
+import { useI18n } from 'vue-i18n';
+import { API_URL } from '../../utils/config';
 
+const { t } = useI18n();
 const router = useRouter();
 
 const users = ref([]);
@@ -41,7 +44,7 @@ onMounted(async () => {
     }
 
     // Make the api request with axios with token in header
-    const res = await axios.get("http://localhost:3000/users", {
+    const res = await axios.get(`${API_URL}/users`, {
         headers: {
             "x-auth-token": `${token}`,
         },

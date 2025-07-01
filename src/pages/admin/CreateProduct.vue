@@ -61,6 +61,7 @@ import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import { API_URL } from '../../utils/config';
 
 const { t } = useI18n();
 
@@ -76,7 +77,7 @@ const router = useRouter();
 const fetchCategories = async () => {
   try {
     const token = localStorage.getItem('token');
-    const response = await axios.get('http://localhost:3000/categories', {
+    const response = await axios.get(`${API_URL}/categories`, {
       headers: {
         'x-auth-token': token,
       },
@@ -114,7 +115,7 @@ const handleSubmit = async () => {
       console.log(key, value);
     });
 
-    const response = await axios.post('http://localhost:3000/products', formData, {
+    const response = await axios.post(`${API_URL}/products`, formData, {
       headers: {
         'x-auth-token': token,
         'Content-Type': 'multipart/form-data',

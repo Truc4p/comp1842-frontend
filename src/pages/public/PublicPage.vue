@@ -168,7 +168,7 @@ onMounted(() => {
         
         <!-- Products Grid -->
         <div v-else-if="filteredProducts.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-          <div v-for="product in filteredProducts" :key="product._id" class="product-card group animate-fade-in">
+          <div v-for="product in filteredProducts" :key="product._id" class="product-card group animate-fade-in cursor-pointer" @click="$router.push('/login')">
             <div class="relative overflow-hidden rounded-t-2xl">
               <img 
                 :src="product.image ? getImageUrl(product.image) : '/images/fallback-image.jpg'" 
@@ -191,15 +191,9 @@ onMounted(() => {
                 <span class="badge badge-info">{{ product.category ? product.category.name : t('noCategory') }}</span>
               </div>
               
-              <div class="flex justify-between items-center pt-4 border-t border-secondary-100">
-                <router-link :to="`/login`" class="text-primary-600 hover:text-primary-700 font-medium flex items-center group">
-                  {{ t('details') }}
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
-                </router-link>
-                <router-link :to="`/login`" class="btn btn-primary btn-sm">
-                  {{ t('addToCart') }}
+              <div class="flex justify-center items-center pt-4 border-t border-secondary-100" @click.stop>
+                <router-link :to="`/login`" class="btn btn-primary" @click.stop>
+                  {{ t('loginToShop') || 'Login to Shop' }}
                 </router-link>
               </div>
             </div>

@@ -58,7 +58,7 @@ const handleLogin = async () => {
 
 <template>
   <div class="max-w-md mx-auto">
-    <div class="text-center mb-8">
+    <div class="text-center mb-8 mt-12">
       <h1 class="text-3xl font-bold text-green-700">{{ t('login') }}</h1>
       <p class="text-gray-600 mt-2">{{ t('welcomeBack') }}</p>
     </div>
@@ -121,7 +121,7 @@ const handleLogin = async () => {
       </div>
     </form>
     
-    <div class="mt-8 text-center">
+    <div class="mt-12 mb-8 text-center">
       <p class="text-gray-600">
         {{ t('dontHaveAccount') }} 
         <router-link to="/register" class="text-green-600 hover:text-green-500 font-medium">

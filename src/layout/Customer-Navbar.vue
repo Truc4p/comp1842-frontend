@@ -110,10 +110,18 @@ import { ref, onMounted, computed } from 'vue';
 const { locale, t } = useI18n();
 const currentLocale = ref(locale.value);
 const mobileMenuOpen = ref(false);
+const cartTrigger = ref(0); // Force reactivity trigger
+
 const cartItemCount = computed(() => {
+  // Trigger reactivity
+  cartTrigger.value;
   const cart = JSON.parse(localStorage.getItem('cart')) || [];
-  return cart.length;
+  return cart.reduce((total, item) => total + (item.quantity || 0), 0);
 });
+
+const updateCartCount = () => {
+  cartTrigger.value++;
+};
 
 const toggleMobileMenu = () => {
   mobileMenuOpen.value = !mobileMenuOpen.value;
@@ -126,9 +134,13 @@ const changeLanguage = (event) => {
 
 onMounted(() => {
   // Listen for storage events to update cart count when it changes
-  window.addEventListener('storage', () => {
-    cartItemCount.value = (JSON.parse(localStorage.getItem('cart')) || []).length;
-  });
+  window.addEventListener('storage', updateCartCount);
+  
+  // Listen for custom cart update events
+  window.addEventListener('cartUpdated', updateCartCount);
+  
+  // Initial cart count update
+  updateCartCount();
 });
 </script>
 

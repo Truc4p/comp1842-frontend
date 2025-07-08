@@ -108,6 +108,9 @@ const placeOrder = async () => {
         // Remove the cart items in cart
         console.log('localStorage:', localStorage.getItem('cart'));
         localStorage.removeItem('cart');
+        
+        // Dispatch custom event to notify other components about cart update
+        window.dispatchEvent(new CustomEvent('cartUpdated'));
 
         // Redirect to the order details page
         const orderId = response.data._id; // Assuming the response contains the order ID

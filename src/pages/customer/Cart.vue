@@ -23,8 +23,8 @@ const removeFromCart = (productId) => {
   cart.value = cart.value.filter(item => item._id !== productId);
   localStorage.setItem('cart', JSON.stringify(cart.value));
   
-  // Trigger storage event for other components to update
-  window.dispatchEvent(new Event('storage'));
+  // Dispatch custom event to notify other components about cart update
+  window.dispatchEvent(new CustomEvent('cartUpdated'));
 };
 
 const updateQuantity = (item, change) => {
@@ -33,6 +33,9 @@ const updateQuantity = (item, change) => {
   if (newQuantity > 0 && newQuantity <= item.stockQuantity) {
     item.quantity = newQuantity;
     localStorage.setItem('cart', JSON.stringify(cart.value));
+    
+    // Dispatch custom event to notify other components about cart update
+    window.dispatchEvent(new CustomEvent('cartUpdated'));
   }
 };
 
@@ -65,6 +68,9 @@ const validateQuantity = (item) => {
     item.quantity = 1;
   }
   localStorage.setItem('cart', JSON.stringify(cart.value));
+  
+  // Dispatch custom event to notify other components about cart update
+  window.dispatchEvent(new CustomEvent('cartUpdated'));
 };
 
 const handleSubmitItem = async (event) => {
@@ -119,8 +125,9 @@ onMounted(() => {
 </script>
 
 <template>
-  <div>
-    <h1 class="text-2xl font-bold mb-6">{{ t('yourCart') }}</h1>
+  <div class="min-h-screen bg-gray-50 py-8">
+    <div class="w-full px-4 xl:px-8 2xl:px-12">
+      <h1 class="text-2xl font-bold mb-6">{{ t('yourCart') }}</h1>
     
     <!-- Loading State -->
     <div v-if="isLoading" class="flex justify-center items-center py-12">
@@ -262,6 +269,7 @@ onMounted(() => {
         </div>
       </div>
     </div>
+    </div>
   </div>
 </template>
 
@@ -275,7 +283,13 @@ onMounted(() => {
 }
 
 .btn-primary {
-  @apply bg-blue-400 text-white px-4 py-2 rounded hover:bg-blue-500;
+  background: var(--gradient-primary);
+  @apply text-white px-4 py-2 rounded transition-all duration-200;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-700);
+  @apply transform translate-y-0.5 shadow-md;
 }
 
 .btn-delete {

@@ -1,51 +1,226 @@
 <template>
-  <div class="container mx-auto p-4">
-    <h2 class="text-2xl font-bold mb-4">{{ t('orderDetails') }}</h2>
-    <div v-if="order">
-      <div class="mb-4">
-        <p><strong>{{ t('orderId') }}:</strong> {{ order._id }}</p>
-        <!-- <p><strong>{{ t('orderUser') }}:</strong> {{ username }}</p> -->
-        <p><strong>{{ t('orderUser') }}:</strong> {{ order.user }}</p>
-        <p><strong>{{ t('orderDate') }}:</strong> {{ new Date(order.orderDate).toLocaleString() }}</p>
-        <p><strong>{{ t('paymentMethod') }}:</strong> {{ t(order.paymentMethod) }}</p>
-        <p><strong>{{ t('totalPrice') }}:</strong> ${{ t(order.totalPrice) }}</p>
-        <router-link :to="`/customer/orders/delete/${order._id}`">
-          <button class="btn-delete">
-            {{ t('deleteOrder') }}
-          </button>
-        </router-link>
+  <div class="min-h-screen bg-gray-50 py-8">
+    <div class="w-full px-4 xl:px-8 2xl:px-12">
+      
+      <!-- Loading State -->
+      <div v-if="!order" class="flex justify-center items-center py-20">
+        <div class="text-center">
+          <svg class="loading-spinner mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <p class="text-gray-600">{{ t('loading') || 'Loading order details...' }}</p>
+        </div>
       </div>
-      <br>
+
+      <!-- Order Content -->
+      <div v-else>
+        
+        <!-- Page Header -->
+        <div class="mb-8">
+          <div class="flex items-center justify-between flex-wrap gap-4">
+            <div>
+              <h1 class="text-4xl font-bold text-gray-900 mb-2">{{ t('orderDetails') }}</h1>
+              <p class="text-gray-600">{{ t('orderDetailsSubtitle') || 'Review your order information and products' }}</p>
+            </div>
+            
+            <!-- Back Button -->
+            <router-link to="/customer/order-history" class="btn-secondary inline-flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              {{ t('backToOrders') || 'Back to Orders' }}
+            </router-link>
+          </div>
+        </div>
+
+                 <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          
+          <!-- Order Information Card -->
+          <div class="lg:col-span-1">
+            <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+              
+              <!-- Order Header -->
+              <div class="px-6 py-8 text-white" style="background: var(--gradient-primary)">
+                <div class="flex items-center space-x-3">
+                  <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
       <div>
-        <h3 class="text-xl font-bold mb-2">{{ t('orderProducts') }}</h3>
-        <table class="min-w-full bg-white">
-          <thead>
-            <tr>
-              <th class="py-2">{{ t('productId') }}</th>
-              <th class="py-2">{{ t('name') }}</th>
-              <th class="py-2">{{ t('image') }}</th>
-              <th class="py-2">{{ t('price') }}</th>
-              <th class="py-2">{{ t('quantity') }}</th>
+                    <h2 class="text-xl font-bold text-white">{{ t('orderInformation') || 'Order Information' }}</h2>
+                    <p class="text-teal-100 text-sm">{{ t('orderSummary') || 'Order Summary' }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Order Details -->
+              <div class="p-6 space-y-6">
+                
+                <!-- Order ID -->
+                <div class="info-item">
+                  <div class="flex items-center text-gray-500 mb-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                    </svg>
+                    <span class="text-sm font-medium">{{ t('orderId') }}</span>
+                  </div>
+                  <p class="text-gray-900 font-mono text-sm bg-gray-50 px-3 py-2 rounded-lg">{{ order._id }}</p>
+                </div>
+
+                <!-- Customer -->
+                <div class="info-item">
+                  <div class="flex items-center text-gray-500 mb-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    <span class="text-sm font-medium">{{ t('customer') || 'Customer' }}</span>
+                  </div>
+                  <p class="text-gray-900 font-semibold">{{ order.user }}</p>
+                </div>
+
+                <!-- Order Date -->
+                <div class="info-item">
+                  <div class="flex items-center text-gray-500 mb-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span class="text-sm font-medium">{{ t('orderDate') }}</span>
+                  </div>
+                  <p class="text-gray-900">{{ new Date(order.orderDate).toLocaleString() }}</p>
+                </div>
+
+                <!-- Payment Method -->
+                <div class="info-item">
+                  <div class="flex items-center text-gray-500 mb-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                    </svg>
+                    <span class="text-sm font-medium">{{ t('paymentMethod') }}</span>
+                  </div>
+                  <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                    {{ t(order.paymentMethod) }}
+                  </span>
+                </div>
+
+                <!-- Total Price -->
+                <div class="info-item border-t border-gray-200 pt-4">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center text-gray-500">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                      </svg>
+                      <span class="text-sm font-medium">{{ t('totalPrice') }}</span>
+                    </div>
+                    <span class="text-2xl font-bold text-gray-900">${{ order.totalPrice }}</span>
+                  </div>
+                </div>
+
+                <!-- Delete Action -->
+                <div class="pt-4 border-t border-gray-200">
+                  <router-link :to="`/customer/orders/delete/${order._id}`" class="btn-danger w-full inline-flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    {{ t('deleteOrder') }}
+                  </router-link>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <!-- Products Table -->
+          <div class="lg:col-span-3">
+            <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+              
+              <!-- Products Header -->
+              <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                <h3 class="text-xl font-semibold text-gray-900 flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                  </svg>
+                  {{ t('orderProducts') }}
+                </h3>
+              </div>
+
+              <!-- Products Content -->
+              <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                  <thead class="bg-gray-50">
+                    <tr>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        {{ t('product') || 'Product' }}
+                      </th>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        {{ t('productId') }}
+                      </th>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        {{ t('price') }}
+                      </th>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        {{ t('quantity') }}
+                      </th>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        {{ t('subtotal') || 'Subtotal' }}
+                      </th>
             </tr>
           </thead>
-          <tbody>
-            <tr v-for="product in order.products" :key="product.productId" class="border-t">
-              <td class="py-2">{{ product.productId._id }}</td>
-              <td class="py-2">{{ product.productId.name }} </td>
-              <td class="py-2">
+                  <tbody class="bg-white divide-y divide-gray-200">
+                    <tr v-for="product in order.products" :key="product.productId" class="hover:bg-gray-50 transition-colors duration-200">
+                      
+                      <!-- Product Info -->
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center space-x-4">
+                          <div class="w-16 h-16 flex-shrink-0">
                 <img
                   :src="product.productId.image ? getImageUrl(product.productId.image) : '/images/fallback-image.jpg'"
-                  alt="Product Image" class="w-32 h-32 object-cover" @error="onImageError" />
+                              :alt="product.productId.name"
+                              class="w-16 h-16 object-cover rounded-lg shadow-sm border border-gray-200" 
+                              @error="onImageError" 
+                            />
+                          </div>
+                          <div>
+                            <div class="text-sm font-medium text-gray-900">{{ product.productId.name }}</div>
+                          </div>
+                        </div>
+                      </td>
+
+                      <!-- Product ID -->
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="text-sm text-gray-500 font-mono bg-gray-100 px-2 py-1 rounded">
+                          {{ product.productId._id.slice(-8) }}
+                        </span>
+                      </td>
+
+                      <!-- Price -->
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="text-sm font-semibold text-gray-900">${{ product.productId.price }}</span>
+                      </td>
+
+                      <!-- Quantity -->
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-teal-100 text-teal-800 text-sm font-medium">
+                          {{ product.quantity }}
+                        </span>
+                      </td>
+
+                      <!-- Subtotal -->
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="text-sm font-bold text-gray-900">${{ (product.productId.price * product.quantity).toFixed(2) }}</span>
               </td>
-              <td class="py-2">${{ product.productId.price }}</td>
-              <td class="py-2">{{ product.quantity }}</td>
+
             </tr>
           </tbody>
         </table>
+              </div>
+
+            </div>
+          </div>
+
       </div>
     </div>
-    <div v-else>
-      <p>{{ t('loading') }}</p>
     </div>
   </div>
 </template>
@@ -94,6 +269,60 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.btn-delete {
-  @apply bg-red-400 text-white px-2 py-1 rounded hover:bg-red-500 mx-1;
-}</style>
+/* Loading spinner */
+.loading-spinner {
+  width: 3rem;
+  height: 3rem;
+  color: var(--primary-600);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Info item styling */
+.info-item {
+  @apply transition-all duration-200;
+}
+
+.info-item:hover {
+  @apply transform translate-y-0.5;
+}
+
+/* Button styles using CSS variables */
+.btn-secondary {
+  @apply inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200;
+}
+
+.btn-secondary:hover {
+  @apply transform translate-y-0.5 shadow-md;
+}
+
+.btn-danger {
+  background-color: var(--error);
+  @apply text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:shadow-md;
+}
+
+.btn-danger:hover {
+  background-color: #dc2626;
+  @apply transform translate-y-0.5;
+}
+
+/* Table row hover effects */
+tbody tr:hover {
+  background-color: var(--primary-50);
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+  .container {
+    @apply px-4;
+  }
+  
+  table {
+    font-size: 0.875rem;
+  }
+}
+</style>

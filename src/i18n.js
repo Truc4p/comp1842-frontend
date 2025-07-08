@@ -138,6 +138,7 @@ const messages = {
     processing: 'Processing',
     shipped: 'Shipped',
     delivered: 'Delivered',
+    searchProducts: 'Search Products',
   },
   vi: {
     welcomeMessage: 'Chào mừng bạn đến với trang web của chúng tôi!',
@@ -275,6 +276,7 @@ const messages = {
     processing: 'Đang xử lý',
     shipped: 'Đã gửi',
     delivered: 'Đã giao',
+    searchProducts: 'Tìm kiếm sản phẩm',
   }
 };
 

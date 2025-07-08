@@ -15,6 +15,16 @@ const error = ref(null);
 const categories = ref([]);
 const selectedCategory = ref('all');
 
+// Computed property to get total cart quantity
+const totalCartQuantity = computed(() => {
+  return cart.value.reduce((total, item) => total + (item.quantity || 0), 0);
+});
+
+// Method to refresh cart from localStorage
+const refreshCart = () => {
+  cart.value = JSON.parse(localStorage.getItem('cart')) || [];
+};
+
 const fetchProducts = async () => {
   isLoading.value = true;
   error.value = null;
@@ -75,6 +85,11 @@ const updateCart = (product, quantity) => {
     cart.value.push({ ...product, quantity });
   }
   localStorage.setItem('cart', JSON.stringify(cart.value));
+  // Force reactivity update
+  cart.value = [...cart.value];
+  
+  // Dispatch custom event to notify other components about cart update
+  window.dispatchEvent(new CustomEvent('cartUpdated'));
 };
 
 const validateQuantity = (product) => {
@@ -106,6 +121,8 @@ const filteredProducts = computed(() => {
 
 onMounted(() => {
   fetchProducts();
+  // Refresh cart on component mount to ensure it's up to date
+  refreshCart();
 });
 </script>
 
@@ -136,10 +153,10 @@ onMounted(() => {
           
           <!-- Cart Link -->
           <router-link to="/customer/cart" class="flex items-center px-6 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors duration-200 font-medium">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m2.6 8L6 6H2m5 7v4a2 2 0 002 2h4a2 2 0 002-2v-4m-6 2a1 1 0 100 2 1 1 0 000-2zm4 0a1 1 0 100 2 1 1 0 000-2z" />
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 transition-transform duration-200 group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
-            {{ t('cart') }} ({{ cart.length }})
+            {{ t('cart') }} ({{ totalCartQuantity }})
           </router-link>
         </div>
         
@@ -189,7 +206,7 @@ onMounted(() => {
         
         <!-- Products Grid -->
         <div v-else-if="filteredProducts.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-          <div v-for="product in filteredProducts" :key="product._id" class="product-card group animate-fade-in cursor-pointer" @click="$router.push(`/customer/products/${product._id}`)">
+          <div v-for="product in filteredProducts" :key="product._id" class="product-card group animate-fade-in cursor-pointer flex flex-col h-full" @click="$router.push(`/customer/products/${product._id}`)">
             <div class="relative overflow-hidden rounded-t-2xl">
               <img 
                 :src="product.image ? getImageUrl(product.image) : '/images/fallback-image.jpg'" 
@@ -200,7 +217,7 @@ onMounted(() => {
               <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </div>
             
-            <div class="card-body">
+            <div class="card-body flex flex-col flex-grow">
               <div class="flex justify-between items-start mb-3">
                 <h3 class="font-bold text-lg text-secondary-900 group-hover:text-primary-600 transition-colors duration-200">
                   {{ product.name }}
@@ -208,21 +225,14 @@ onMounted(() => {
                 <span class="text-2xl font-bold text-primary-600">${{ product.price }}</span>
               </div>
               
-              <div class="flex items-center mb-4">
+              <div class="flex items-center">
                 <span class="badge badge-info">{{ product.category ? product.category.name : t('noCategory') || 'No Category' }}</span>
               </div>
               
+              <div class="flex-grow"></div>
+              
               <!-- Quantity and Add to Cart -->
-              <div class="flex items-center gap-3 pt-4 border-t border-secondary-100" @click.stop>
-                <input 
-                  type="number" 
-                  v-model.number="product.quantity" 
-                  min="1" 
-                  :max="product.stockQuantity"
-                  class="w-16 px-2 py-1 border border-gray-300 rounded-lg text-center focus:ring-2 focus:ring-primary-500 focus:border-transparent" 
-                  @input="validateQuantity(product)"
-                  @click.stop
-                />
+              <div class="flex items-center gap-3 pt-4 mt-auto border-secondary-100" @click.stop>
                 <button 
                   class="btn btn-primary flex-1" 
                   @click.stop="updateCart(product, product.quantity || 1)"

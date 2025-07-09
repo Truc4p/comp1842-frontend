@@ -112,7 +112,7 @@ onMounted(() => {
     </section>
     
     <!-- Products Section - Full Width Background -->
-    <div class="w-full py-16 bg-white">
+    <div class="page-background">
       <div class="container mx-auto px-6">
         <!-- Section Header -->
         <div class="text-center mb-12">

@@ -1131,3 +1131,27 @@ input, select, textarea {
 .hover\:text-green-200:hover {
   color: var(--primary-200) !important;
 }
+
+/* Page Background Utility */
+.page-background {
+  width: 100%;
+  padding-top: 4rem;
+  padding-bottom: 4rem;
+  background: linear-gradient(to bottom right, var(--primary-50), var(--secondary-50));
+}
+
+/* Alternative responsive page background */
+.page-background-lg {
+  width: 100%;
+  padding-top: 6rem;
+  padding-bottom: 6rem;
+  background: linear-gradient(to bottom right, var(--primary-50), var(--secondary-50));
+}
+
+/* For pages that need minimal padding */
+.page-background-sm {
+  width: 100%;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+  background: linear-gradient(to bottom right, var(--primary-50), var(--secondary-50));
+}

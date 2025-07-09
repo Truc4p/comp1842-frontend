@@ -140,7 +140,7 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="container mx-auto p-4">
+    <div class="page-background">
         <h1 class="text-2xl font-bold mb-4">Checkout</h1>
         <div class="mb-4">
             <h2 class="text-xl font-bold mb-2">Customer Details</h2>

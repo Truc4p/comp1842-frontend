@@ -176,3 +176,72 @@ const viewDetails = (id) => {
 };
 </script>
 ```
+
+# COMP1842 Frontend
+
+This is a Vue.js frontend application for the COMP1842 course project.
+
+## Features
+
+- User authentication (login/register)
+- Role-based access (Customer/Admin)
+- Product management
+- Category management
+- Shopping cart functionality
+- Order management
+- Multi-language support (English/Vietnamese)
+
+## Page Background Styling
+
+To maintain consistency across all pages, we've created reusable CSS utility classes for page backgrounds:
+
+### Available Classes
+
+- `.page-background` - Standard padding (4rem top/bottom) with gradient background
+- `.page-background-lg` - Large padding (6rem top/bottom) with gradient background  
+- `.page-background-sm` - Small padding (2rem top/bottom) with gradient background
+
+### Usage Examples
+
+```html
+<!-- Standard page background -->
+<div class="page-background">
+  <div class="container mx-auto px-6">
+    <!-- Your page content here -->
+  </div>
+</div>
+
+<!-- For pages needing more space -->
+<div class="page-background-lg">
+  <div class="container mx-auto px-6">
+    <!-- Your page content here -->
+  </div>
+</div>
+
+<!-- For compact pages -->
+<div class="page-background-sm">
+  <div class="container mx-auto px-6">
+    <!-- Your page content here -->
+  </div>
+</div>
+```
+
+### Before (duplicated code in each page)
+```html
+<div class="w-full py-16 bg-gradient-to-br from-primary-50 to-secondary-50">
+  <!-- content -->
+</div>
+```
+
+### After (using utility class)
+```html
+<div class="page-background">
+  <!-- content -->
+</div>
+```
+
+This approach:
+- ✅ Eliminates code duplication
+- ✅ Ensures consistent styling across all pages
+- ✅ Makes it easy to update the gradient/padding globally
+- ✅ Provides different padding options for various page types

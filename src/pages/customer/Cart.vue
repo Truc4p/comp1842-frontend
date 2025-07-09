@@ -125,7 +125,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50 py-8">
+  <div class="page-background">
     <div class="w-full px-4 xl:px-8 2xl:px-12">
       <h1 class="text-2xl font-bold mb-6">{{ t('yourCart') }}</h1>
     

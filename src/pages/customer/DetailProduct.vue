@@ -116,7 +116,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-secondary-50 to-primary-50 py-8">
+  <div class="page-background">
     <div class="container mx-auto px-6 max-w-6xl">
 
       <!-- Loading State -->

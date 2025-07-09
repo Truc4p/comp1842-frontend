@@ -83,32 +83,23 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50 py-8">
+  <div class="page-background">
     <div class="w-full px-4 xl:px-8 2xl:px-12">
       
       <!-- Page Header -->
       <div class="text-center mb-12">
         <h1 class="text-4xl font-bold text-gray-900 mb-4">{{ t('orderHistory') || 'Your Order History' }}</h1>
-        <p class="text-gray-600 max-w-2xl mx-auto">
-          {{ t('orderHistoryDesc') || 'Track and review all your past orders and purchases' }}
-        </p>
+        <p class="text-gray-500 mb-8 max-w-md mx-auto">{{ t('orderHistoryDesc') || 'View your order history and track your purchases.' }}</p>
       </div>
 
       <!-- Quick Actions Bar -->
       <div class="mb-8 flex flex-wrap items-center justify-between gap-4">
         <div class="flex items-center space-x-4">
-          <router-link to="/customer" class="btn-secondary inline-flex items-center">
+          <router-link to="/customer" class="btn-primary inline-flex items-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
             </svg>
             {{ t('continueShopping') || 'Continue Shopping' }}
-          </router-link>
-          
-          <router-link to="/customer/cart" class="btn-outline inline-flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-            </svg>
-            {{ t('viewCart') || 'View Cart' }}
           </router-link>
         </div>
         
@@ -162,21 +153,21 @@ onMounted(() => {
           <router-link :to="`/customer/orders/order/${order._id}`" class="block h-full">
             
             <!-- Order Header -->
-            <div class="px-6 py-4 text-white" style="background: var(--gradient-primary)">
+            <div class="px-6 py-4 text-gray-900" style="background: white; border-bottom: 1px solid #e5e7eb;">
               <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-3">
-                  <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
+                  <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p class="text-gray-900">{{ t('order') || 'Order' }} #{{ order._id.slice(-8) }}</p>
+                      <p class="text-gray-500 text-sm">{{ formatDate(order.orderDate) }}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 class="font-bold text-white">{{ t('order') || 'Order' }} #{{ order._id.slice(-8) }}</h3>
-                    <p class="text-teal-100 text-sm">{{ formatDate(order.orderDate) }}</p>
-                  </div>
-                </div>
                 
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white/70 group-hover:text-white transition-colors duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 group-hover:text-gray-600 transition-colors duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
               </div>
@@ -300,7 +291,6 @@ onMounted(() => {
   background-color: white;
   border-radius: 1rem;
   overflow: hidden;
-  border: 1px solid var(--secondary-200);
   transition: all 0.3s ease;
   box-shadow: 0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04);
   display: flex;
@@ -322,18 +312,7 @@ onMounted(() => {
   @apply transform translate-y-0.5 shadow-md;
 }
 
-.btn-outline {
-  background-color: transparent;
-  color: var(--primary-600);
-  border: 2px solid var(--primary-600);
-  @apply inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200;
-}
 
-.btn-outline:hover {
-  background-color: var(--primary-600);
-  color: white;
-  @apply transform translate-y-0.5 shadow-md;
-}
 
 .btn-primary {
   background: var(--gradient-primary);

@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-50 py-8">
+  <div class="page-background">
     <div class="container mx-auto px-4 max-w-4xl">
       <!-- Page Header -->
       <div class="text-center mb-8">
@@ -25,16 +25,16 @@
         <div class="lg:col-span-2">
           <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
             <!-- Profile Header -->
-            <div class="px-6 py-8 text-white" style="background: var(--gradient-primary)">
+            <div class="px-6 py-8 text-gray-900" style="background: white; border-bottom: 1px solid #e5e7eb;">
               <div class="flex items-center space-x-4">
-                <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="w-20 h-20 bg-primary-100 rounded-full flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
                 </div>
                 <div>
-                  <h2 class="text-2xl font-bold text-white">{{ user.username }}</h2>
-                  <p class="text-teal-100">{{ t('customerAccount') || 'Customer Account' }}</p>
+                  <h2 class="text-2xl font-bold text-gray-900">{{ user.username }}</h2>
+                  <p class="text-gray-500">{{ t('customerAccount') || 'Customer Account' }}</p>
                 </div>
               </div>
             </div>

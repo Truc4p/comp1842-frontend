@@ -1,5 +1,5 @@
 <template>
-    <div class="container mx-auto p-4">
+    <div class="page-background">
       <h2 class="text-2xl font-bold mb-4">Delete Order</h2>
       <p>Are you sure you want to delete this order?</p>
       <div class="flex items-center justify-between mt-4">

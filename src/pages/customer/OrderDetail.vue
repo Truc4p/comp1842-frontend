@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-50 py-8">
+  <div class="page-background">
     <div class="w-full px-4 xl:px-8 2xl:px-12">
       
       <!-- Loading State -->
@@ -34,23 +34,22 @@
           </div>
         </div>
 
-                 <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
           <!-- Order Information Card -->
           <div class="lg:col-span-1">
             <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
               
               <!-- Order Header -->
-              <div class="px-6 py-8 text-white" style="background: var(--gradient-primary)">
+              <div class="px-6 py-8 text-gray-900" style="background: white; border-bottom: 1px solid #e5e7eb;">
                 <div class="flex items-center space-x-3">
-                  <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div class="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                   </div>
-      <div>
-                    <h2 class="text-xl font-bold text-white">{{ t('orderInformation') || 'Order Information' }}</h2>
-                    <p class="text-teal-100 text-sm">{{ t('orderSummary') || 'Order Summary' }}</p>
+                  <div>
+                    <h2 class="text-xl font-bold text-gray-900">{{ t('orderInformation') || 'Order Information' }}</h2>
+                    <p class="text-gray-500 text-sm">{{ t('orderSummary') || 'Order Summary' }}</p>
                   </div>
                 </div>
               </div>
@@ -136,9 +135,9 @@
             <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
               
               <!-- Products Header -->
-              <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+              <div class="px-6 py-4 border-b border-gray-200 bg-white">
                 <h3 class="text-xl font-semibold text-gray-900 flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                   </svg>
                   {{ t('orderProducts') }}
@@ -148,7 +147,7 @@
               <!-- Products Content -->
               <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
-                  <thead class="bg-gray-50">
+                  <thead class="white">
                     <tr>
                       <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         {{ t('product') || 'Product' }}

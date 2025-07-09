@@ -187,14 +187,8 @@ onMounted(() => {
                 <span class="text-2xl font-bold text-primary-600">${{ product.price }}</span>
               </div>
               
-              <div class="flex items-center mb-4">
+              <div class="flex items-center">
                 <span class="badge badge-info">{{ product.category ? product.category.name : t('noCategory') }}</span>
-              </div>
-              
-              <div class="flex justify-center items-center pt-4 border-t border-secondary-100" @click.stop>
-                <router-link :to="`/login`" class="btn btn-primary" @click.stop>
-                  {{ t('loginToShop') || 'Login to Shop' }}
-                </router-link>
               </div>
             </div>
           </div>

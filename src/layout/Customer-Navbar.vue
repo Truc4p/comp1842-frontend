@@ -38,7 +38,6 @@
                   {{ cartItemCount }}
                 </span>
               </div>
-              <span class="hidden lg:block">{{ t('cart') }}</span>
             </div>
           </router-link>
           

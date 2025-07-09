@@ -15,11 +15,6 @@ const error = ref(null);
 const categories = ref([]);
 const selectedCategory = ref('all');
 
-// Computed property to get total cart quantity
-const totalCartQuantity = computed(() => {
-  return cart.value.reduce((total, item) => total + (item.quantity || 0), 0);
-});
-
 // Method to refresh cart from localStorage
 const refreshCart = () => {
   cart.value = JSON.parse(localStorage.getItem('cart')) || [];
@@ -129,7 +124,7 @@ onMounted(() => {
 <template>
   <div class="w-full">
     <!-- Products Section - Full Width Background -->
-    <div class="w-full py-16 bg-white">
+    <div class="w-full py-16 bg-gradient-to-br from-primary-50 to-secondary-50">
       <div class="container mx-auto px-6">
         <!-- Section Header -->
         <div class="text-center mb-12">
@@ -142,22 +137,21 @@ onMounted(() => {
         <!-- Search and Cart Section -->
         <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-8">
           <!-- Search -->
-          <div class="w-full md:w-1/2">
-            <input 
-              type="text" 
-              v-model="searchQuery" 
-              :placeholder="t('searchProducts') || 'Search products or categories'" 
-              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-            />
+          <div class="w-full md:w-1/4">
+            <div class="search-container relative">
+              <input 
+                type="text" 
+                v-model="searchQuery" 
+                placeholder="Search"
+                class="search-input w-full bg-transparent border-0 text-lg text-primary-800 focus:outline-none transition-all duration-300 pr-10"
+              />
+              <div class="absolute right-2 top-1/2 transform -translate-y-1/2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" style="color: var(--secondary-500);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+            </div>
           </div>
-          
-          <!-- Cart Link -->
-          <router-link to="/customer/cart" class="flex items-center px-6 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors duration-200 font-medium">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 transition-transform duration-200 group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-            </svg>
-            {{ t('cart') }} ({{ totalCartQuantity }})
-          </router-link>
         </div>
         
         <!-- Category Filter -->
@@ -214,7 +208,6 @@ onMounted(() => {
                 class="product-image"
                 @error="onImageError" 
               />
-              <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </div>
             
             <div class="card-body flex flex-col flex-grow">
@@ -225,21 +218,21 @@ onMounted(() => {
                 <span class="text-2xl font-bold text-primary-600">${{ product.price }}</span>
               </div>
               
-              <div class="flex items-center">
+              <div class="flex items-center justify-between">
                 <span class="badge badge-info">{{ product.category ? product.category.name : t('noCategory') || 'No Category' }}</span>
+                <!-- Add to Cart -->
+                <button 
+                  class="w-8 h-8 bg-primary-600 hover:bg-primary-700 text-white rounded-full flex items-center justify-center transition-colors duration-200" 
+                  @click.stop="updateCart(product, product.quantity || 1)"
+                  :title="t('addToCart')"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                </button>
               </div>
               
               <div class="flex-grow"></div>
-              
-              <!-- Quantity and Add to Cart -->
-              <div class="flex items-center gap-3 pt-4 mt-auto border-secondary-100" @click.stop>
-                <button 
-                  class="btn btn-primary flex-1" 
-                  @click.stop="updateCart(product, product.quantity || 1)"
-                >
-                  {{ t('addToCart') }}
-                </button>
-              </div>
             </div>
           </div>
         </div>
@@ -283,4 +276,33 @@ onMounted(() => {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+
+/* Search Input Styling */
+.search-container {
+  max-width: 100%;
+}
+
+.search-input {
+  border-radius: 0 !important;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  padding-bottom: 12px;
+  border-bottom: 3px solid transparent;
+  background: linear-gradient(to bottom right, var(--primary-50)) padding-box,
+              linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 50%, var(--primary-700) 100%) border-box;
+  outline: none !important;
+}
+
+.search-input::placeholder {
+  color: var(--secondary-500);
+  font-size: 1.125rem;
+  font-weight: 500;
+}
+
+.search-input:focus {
+  background: linear-gradient(to bottom right, var(--primary-50)) padding-box,
+              linear-gradient(135deg, var(--primary-600) 0%, var(--primary-700) 50%, var(--primary-800) 100%) border-box;
+}
+
 </style>

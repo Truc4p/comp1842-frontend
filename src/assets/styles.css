@@ -320,8 +320,6 @@
 .navbar {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--secondary-200);
-  box-shadow: var(--shadow-soft);
 }
 
 .navbar-brand {
@@ -371,9 +369,8 @@
   background-color: white;
   border-radius: 1rem;
   overflow: hidden;
-  border: 1px solid var(--secondary-200);
   transition: all 0.3s ease;
-  box-shadow: var(--shadow-soft);
+  padding-top: 1rem;
 }
 
 .product-card:hover {
@@ -896,12 +893,9 @@
   border-radius: 1rem;
   text-align: center;
   transition: all 0.3s ease;
-  border: 1px solid var(--secondary-100);
-  box-shadow: var(--shadow-soft);
 }
 
 .feature-card:hover {
-  box-shadow: var(--shadow-medium);
   transform: translateY(-2px);
 }
 
@@ -965,12 +959,11 @@
 }
 
 .category-filter:not(.active) {
-  background-color: var(--secondary-100);
   color: var(--secondary-600);
 }
 
 .category-filter:not(.active):hover {
-  background-color: var(--secondary-200);
+  background-color: white;
 }
 
 .animate-fade-in {

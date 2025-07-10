@@ -9,23 +9,33 @@ const { t } = useI18n();
 const router = useRouter();
 
 const products = ref([]);
+const loading = ref(true);
+const error = ref(null);
 
 onMounted(async () => {
   const token = localStorage.getItem("token");
   if (!token) {
     alert("You need to login first");
     router.push("/login");
+    return;
   }
 
-  // Make the api request with axios with token in header
-  const res = await axios.get(`${API_URL}/products`, {
-    headers: {
-      "x-auth-token": `${token}`,
-    },
-  });
+  try {
+    // Make the api request with axios with token in header
+    const res = await axios.get(`${API_URL}/products`, {
+      headers: {
+        "x-auth-token": `${token}`,
+      },
+    });
 
-  console.log("Products response:", res.data);
-  products.value = res.data;
+    console.log("Products response:", res.data);
+    products.value = res.data;
+  } catch (err) {
+    console.error("Error fetching products:", err);
+    error.value = "Failed to load products";
+  } finally {
+    loading.value = false;
+  }
 });
 
 const getImageUrl = (relativePath) => {
@@ -38,83 +48,228 @@ const onImageError = (event) => {
   console.log('Image failed to load, using fallback image.');
   event.target.src = '/images/fallback-image.jpg'; // Provide a fallback image URL
 };
-
 </script>
 
 <template>
-  <div class="container mx-auto p-4">
-    <!-- Create Product Button -->
-    <div class="flex mb-4">
-      <router-link to="/admin/create-product">
-        <button class="btn-primary" @click="createProduct">
-          Create Product
-        </button>
-      </router-link>  
+  <div class="page-background min-h-screen">
+    <!-- Header and Action Bar in Container -->
+    <div class="container mx-auto px-4 mb-8">
+      <!-- Page Header -->
+      <div class="mb-8">
+        <h1 class="text-2xl font-bold gradient-text mb-2">Product Management</h1>
+        <p class="text-secondary-600 text-lg">Manage your product inventory</p>
+      </div>
+
+      <!-- Action Bar -->
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <div class="flex items-center gap-4 mb-4 sm:mb-0">
+          <router-link to="/admin/create-product">
+            <button class="btn btn-primary">
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+              </svg>
+              Create Product
+            </button>
+          </router-link>
+        </div>
+        
+        <div class="flex items-center gap-6 text-secondary-500">
+          <div class="flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+            </svg>
+            <span class="font-medium">{{ products.length }} Products</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <svg class="w-5 h-5 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span class="font-medium">{{ products.filter(p => p.stockQuantity > 0).length }} In Stock</span>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <!-- Products Table -->
-    <div class="overflow-x-auto">
-      <table class="min-w-full bg-white border border-gray-300">
-        <thead>
-          <tr>
-            <!-- <th class="py-2 px-4 border-b">ID</th> -->
-            <th class="py-2 px-4 border-b">{{ t('productName') }}</th>
-            <th class="py-2 px-4 border-b">Image</th>
-            <th class="py-2 px-4 border-b">{{ t('productCategory') }}</th>
-            <th class="py-2 px-4 border-b">Stock Quantity</th>
-            <th class="py-2 px-4 border-b">Price</th>
-            <th class="py-2 px-4 border-b">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="product in products" :key="product._id">
-            <!-- <td class="py-2 px-4 border-b">{{ product._id }}</td> -->
-            <td class="py-2 px-4 border-b">{{ product.name }}</td>
-            <td class="py-2 px-4 border-b">
-              <img :src="product.image ? getImageUrl(product.image) : '/images/fallback-image.jpg'" alt="Product Image" class="w-32 h-32 object-cover" @error="onImageError" />
-            </td>
-            <td class="py-2 px-4 border-b">{{ product.category ? product.category.name : 'No Category' }}</td>
-            <td class="py-2 px-4 border-b">{{ product.stockQuantity }}</td>
-            <td class="py-2 px-4 border-b">${{ product.price }}</td>
-            <td class="py-2 px-4 border-b">
-              
-                <router-link :to="`/admin/products/edit/${product._id}`">
-                    <button class="btn-edit">
-                    Edit
-                    </button>
-                </router-link>    
+    <!-- Full Width Content Area -->
+    <div class="w-full">
+      <!-- Loading State -->
+      <div v-if="loading" class="flex justify-center items-center py-16">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      </div>
 
-                <router-link :to="`/admin/products/delete/${product._id}`">
-                    <button class="btn-delete">
-                        Delete
-                    </button>
-                </router-link>
+      <!-- Error State -->
+      <div v-else-if="error" class="max-w-4xl mx-auto px-4">
+        <div class="card p-8 text-center">
+          <div class="text-error text-lg font-medium mb-2">{{ error }}</div>
+          <p class="text-secondary-500">Please try refreshing the page</p>
+        </div>
+      </div>
 
-                <router-link :to="`/admin/products/${product._id}`">
-                    <button class="btn-details">
-                    Details
-                    </button>
-                </router-link>
+      <!-- Empty State -->
+      <div v-else-if="products.length === 0" class="max-w-4xl mx-auto px-4">
+        <div class="card p-12 text-center">
+          <div class="mb-6">
+            <svg class="w-20 h-20 mx-auto text-secondary-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold text-secondary-700 mb-2">No Products Found</h3>
+          <p class="text-secondary-500 mb-6">Get started by creating your first product</p>
+          <router-link to="/admin/create-product">
+            <button class="btn btn-primary">
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+              </svg>
+              Create First Product
+            </button>
+          </router-link>
+        </div>
+      </div>
 
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <!-- Full Width Products Table -->
+      <div v-else class="w-full px-10">
+        <div class="bg-white shadow-sm border border-secondary-200 rounded-xl overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full divide-y divide-secondary-200">
+              <thead style="background-color: white">
+                <tr>
+                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-600 uppercase tracking-wider">
+                    {{ t('productName') }}
+                  </th>
+                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-600 uppercase tracking-wider">
+                    Image
+                  </th>
+                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-600 uppercase tracking-wider">
+                    {{ t('productCategory') }}
+                  </th>
+                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-600 uppercase tracking-wider">
+                    Stock
+                  </th>
+                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-600 uppercase tracking-wider">
+                    Price
+                  </th>
+                  <th scope="col" class="px-6 py-4 text-center text-xs font-semibold text-secondary-600 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-secondary-100">
+                <tr v-for="(product, index) in products" :key="product._id" 
+                    class="hover:bg-secondary-50 transition-colors duration-200 cursor-pointer"
+                    :class="{ 'bg-secondary-25': index % 2 === 0 }"
+                    @click="router.push(`/admin/products/${product._id}`)">
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex items-center">
+                      <div class="text-sm font-medium text-secondary-900">{{ product.name }}</div>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex items-center">
+                      <div class="flex-shrink-0 h-24 w-24">
+                        <img 
+                          :src="product.image ? getImageUrl(product.image) : '/images/fallback-image.jpg'" 
+                          alt="Product Image" 
+                          class="h-24 w-24 rounded-lg object-cover border border-secondary-200 shadow-sm" 
+                          @error="onImageError" 
+                        />
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex items-center">
+                      <span v-if="product.category" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
+                        {{ product.category.name }}
+                      </span>
+                      <span v-else class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary-100 text-secondary-600">
+                        No Category
+                      </span>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex items-center">
+                      <span v-if="product.stockQuantity > 10" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-success text-white">
+                        {{ product.stockQuantity }} units
+                      </span>
+                      <span v-else-if="product.stockQuantity > 0" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-warning text-white">
+                        {{ product.stockQuantity }} units
+                      </span>
+                      <span v-else class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-error text-white">
+                        Out of Stock
+                      </span>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-lg font-semibold text-secondary-900">${{ product.price }}</div>
+                  </td>
+                                     <td class="px-6 py-4 whitespace-nowrap text-center" @click.stop>
+                     <div class="flex items-center justify-center space-x-2">
+                       <router-link :to="`/admin/products/edit/${product._id}`">
+                         <button class="btn-action btn-edit" title="Edit Product">
+                           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                           </svg>
+                           <span class="hidden sm:inline ml-1">Edit</span>
+                         </button>
+                       </router-link>
+
+                       <router-link :to="`/admin/products/delete/${product._id}`">
+                         <button class="btn-action btn-delete" title="Delete Product">
+                           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                           </svg>
+                           <span class="hidden sm:inline ml-1">Delete</span>
+                         </button>
+                       </router-link>
+                     </div>
+                   </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.btn-primary {
-  @apply bg-blue-400 text-white px-4 py-2 rounded hover:bg-blue-500;
+.btn-action {
+  @apply inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
 }
-.btn-edit {
-  @apply bg-yellow-400 text-white px-2 py-1 rounded hover:bg-yellow-500 mx-1;
-}
-.btn-delete {
-  @apply bg-red-400 text-white px-2 py-1 rounded hover:bg-red-500 mx-1;
-}
+
 .btn-details {
-  @apply bg-green-400 text-white px-2 py-1 rounded hover:bg-green-500 mx-1;
+  @apply text-primary-700 bg-primary-50 hover:bg-primary-100 hover:text-primary-800 focus:ring-primary-500;
+}
+
+.btn-edit {
+  @apply text-warning bg-yellow-50 hover:bg-yellow-100 hover:text-yellow-800 focus:ring-yellow-500;
+}
+
+.btn-delete {
+  @apply text-error bg-red-50 hover:bg-red-100 hover:text-red-800 focus:ring-red-500;
+}
+
+.bg-secondary-25 {
+  background-color: #fafbfc;
+}
+
+/* Custom animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.card {
+  animation: fadeIn 0.3s ease-out;
+}
+
+tr:hover .btn-action {
+  transform: scale(1.05);
+}
+
+/* Product image hover effect */
+tr:hover img {
+  transform: scale(1.05);
+  transition: transform 0.2s ease;
 }
 </style>

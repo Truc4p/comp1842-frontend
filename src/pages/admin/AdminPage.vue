@@ -42,10 +42,10 @@ onMounted(async () => {
 
 <template>
   <div class="page-background min-h-screen">
-    <div class="container mx-auto px-4 py-8">
+    <div class="container mx-auto px-4">
       <!-- Page Header -->
       <div class="mb-8">
-        <h1 class="text-4xl font-bold gradient-text mb-2">Category Management</h1>
+        <h1 class="text-2xl font-bold gradient-text mb-2">Category Management</h1>
         <p class="text-secondary-600 text-lg">Manage your product categories</p>
       </div>
 
@@ -127,8 +127,9 @@ onMounted(async () => {
             </thead>
             <tbody class="bg-white divide-y divide-secondary-100">
               <tr v-for="(category, index) in categories" :key="category._id" 
-                  class="hover:bg-secondary-50 transition-colors duration-200"
-                  :class="{ 'bg-secondary-25': index % 2 === 0 }">
+                  class="hover:bg-secondary-50 transition-colors duration-200 cursor-pointer"
+                  :class="{ 'bg-secondary-25': index % 2 === 0 }"
+                  @click="router.push(`/admin/categories/${category._id}`)">
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
                     <div class="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center mr-3">
@@ -142,7 +143,7 @@ onMounted(async () => {
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-lg font-semibold text-secondary-900">{{ category.name }}</div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-center">
+                <td class="px-6 py-4 whitespace-nowrap text-center" @click.stop>
                   <div class="flex items-center justify-center space-x-2">
                     <router-link :to="`/admin/categories/${category._id}`">
                       <button class="btn-action btn-details" title="View Details">

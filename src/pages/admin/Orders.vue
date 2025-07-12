@@ -55,13 +55,12 @@ onMounted(async () => {
 const getStatusColor = (status) => {
   switch (status?.toLowerCase()) {
     case 'completed':
-    case 'delivered':
       return 'bg-success text-white';
-    case 'pending':
-    case 'processing':
+    case 'shipping':
       return 'bg-warning text-white';
+    case 'processing':
+      return 'bg-primary text-white';
     case 'cancelled':
-    case 'failed':
       return 'bg-error text-white';
     default:
       return 'bg-secondary-100 text-secondary-600';
@@ -187,7 +186,6 @@ const getStatusColor = (status) => {
               <tbody class="bg-white divide-y divide-secondary-100">
                 <tr v-for="(order, index) in filteredOrders" :key="order._id" 
                     class="hover:bg-secondary-50 transition-colors duration-200 cursor-pointer"
-                    :class="{ 'bg-secondary-25': index % 2 === 0 }"
                     @click="router.push(`/admin/orders/order/${order._id}`)">
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="flex items-center">
@@ -209,7 +207,7 @@ const getStatusColor = (status) => {
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="flex items-center">
                       <span :class="getStatusColor(order.status)" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize">
-                        {{ order.status || 'pending' }}
+                        {{ order.status || 'processing' }}
                       </span>
                     </div>
                   </td>

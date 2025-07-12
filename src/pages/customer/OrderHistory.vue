@@ -38,10 +38,9 @@ const formatDate = (dateString) => {
 
 const getStatusColor = (status) => {
   switch (status?.toLowerCase()) {
-    case 'pending':
-      return 'bg-yellow-100 text-yellow-800';
     case 'processing':
       return 'bg-blue-100 text-blue-800';
+    
     case 'completed':
       return 'bg-green-100 text-green-800';
     case 'cancelled':
@@ -189,7 +188,7 @@ onMounted(() => {
                     'inline-flex items-center px-3 py-1 rounded-full text-sm font-medium',
                     getStatusColor(order.status)
                   ]">
-                    {{ order.status || 'Pending' }}
+                    {{ order.status || 'Processing' }}
                   </span>
                 </div>
               </div>

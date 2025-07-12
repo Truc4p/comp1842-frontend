@@ -89,7 +89,7 @@ const placeOrder = async () => {
             products: cartItems.value,
             paymentMethod: customerDetails.value.paymentMethod,
             orderDate: new Date(),
-            status: 'pending',
+            status: 'processing',
             totalPrice: totalPrice,
         };
 

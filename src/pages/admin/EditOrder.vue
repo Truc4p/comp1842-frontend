@@ -90,7 +90,7 @@ const route = useRoute();
 const router = useRouter(); // Create a router instance
 
 const selectedStatus = ref('');
-const statusOptions = ['pending', 'processing', 'shipped', 'delivered'];
+const statusOptions = ['processing', 'shipping', 'completed'];
 
 const getImageUrl = (relativePath) => {
   const url = `${API_URL}/${relativePath}`; // Adjust the base URL as needed

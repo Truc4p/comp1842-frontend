@@ -156,7 +156,6 @@ const onImageError = (event) => {
               <tbody class="bg-white divide-y divide-secondary-100">
                 <tr v-for="(product, index) in products" :key="product._id" 
                     class="hover:bg-secondary-50 transition-colors duration-200 cursor-pointer"
-                    :class="{ 'bg-secondary-25': index % 2 === 0 }"
                     @click="router.push(`/admin/products/${product._id}`)">
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="flex items-center">

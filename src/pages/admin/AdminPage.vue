@@ -128,7 +128,6 @@ onMounted(async () => {
             <tbody class="bg-white divide-y divide-secondary-100">
               <tr v-for="(category, index) in categories" :key="category._id" 
                   class="hover:bg-secondary-50 transition-colors duration-200 cursor-pointer"
-                  :class="{ 'bg-secondary-25': index % 2 === 0 }"
                   @click="router.push(`/admin/categories/${category._id}`)">
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">

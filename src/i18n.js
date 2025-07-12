@@ -134,10 +134,9 @@ const messages = {
     cookiePolicy: 'Cookie Policy',
     newArrivals: 'New Arrivals',
     specialOffers: 'Special Offers',
-    pending: 'Pending',
     processing: 'Processing',
-    shipped: 'Shipped',
-    delivered: 'Delivered',
+    shipping: 'Shipping',
+    completed: 'Completed',
     searchProducts: 'Search Products',
   },
   vi: {
@@ -272,10 +271,9 @@ const messages = {
     cookiePolicy: 'Chính sách cookie',
     newArrivals: 'Hàng mới về',
     specialOffers: 'Ưu đãi đặc biệt',
-    pending: 'Đang chờ',
     processing: 'Đang xử lý',
-    shipped: 'Đã gửi',
-    delivered: 'Đã giao',
+    shipping: 'Đang giao',
+    completed: 'Đã hoàn thành',
     searchProducts: 'Tìm kiếm sản phẩm',
   }
 };

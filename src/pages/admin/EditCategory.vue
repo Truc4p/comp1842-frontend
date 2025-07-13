@@ -17,9 +17,6 @@
         <div class="card p-8 text-center">
           <div class="text-error text-lg font-medium mb-2">{{ error }}</div>
           <p class="text-secondary-500 mb-4">Please try again or go back to categories</p>
-          <button @click="router.push('/admin/categories')" class="btn btn-secondary">
-            Back to Categories
-          </button>
         </div>
       </div>
 
@@ -38,13 +35,10 @@
           <div class="card-body">
             <form @submit.prevent="updateCategory" class="space-y-6">
               <!-- Category ID Display -->
-              <div class="bg-secondary-50 p-4 rounded-lg">
+              <div class="p-4 rounded-lg">
                 <label class="form-label text-secondary-500 text-sm">Category ID</label>
                 <div class="flex items-center gap-2 mt-1">
-                  <div class="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center">
-                    <span class="text-xs font-bold text-primary-700">#</span>
-                  </div>
-                  <span class="text-sm font-mono text-secondary-600 bg-white px-2 py-1 rounded border">
+                  <span class="text-sm font-mono text-secondary-600 bg-white px-2 py-1 rounded">
                     {{ category._id }}
                   </span>
                 </div>
@@ -133,9 +127,6 @@
           </div>
           <h3 class="text-xl font-semibold text-secondary-700 mb-2">Category Not Found</h3>
           <p class="text-secondary-500 mb-6">The category you're looking for doesn't exist or has been deleted</p>
-          <button @click="router.push('/admin/categories')" class="btn btn-primary">
-            Back to Categories
-          </button>
         </div>
       </div>
     </div>

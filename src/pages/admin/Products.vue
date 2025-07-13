@@ -128,9 +128,9 @@ const onImageError = (event) => {
 
       <!-- Full Width Products Table -->
       <div v-else class="w-full px-10">
-        <div class="bg-white shadow-sm border border-secondary-200 rounded-xl overflow-hidden">
+        <div class="bg-white shadow-sm border border-secondary-100 rounded-xl overflow-hidden">
           <div class="overflow-x-auto">
-            <table class="w-full divide-y divide-secondary-200">
+            <table class="w-full divide-y divide-secondary-100">
               <thead style="background-color: white">
                 <tr>
                   <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-600 uppercase tracking-wider">
@@ -168,7 +168,7 @@ const onImageError = (event) => {
                         <img 
                           :src="product.image ? getImageUrl(product.image) : '/images/fallback-image.jpg'" 
                           alt="Product Image" 
-                          class="h-24 w-24 rounded-lg object-cover border border-secondary-200 shadow-sm" 
+                          class="h-24 w-24 rounded-lg object-cover" 
                           @error="onImageError" 
                         />
                       </div>
@@ -176,23 +176,23 @@ const onImageError = (event) => {
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="flex items-center">
-                      <span v-if="product.category" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
+                      <span v-if="product.category" class="inline-flex items-center px-2.5 py-0.5">
                         {{ product.category.name }}
                       </span>
-                      <span v-else class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary-100 text-secondary-600">
+                      <span v-else class="inline-flex items-center px-2.5 py-0.5">
                         No Category
                       </span>
                     </div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="flex items-center">
-                      <span v-if="product.stockQuantity > 10" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-success text-white">
+                      <span v-if="product.stockQuantity > 10" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-primary-800">
                         {{ product.stockQuantity }} units
                       </span>
-                      <span v-else-if="product.stockQuantity > 0" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-warning text-white">
+                      <span v-else-if="product.stockQuantity > 0" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
                         {{ product.stockQuantity }} units
                       </span>
-                      <span v-else class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-error text-white">
+                      <span v-else class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
                         Out of Stock
                       </span>
                     </div>

@@ -131,7 +131,7 @@ onMounted(async () => {
                   @click="router.push(`/admin/categories/${category._id}`)">
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
-                    <div class="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center mr-3">
+                    <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
                       <span class="text-xs font-bold text-primary-700">#{{ index + 1 }}</span>
                     </div>
                     <div class="text-sm font-mono text-secondary-500 bg-secondary-100 px-2 py-1 rounded">
@@ -189,7 +189,7 @@ onMounted(async () => {
 }
 
 .btn-details {
-  @apply text-primary-700 bg-primary-50 hover:bg-primary-100 hover:text-primary-800 focus:ring-primary-500;
+  @apply text-primary-700 bg-green-50 hover:bg-green-100 hover:text-primary-800 focus:ring-primary-500;
 }
 
 .btn-edit {

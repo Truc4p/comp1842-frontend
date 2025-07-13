@@ -3,17 +3,6 @@
     <div class="container mx-auto px-4 py-8">
       <!-- Page Header -->
       <div class="mb-8">
-        <div class="flex items-center gap-3 mb-4">
-          <button 
-            @click="router.push('/admin/categories')"
-            class="flex items-center gap-2 text-secondary-600 hover:text-primary-600 transition-colors duration-200"
-          >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-            </svg>
-            <span class="font-medium">Back to Categories</span>
-          </button>
-        </div>
         <h1 class="text-2xl font-bold gradient-text mb-2">Delete Category</h1>
         <p class="text-secondary-600 text-lg">Remove category from your system</p>
       </div>
@@ -36,9 +25,6 @@
           <div class="flex justify-center gap-4">
             <button @click="fetchCategory" class="btn btn-primary">
               Try Again
-            </button>
-            <button @click="router.push('/admin/categories')" class="btn btn-secondary">
-              Back to Categories
             </button>
           </div>
         </div>

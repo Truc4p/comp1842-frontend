@@ -9,11 +9,6 @@
       <div v-else>
         <p>Loading...</p>
       </div>
-      <router-link to="/admin/categories">
-        <button class="bg-blue-400 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-          Back to Categories
-        </button>
-      </router-link>
     </div>
   </template>
   

@@ -55,15 +55,17 @@ onMounted(async () => {
 const getStatusColor = (status) => {
   switch (status?.toLowerCase()) {
     case 'completed':
-      return 'bg-success text-white';
+      return 'bg-green-100 text-green-800';
+    case 'pending':
+      return 'bg-purple-100 text-purple-800';
     case 'shipping':
-      return 'bg-warning text-white';
-    case 'processing':
-      return 'bg-primary text-white';
+      return 'bg-orange-100 text-orange-800';
     case 'cancelled':
-      return 'bg-error text-white';
+      return 'bg-red-100 text-red-800';
+    case 'refunded':
+      return 'bg-gray-100 text-gray-800';
     default:
-      return 'bg-secondary-100 text-secondary-600';
+      return 'bg-slate-100 text-slate-700';
   }
 };
 </script>
@@ -195,7 +197,7 @@ const getStatusColor = (status) => {
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="flex items-center">
                       <div class="text-sm font-medium text-secondary-900">
-                        {{ order.customer?.name || order.user?.name || 'Guest Customer' }}
+                        {{ order.user.username }}
                       </div>
                     </div>
                   </td>

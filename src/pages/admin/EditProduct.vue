@@ -26,9 +26,6 @@
             <button @click="fetchProduct" class="btn btn-primary">
               Try Again
             </button>
-            <button @click="router.push('/admin/products')" class="btn btn-secondary">
-              Back to Products
-            </button>
           </div>
         </div>
       </div>
@@ -207,7 +204,7 @@
                       <img 
                         :src="imagePreview || getImageUrl(product.image)" 
                         alt="Product Image" 
-                        class="w-full h-64 object-cover rounded-lg border border-secondary-200 shadow-sm"
+                        class="w-full h-64 object-cover rounded-lg"
                       />
                       <div v-if="imagePreview" class="absolute top-2 right-2">
                         <button

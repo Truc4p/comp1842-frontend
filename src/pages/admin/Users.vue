@@ -119,7 +119,7 @@
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="flex items-center">
                       <div class="flex-shrink-0 h-10 w-10">
-                        <div class="h-10 w-10 rounded-full bg-primary-100 flex items-center justify-center">
+                        <div class="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
                           <span class="text-sm font-medium text-primary-700">
                             {{ getUserInitials(user.username || user.name) }}
                           </span>
@@ -236,7 +236,7 @@ const getUserStatus = (user) => {
 const getUserStatusColor = (user) => {
   if (user.isActive === false) return 'bg-error text-white';
   if (user.isVerified === false) return 'bg-warning text-white';
-  return 'bg-success text-white';
+  return 'bg-green-100 text-primary-800';
 };
 
 const formatDate = (dateString) => {

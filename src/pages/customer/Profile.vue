@@ -27,9 +27,9 @@
             <!-- Profile Header -->
             <div class="px-6 py-8 text-gray-900" style="background: white; border-bottom: 1px solid #e5e7eb;">
               <div class="flex items-center space-x-4">
-                <div class="w-20 h-20 bg-primary-100 rounded-full flex items-center justify-center">
+                <div class="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
                 </div>
                 <div>

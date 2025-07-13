@@ -216,7 +216,6 @@
   background-color: white;
   border-radius: 1rem;
   overflow: hidden;
-  border: 1px solid var(--secondary-200);
   transition: all 0.3s ease;
   box-shadow: var(--shadow-soft);
 }

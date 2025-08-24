@@ -110,141 +110,76 @@
             <label for="description" class="form-label">
               {{ t('productDescription') }}
             </label>
-            <textarea 
-              id="description" 
-              v-model="description"
-              class="form-control min-h-[120px] resize-y"
-              :placeholder="t('enterProductDescription') || 'Enter a detailed description of the product'"
-              rows="4"
-            ></textarea>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <!-- Description Input -->
+              <div>
+                <textarea 
+                  id="description" 
+                  v-model="description"
+                  class="form-control min-h-[120px] resize-y"
+                  :placeholder="t('enterProductDescription') || 'Enter a detailed description of the product'"
+                  rows="4"
+                ></textarea>
+                <div class="text-sm text-secondary-500 mt-1 space-y-1">
+                  <p>{{ t('descriptionNote') || 'Line breaks and formatting will be preserved as you type them.' }}</p>
+                  <div class="text-xs bg-secondary-50 p-2 rounded border">
+                    <strong>Formatting tips:</strong><br>
+                    • Use **text** for <strong>bold</strong><br>
+                    • Start lines with • or - for bullet points<br>
+                    • Use emojis like 🌟 💧 🔬 🌿 ✨ for highlights<br>
+                    • End lines with : for section headers
+                  </div>
+                </div>
+              </div>
+              <!-- Description Preview -->
+              <div v-if="description.trim()" class="lg:block hidden">
+                <label class="form-label text-sm text-secondary-600">
+                  {{ t('preview') || 'Preview' }}
+                </label>
+                <div class="border border-secondary-300 rounded-md p-3 min-h-[120px] bg-secondary-50">
+                  <div 
+                    class="text-secondary-700 text-sm leading-relaxed formatted-description"
+                    v-html="formatDescription(description)"
+                  ></div>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <!-- Multiple Image Upload -->
+          <!-- Image Upload -->
           <div class="form-group">
-            <label for="images" class="form-label">
-              {{ t('productImages') || 'Product Images' }}
-              <span class="text-sm text-secondary-500 ml-2">({{ t('multipleImagesAllowed') || 'Multiple images allowed' }})</span>
+            <label for="image" class="form-label">
+              {{ t('productImage') }}
             </label>
-            
-            <!-- Upload Area -->
             <div class="relative">
               <input 
                 type="file" 
-                id="images" 
+                id="image" 
                 @change="handleImageUpload"
                 accept="image/*"
-                multiple
                 class="hidden"
                 ref="fileInput"
               />
               <div 
                 @click="$refs.fileInput.click()"
-                @dragover.prevent="isDragOver = true"
-                @dragleave.prevent="isDragOver = false"
-                @drop.prevent="handleDrop"
-                :class="[
-                  'border-2 border-dashed rounded-lg p-6 text-center transition-all cursor-pointer',
-                  isDragOver 
-                    ? 'border-primary-400 bg-primary-50' 
-                    : 'border-secondary-300 bg-secondary-50 hover:border-primary-400 hover:bg-primary-50'
-                ]"
+                class="border-2 border-dashed border-secondary-300 rounded-lg p-6 text-center hover:border-primary-400 transition-colors cursor-pointer bg-secondary-50 hover:bg-primary-50"
               >
-                <div class="space-y-2">
+                <div v-if="!image" class="space-y-2">
                   <svg class="w-12 h-12 mx-auto text-secondary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                       d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                   </svg>
-                  <p class="text-secondary-600">
-                    {{ isDragOver ? (t('dropImagesHere') || 'Drop images here') : (t('clickToUploadImages') || 'Click to upload product images') }}
-                  </p>
-                  <p class="text-sm text-secondary-400">{{ t('imageFormats') || 'PNG, JPG, GIF up to 10MB each' }}</p>
-                  <p class="text-xs text-secondary-400">{{ t('dragDropHint') || 'Drag & drop files here or click to browse' }}</p>
+                  <p class="text-secondary-600">{{ t('clickToUploadImage') || 'Click to upload product image' }}</p>
+                  <p class="text-sm text-secondary-400">{{ t('imageFormats') || 'PNG, JPG, GIF up to 10MB' }}</p>
                 </div>
-              </div>
-            </div>
-
-            <!-- Image Preview Grid -->
-            <div v-if="images.length > 0" class="mt-4">
-              <h4 class="text-sm font-medium text-secondary-700 mb-3">
-                {{ t('selectedImages') || 'Selected Images' }} ({{ images.length }})
-              </h4>
-              <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                <div 
-                  v-for="(image, index) in images" 
-                  :key="index"
-                  class="relative group"
-                  draggable="true"
-                  @dragstart="handleDragStart(index)"
-                  @dragover.prevent
-                  @drop.prevent="handleImageDrop(index)"
-                >
-                  <!-- Image Preview -->
-                  <div class="aspect-square bg-secondary-100 rounded-lg overflow-hidden border-2 border-secondary-200 hover:border-primary-300 transition-colors cursor-move">
-                    <img 
-                      :src="image.preview" 
-                      :alt="`Preview ${index + 1}`"
-                      class="w-full h-full object-cover"
-                    />
-                  </div>
-                  
-                  <!-- Remove Button -->
-                  <button 
-                    type="button"
-                    @click="removeImage(index)"
-                    class="absolute -top-2 -right-2 bg-error text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-error-dark transition-colors opacity-0 group-hover:opacity-100"
-                    :title="t('removeImage') || 'Remove image'"
-                  >
-                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                  </button>
-
-                  <!-- Reorder Controls -->
-                  <div class="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button 
-                      v-if="index > 0"
-                      type="button"
-                      @click="moveImageLeft(index)"
-                      class="bg-secondary-800 bg-opacity-75 text-white rounded p-1 text-xs hover:bg-opacity-100 transition-all"
-                      :title="t('moveLeft') || 'Move left'"
-                    >
-                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                      </svg>
-                    </button>
-                    <button 
-                      v-if="index < images.length - 1"
-                      type="button"
-                      @click="moveImageRight(index)"
-                      class="bg-secondary-800 bg-opacity-75 text-white rounded p-1 text-xs hover:bg-opacity-100 transition-all"
-                      :title="t('moveRight') || 'Move right'"
-                    >
-                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                      </svg>
-                    </button>
-                  </div>
-
-                  <!-- Image Name -->
-                  <p class="mt-1 text-xs text-secondary-600 truncate">{{ image.file.name }}</p>
-                  
-                  <!-- Primary Image Badge -->
-                  <div v-if="index === 0" class="absolute top-1 left-1">
-                    <span class="bg-primary text-white text-xs px-2 py-1 rounded">
-                      {{ t('primary') || 'Primary' }}
-                    </span>
-                  </div>
+                <div v-else class="space-y-2">
+                  <svg class="w-12 h-12 mx-auto text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                  <p class="text-success font-medium">{{ image.name }}</p>
+                  <p class="text-sm text-secondary-500">{{ t('clickToChangeImage') || 'Click to change image' }}</p>
                 </div>
-              </div>
-              
-              <!-- Reorder Instructions -->
-              <div class="mt-3 space-y-1">
-                <p class="text-xs text-secondary-500">
-                  {{ t('firstImagePrimary') || 'The first image will be used as the primary product image' }}
-                </p>
-                <p class="text-xs text-secondary-400">
-                  {{ t('reorderInstructions') || 'Drag images to reorder, or use the arrow buttons' }}
-                </p>
               </div>
             </div>
           </div>
@@ -296,11 +231,9 @@ const category = ref('');
 const price = ref('');
 const stockQuantity = ref('');
 const description = ref('');
-const images = ref([]);
+const image = ref(null);
 const categories = ref([]);
 const isSubmitting = ref(false);
-const isDragOver = ref(false);
-const draggedIndex = ref(null);
 const router = useRouter();
 
 const fetchCategories = async () => {
@@ -322,76 +255,9 @@ onMounted(() => {
 });
 
 const handleImageUpload = (event) => {
-  const files = Array.from(event.target.files);
-  processFiles(files);
-  console.log('Images uploaded:', files.length);
-};
-
-const removeImage = (index) => {
-  images.value.splice(index, 1);
-};
-
-// Drag and drop functionality
-const handleDrop = (event) => {
-  isDragOver.value = false;
-  const files = Array.from(event.dataTransfer.files);
-  processFiles(files);
-};
-
-const processFiles = (files) => {
-  files.forEach(file => {
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      console.error(`File ${file.name} is not an image`);
-      return;
-    }
-    
-    // Validate file size (10MB limit)
-    if (file.size > 10 * 1024 * 1024) {
-      console.error(`File ${file.name} is too large (max 10MB)`);
-      return;
-    }
-    
-    // Create preview URL
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      images.value.push({
-        file: file,
-        preview: e.target.result
-      });
-    };
-    reader.readAsDataURL(file);
-  });
-};
-
-// Image reordering functions
-const handleDragStart = (index) => {
-  draggedIndex.value = index;
-};
-
-const handleImageDrop = (dropIndex) => {
-  if (draggedIndex.value !== null && draggedIndex.value !== dropIndex) {
-    const draggedItem = images.value[draggedIndex.value];
-    images.value.splice(draggedIndex.value, 1);
-    images.value.splice(dropIndex, 0, draggedItem);
-  }
-  draggedIndex.value = null;
-};
-
-const moveImageLeft = (index) => {
-  if (index > 0) {
-    const temp = images.value[index];
-    images.value[index] = images.value[index - 1];
-    images.value[index - 1] = temp;
-  }
-};
-
-const moveImageRight = (index) => {
-  if (index < images.value.length - 1) {
-    const temp = images.value[index];
-    images.value[index] = images.value[index + 1];
-    images.value[index + 1] = temp;
-  }
+  const file = event.target.files[0];
+  image.value = file;
+  console.log('Image was uploaded:', file);
 };
 
 const handleSubmit = async () => {
@@ -407,11 +273,9 @@ const handleSubmit = async () => {
     formData.append('price', price.value);
     formData.append('stockQuantity', stockQuantity.value);
     formData.append('description', description.value);
-    
-    // Append multiple images
-    images.value.forEach((imageData, index) => {
-      formData.append('images', imageData.file);
-    });
+    if (image.value) {
+      formData.append('image', image.value);
+    }
 
     // Log the contents of formData
     formData.forEach((value, key) => {
@@ -438,6 +302,34 @@ const handleSubmit = async () => {
   } finally {
     isSubmitting.value = false;
   }
+};
+
+// Format description to preserve formatting and convert common patterns to HTML
+const formatDescription = (text) => {
+  if (!text) return '';
+  
+  return text
+    // Convert line breaks to <br> tags
+    .replace(/\n/g, '<br>')
+    // Convert bullet points (• or -) to HTML list items
+    .replace(/^[•\-]\s+(.+)$/gm, '<li>$1</li>')
+    // Wrap consecutive list items in <ul> tags
+    .replace(/(<li>.*<\/li>)(?:\s*<br>\s*(<li>.*<\/li>))+/g, function(match) {
+      return '<ul class="list-disc ml-6 my-2">' + match.replace(/<br>/g, '') + '</ul>';
+    })
+    // Convert **bold** or strong text patterns
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    // Convert section headers (lines ending with :)
+    .replace(/^(.+):$/gm, '<h4 class="font-semibold text-secondary-800 mt-4 mb-2">$1:</h4>')
+    // Convert emojis and special characters (preserve them)
+    // Convert numbered sections
+    .replace(/^(\d+\.\s+.+)$/gm, '<div class="mt-2"><strong>$1</strong></div>')
+    // Convert lines that start with 🌟, 💧, 🔬, 🌿, ✨ as highlighted points
+    .replace(/^([🌟💧🔬🌿✨]\s*.+)$/gm, '<div class="flex items-start gap-2 my-2"><span class="text-xl">$1</span></div>')
+    // Clean up any double <br> tags
+    .replace(/<br><br>/g, '<br>')
+    // Add spacing between sections
+    .replace(/(<\/h4>)/g, '$1<br>');
 };
 </script>
 
@@ -494,5 +386,27 @@ select.form-control {
 .upload-area:hover {
   transform: translateY(-1px);
   box-shadow: var(--shadow-medium);
+}
+
+/* Formatted description styles */
+.formatted-description {
+  white-space: normal;
+}
+
+.formatted-description h4 {
+  color: var(--secondary-800);
+}
+
+.formatted-description ul {
+  padding-left: 1.5rem;
+}
+
+.formatted-description li {
+  margin-bottom: 0.5rem;
+}
+
+.formatted-description strong {
+  font-weight: 600;
+  color: var(--secondary-800);
 }
 </style>

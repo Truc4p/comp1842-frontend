@@ -15,12 +15,6 @@ const getImageUrl = (relativePath) => {
   return `${API_URL}/${relativePath}`;
 };
 
-const getProductImageUrl = (product) => {
-  // Use allImages virtual field first, fallback to images array, then image field
-  const images = product.allImages || product.images || (product.image ? [product.image] : []);
-  return images.length > 0 ? getImageUrl(images[0]) : '/images/fallback-image.jpg';
-};
-
 const onImageError = (event) => {
   event.target.src = '/images/fallback-image.jpg';
 };
@@ -172,7 +166,7 @@ onMounted(() => {
                 <!-- Product Image -->
                 <div class="w-full sm:w-24 h-24 flex-shrink-0">
                   <img 
-                    :src="getProductImageUrl(item)" 
+                    :src="item.image ? getImageUrl(item.image) : '/images/fallback-image.jpg'" 
                     :alt="item.name"
                     class="w-full h-full object-cover rounded" 
                     @error="onImageError" 

@@ -17,12 +17,6 @@ const getImageUrl = (relativePath) => {
   return `${API_URL}/${relativePath}`;
 };
 
-const getProductImageUrl = (product) => {
-  // Use allImages virtual field first, fallback to images array, then image field
-  const images = product.allImages || product.images || (product.image ? [product.image] : []);
-  return images.length > 0 ? getImageUrl(images[0]) : '/images/fallback-image.jpg';
-};
-
 const onImageError = (event) => {
   event.target.src = '/images/fallback-image.jpg';
 };
@@ -119,6 +113,34 @@ onMounted(async () => {
     isLoading.value = false;
   }
 });
+
+// Format description to preserve formatting and convert common patterns to HTML
+const formatDescription = (text) => {
+  if (!text) return '';
+  
+  return text
+    // Convert line breaks to <br> tags
+    .replace(/\n/g, '<br>')
+    // Convert bullet points (• or -) to HTML list items
+    .replace(/^[•\-]\s+(.+)$/gm, '<li>$1</li>')
+    // Wrap consecutive list items in <ul> tags
+    .replace(/(<li>.*<\/li>)(?:\s*<br>\s*(<li>.*<\/li>))+/g, function(match) {
+      return '<ul class="list-disc ml-6 my-2">' + match.replace(/<br>/g, '') + '</ul>';
+    })
+    // Convert **bold** or strong text patterns
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    // Convert section headers (lines ending with :)
+    .replace(/^(.+):$/gm, '<h4 class="font-semibold text-secondary-800 mt-4 mb-2">$1:</h4>')
+    // Convert emojis and special characters (preserve them)
+    // Convert numbered sections
+    .replace(/^(\d+\.\s+.+)$/gm, '<div class="mt-2"><strong>$1</strong></div>')
+    // Convert lines that start with 🌟, 💧, 🔬, 🌿, ✨ as highlighted points
+    .replace(/^([🌟💧🔬🌿✨]\s*.+)$/gm, '<div class="flex items-start gap-2 my-2"><span class="text-xl">$1</span></div>')
+    // Clean up any double <br> tags
+    .replace(/<br><br>/g, '<br>')
+    // Add spacing between sections
+    .replace(/(<\/h4>)/g, '$1<br>');
+};
 </script>
 
 <template>
@@ -166,7 +188,7 @@ onMounted(async () => {
             <!-- Product Image Section -->
             <div class="relative white p-4 flex items-center justify-center">
               <div class="relative group w-full">
-                <img :src="getProductImageUrl(product)"
+                <img :src="product.image ? getImageUrl(product.image) : '/images/fallback-image.jpg'"
                   :alt="product.name"
                   class="relative w-full h-auto max-h-none object-contain transform group-hover:scale-105 transition-transform duration-300"
                   @error="onImageError" />
@@ -278,13 +300,24 @@ onMounted(async () => {
           </div>
 
           <!-- Product Description -->
-          <div class="mb-8">
-            <h3 class="text-xl font-semibold text-secondary-800 mb-3">
-              {{ t('description') || 'Description' }}
-            </h3>
-            <p class="text-secondary-600 leading-relaxed text-lg">
-              {{ product.description || t('noDescription') || 'No description available.' }}
-            </p>
+          <div class="rounded-xl p-8 mb-8">
+            <div class="flex items-center gap-3 mb-6">
+              <div class="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <h3 class="text-2xl font-bold text-secondary-900">
+                {{ t('description') || 'Product Description' }}
+              </h3>
+            </div>
+            
+            <div class="bg-white rounded-lg p-6">
+              <div 
+                class="text-secondary-700 leading-relaxed text-base"
+                v-html="formatDescription(product.description || t('noDescription') || 'No description available.')"
+              ></div>
+            </div>
           </div>
         </div>
 
@@ -371,6 +404,27 @@ onMounted(async () => {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+.formatted-description {
+  white-space: normal;
+}
+
+.formatted-description h4 {
+  color: var(--secondary-800);
+}
+
+.formatted-description ul {
+  padding-left: 1.5rem;
+}
+
+.formatted-description li {
+  margin-bottom: 0.5rem;
+}
+
+.formatted-description strong {
+  font-weight: 600;
+  color: var(--secondary-800);
 }
 
 .bg-gradient-primary {

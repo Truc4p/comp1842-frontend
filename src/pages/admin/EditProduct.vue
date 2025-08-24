@@ -140,16 +140,40 @@
                   <label for="description" class="form-label">
                     Description
                   </label>
-                  <textarea
-                    id="description"
-                    v-model="description"
-                    class="form-control"
-                    rows="4"
-                    placeholder="Enter product description..."
-                  ></textarea>
-                  <p class="text-secondary-500 text-sm mt-1">
-                    Provide a detailed description of your product
-                  </p>
+                  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <!-- Description Input -->
+                    <div>
+                      <textarea
+                        id="description"
+                        v-model="description"
+                        class="form-control"
+                        rows="4"
+                        placeholder="Enter product description..."
+                      ></textarea>
+                      <div class="text-sm text-secondary-500 mt-1 space-y-1">
+                        <p>Line breaks and formatting will be preserved as you type them.</p>
+                        <div class="text-xs bg-secondary-50 p-2 rounded border">
+                          <strong>Formatting tips:</strong><br>
+                          • Use **text** for <strong>bold</strong><br>
+                          • Start lines with • or - for bullet points<br>
+                          • Use emojis like 🌟 💧 🔬 🌿 ✨ for highlights<br>
+                          • End lines with : for section headers
+                        </div>
+                      </div>
+                    </div>
+                    <!-- Description Preview -->
+                    <div v-if="description && description.trim()" class="lg:block hidden">
+                      <label class="form-label text-sm text-secondary-600">
+                        Preview
+                      </label>
+                      <div class="border border-secondary-300 rounded-md p-3 min-h-[100px] bg-secondary-50">
+                        <div 
+                          class="text-secondary-700 text-sm leading-relaxed formatted-description"
+                          v-html="formatDescription(description)"
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -555,6 +579,34 @@ const getImageUrl = (relativePath) => {
 onMounted(async () => {
   await Promise.all([fetchCategories(), fetchProduct()]);
 });
+
+// Format description to preserve formatting and convert common patterns to HTML
+const formatDescription = (text) => {
+  if (!text) return '';
+  
+  return text
+    // Convert line breaks to <br> tags
+    .replace(/\n/g, '<br>')
+    // Convert bullet points (• or -) to HTML list items
+    .replace(/^[•\-]\s+(.+)$/gm, '<li>$1</li>')
+    // Wrap consecutive list items in <ul> tags
+    .replace(/(<li>.*<\/li>)(?:\s*<br>\s*(<li>.*<\/li>))+/g, function(match) {
+      return '<ul class="list-disc ml-6 my-2">' + match.replace(/<br>/g, '') + '</ul>';
+    })
+    // Convert **bold** or strong text patterns
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    // Convert section headers (lines ending with :)
+    .replace(/^(.+):$/gm, '<h4 class="font-semibold text-secondary-800 mt-4 mb-2">$1:</h4>')
+    // Convert emojis and special characters (preserve them)
+    // Convert numbered sections
+    .replace(/^(\d+\.\s+.+)$/gm, '<div class="mt-2"><strong>$1</strong></div>')
+    // Convert lines that start with 🌟, 💧, 🔬, 🌿, ✨ as highlighted points
+    .replace(/^([🌟💧🔬🌿✨]\s*.+)$/gm, '<div class="flex items-start gap-2 my-2"><span class="text-xl">$1</span></div>')
+    // Clean up any double <br> tags
+    .replace(/<br><br>/g, '<br>')
+    // Add spacing between sections
+    .replace(/(<\/h4>)/g, '$1<br>');
+};
 </script>
 
 <style scoped>
@@ -620,5 +672,27 @@ select.form-control {
   .lg\\:col-span-2 {
     grid-column: span 1;
   }
+}
+
+/* Formatted description styles */
+.formatted-description {
+  white-space: normal;
+}
+
+.formatted-description h4 {
+  color: var(--secondary-800);
+}
+
+.formatted-description ul {
+  padding-left: 1.5rem;
+}
+
+.formatted-description li {
+  margin-bottom: 0.5rem;
+}
+
+.formatted-description strong {
+  font-weight: 600;
+  color: var(--secondary-800);
 }
 </style>

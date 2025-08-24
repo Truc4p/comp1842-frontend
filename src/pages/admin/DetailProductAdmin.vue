@@ -40,6 +40,34 @@ onMounted(async () => {
     isLoading.value = false;
   }
 });
+
+// Format description to preserve formatting and convert common patterns to HTML
+const formatDescription = (text) => {
+  if (!text) return '';
+  
+  return text
+    // Convert line breaks to <br> tags
+    .replace(/\n/g, '<br>')
+    // Convert bullet points (• or -) to HTML list items
+    .replace(/^[•\-]\s+(.+)$/gm, '<li>$1</li>')
+    // Wrap consecutive list items in <ul> tags
+    .replace(/(<li>.*<\/li>)(?:\s*<br>\s*(<li>.*<\/li>))+/g, function(match) {
+      return '<ul class="list-disc ml-6 my-2">' + match.replace(/<br>/g, '') + '</ul>';
+    })
+    // Convert **bold** or strong text patterns
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    // Convert section headers (lines ending with :)
+    .replace(/^(.+):$/gm, '<h4 class="font-semibold text-secondary-800 mt-4 mb-2">$1:</h4>')
+    // Convert emojis and special characters (preserve them)
+    // Convert numbered sections
+    .replace(/^(\d+\.\s+.+)$/gm, '<div class="mt-2"><strong>$1</strong></div>')
+    // Convert lines that start with 🌟, 💧, 🔬, 🌿, ✨ as highlighted points
+    .replace(/^([🌟💧🔬🌿✨]\s*.+)$/gm, '<div class="flex items-start gap-2 my-2"><span class="text-xl">$1</span></div>')
+    // Clean up any double <br> tags
+    .replace(/<br><br>/g, '<br>')
+    // Add spacing between sections
+    .replace(/(<\/h4>)/g, '$1<br>');
+};
 </script>
 
 <template>
@@ -109,16 +137,6 @@ onMounted(async () => {
                 </div>
               </div>
 
-              <!-- Product Description -->
-              <div class="mb-8">
-                <h3 class="text-xl font-semibold text-secondary-800 mb-3">
-                  {{ t('description') || 'Description' }}
-                </h3>
-                <p class="text-secondary-600 leading-relaxed text-lg">
-                  {{ product.description || t('noDescription') || 'No description available.' }}
-                </p>
-              </div>
-
               <!-- Admin Actions -->
               <div class="flex gap-4 pt-6 border-t border-secondary-200">
                 <router-link :to="`/admin/products/edit/${product._id}`" class="btn btn-primary">
@@ -136,41 +154,16 @@ onMounted(async () => {
               </div>
             </div>
           </div>
-        </div>
-
-        <!-- Product Stats -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
-          <!-- Stock Status -->
-          <div class="feature-card text-center">
-            <div class="feature-icon text-primary-600 mb-4">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-              </svg>
-            </div>
-            <h3 class="text-lg font-semibold text-secondary-900 mb-2">{{ t('stockQuantity') || 'Stock Quantity' }}</h3>
-            <p class="text-secondary-600 text-sm">{{ product.stockQuantity }} {{ t('unitsAvailable') || 'units available' }}</p>
-          </div>
-
-          <!-- Category Info -->
-          <div class="feature-card text-center">
-            <div class="feature-icon text-primary-600 mb-4">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-              </svg>
-            </div>
-            <h3 class="text-lg font-semibold text-secondary-900 mb-2">{{ t('category') || 'Category' }}</h3>
-            <p class="text-secondary-600 text-sm">{{ product.category ? product.category.name : t('noCategory') || 'No Category' }}</p>
-          </div>
-
-          <!-- Price Info -->
-          <div class="feature-card text-center">
-            <div class="feature-icon text-primary-600 mb-4">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-              </svg>
-            </div>
-            <h3 class="text-lg font-semibold text-secondary-900 mb-2">{{ t('price') || 'Price' }}</h3>
-            <p class="text-secondary-600 text-sm">${{ product.price }} {{ t('perUnit') || 'per unit' }}</p>
+          
+          <!-- Product Description -->
+          <div class="mb-8">
+            <h3 class="text-xl font-semibold text-secondary-800 mb-3">
+              {{ t('description') || 'Description' }}
+            </h3>
+                            <div 
+                  class="text-secondary-600 leading-relaxed text-lg formatted-description"
+                  v-html="formatDescription(product.description || t('noDescription') || 'No description available.')"
+                ></div>
           </div>
         </div>
       </div>
@@ -203,6 +196,27 @@ onMounted(async () => {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+.formatted-description {
+  white-space: normal;
+}
+
+.formatted-description h4 {
+  color: var(--secondary-800);
+}
+
+.formatted-description ul {
+  padding-left: 1.5rem;
+}
+
+.formatted-description li {
+  margin-bottom: 0.5rem;
+}
+
+.formatted-description strong {
+  font-weight: 600;
+  color: var(--secondary-800);
 }
 
 .bg-gradient-primary {

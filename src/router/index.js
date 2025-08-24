@@ -20,6 +20,7 @@ import DeleteCategory from '@/pages/admin/DeleteCategory.vue';
 
 import Products from '@/pages/admin/Products.vue';
 import CreateProduct from '@/pages/admin/CreateProduct.vue';
+import DetailProductAdmin from '@/pages/admin/DetailProductAdmin.vue';
 import EditProduct from '@/pages/admin/EditProduct.vue';
 import DeleteProduct from '@/pages/admin/DeleteProduct.vue';
 
@@ -65,7 +66,7 @@ const routes = [
 
       { path: "products", component: Products },
       { path: "create-product", component: CreateProduct },
-      { path: "products/:id", component: DetailProduct },
+      { path: "products/:id", component: DetailProductAdmin },
       { path: "products/edit/:id", component: EditProduct },
       { path: "products/delete/:id", component: DeleteProduct },
 

@@ -154,7 +154,7 @@ const onImageError = (event) => {
                 </tr>
               </thead>
               <tbody class="bg-white divide-y divide-secondary-100">
-                <tr v-for="(product, index) in products" :key="product._id" 
+                <tr v-for="(product) in products" :key="product._id" 
                     class="hover:bg-secondary-50 transition-colors duration-200 cursor-pointer"
                     @click="router.push(`/admin/products/${product._id}`)">
                   <td class="px-6 py-4 whitespace-nowrap">

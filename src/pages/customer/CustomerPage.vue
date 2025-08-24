@@ -60,6 +60,12 @@ const getImageUrl = (relativePath) => {
   return `${API_URL}/${relativePath}`; // Adjust the base URL as needed
 };
 
+const getProductImageUrl = (product) => {
+  // Use allImages virtual field first, fallback to images array, then image field
+  const images = product.allImages || product.images || (product.image ? [product.image] : []);
+  return images.length > 0 ? getImageUrl(images[0]) : '/images/fallback-image.jpg';
+};
+
 const onImageError = (event) => {
   event.target.src = '/images/fallback-image.jpg'; // Provide a fallback image URL
 };
@@ -203,7 +209,7 @@ onMounted(() => {
           <div v-for="product in filteredProducts" :key="product._id" class="product-card group animate-fade-in cursor-pointer flex flex-col h-full" @click="$router.push(`/customer/products/${product._id}`)">
             <div class="relative overflow-hidden rounded-t-2xl">
               <img 
-                :src="product.image ? getImageUrl(product.image) : '/images/fallback-image.jpg'" 
+                :src="getProductImageUrl(product)" 
                 :alt="product.name"
                 class="product-image"
                 @error="onImageError" 

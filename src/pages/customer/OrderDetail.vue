@@ -156,8 +156,8 @@
                       </th>
             </tr>
           </thead>
-                  <tbody class="bg-white divide-y divide-gray-200">
-                    <tr v-for="product in order.products" :key="product.productId" class="hover:bg-gray-50 transition-colors duration-200">
+                  <tbody class="bg-white divide-y divide-secondary-100">
+                    <tr v-for="product in order.products" :key="product.productId" class="hover:bg-secondary-50 transition-colors duration-200 cursor-pointer">
                       
                       <!-- Product Info -->
                       <td class="px-6 py-4 whitespace-nowrap">
@@ -166,7 +166,7 @@
                 <img
                   :src="product.productId.image ? getImageUrl(product.productId.image) : '/images/fallback-image.jpg'"
                               :alt="product.productId.name"
-                              class="w-16 h-16 object-cover rounded-lg shadow-sm border border-gray-200" 
+                              class="w-16 h-16 object-cover rounded-lg" 
                               @error="onImageError" 
                             />
                           </div>
@@ -190,7 +190,7 @@
 
                       <!-- Quantity -->
                       <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-teal-100 text-teal-800 text-sm font-medium">
+                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-teal-50 text-teal-800 text-sm font-medium">
                           {{ product.quantity }}
                         </span>
                       </td>
@@ -297,11 +297,6 @@ onMounted(async () => {
 .btn-danger:hover {
   background-color: #dc2626;
   @apply transform translate-y-0.5;
-}
-
-/* Table row hover effects */
-tbody tr:hover {
-  background-color: var(--primary-50);
 }
 
 /* Responsive improvements */

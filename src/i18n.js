@@ -139,6 +139,8 @@ const messages = {
     completed: 'Completed',
     searchProducts: 'Search Products',
     orderDetailsSubtitle: 'Review your order information and products',
+    productCount: 'Product Count',
+    orderInformation: 'Order Information',
   },
   vi: {
     welcomeMessage: 'Chào mừng bạn đến với trang web của chúng tôi!',
@@ -277,6 +279,8 @@ const messages = {
     completed: 'Đã hoàn thành',
     searchProducts: 'Tìm kiếm sản phẩm',
     orderDetailsSubtitle: 'Xem thông tin và sản phẩm của đơn hàng',
+    productCount: 'Số lượng sản phẩm',
+    orderInformation: 'Thông tin đơn hàng',
   }
 };
 

@@ -5,14 +5,7 @@
         <!-- Logo and Brand -->
         <div class="flex items-center space-x-3">
           <router-link to="/" class="navbar-brand">
-            <div class="flex items-center space-x-3">
-              <div class="footer-logo">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                </svg>
-              </div>
-              <span class="footer-brand-text">WrenCos</span>
-            </div>
+            <span class="footer-brand-text">WrenCos</span>
           </router-link>
         </div>
         
@@ -64,9 +57,9 @@
         <div class="pt-3 border-t border-secondary-200">
           <label class="block text-sm font-medium text-secondary-700 mb-2">{{ t('language') || 'Language' }}</label>
           <div class="language-selector">
-            <select @change="changeLanguage" v-model="currentLocale" class="w-full">
-              <option value="en">🇺🇸 English</option>
-              <option value="vi">🇻🇳 Tiếng Việt</option>
+            <select @change="changeLanguage" v-model="currentLocale">
+              <option value="en">🇺🇸 EN</option>
+              <option value="vi">🇻🇳 VI</option>
             </select>
           </div>
         </div>

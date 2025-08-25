@@ -66,7 +66,13 @@ const fetchOrders = async () => {
         "x-auth-token": token,
       },
     });
-    orders.value = response.data;
+    // Sort latest first by orderDate (fallback to createdAt)
+    const sorted = [...response.data].sort((a, b) => {
+      const aDate = new Date(a.orderDate || a.createdAt || 0);
+      const bDate = new Date(b.orderDate || b.createdAt || 0);
+      return bDate - aDate;
+    });
+    orders.value = sorted;
     console.log('Orders response:', response.data);
   } catch (err) {
     console.error('Error fetching orders:', err);

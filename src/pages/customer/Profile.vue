@@ -53,7 +53,7 @@
                     </svg>
                     <span class="text-sm font-medium">{{ t('userID') || 'User ID' }}</span>
                   </div>
-                  <p class="text-gray-900 font-mono text-sm bg-gray-50 px-3 py-2 rounded-lg">{{ user._id }}</p>
+                  <p class="text-gray-900 font-mono text-sm bg-gray-50 px-3 py-2 rounded-lg">#{{ user._id.slice(-8) }}</p>
                 </div>
 
                 <!-- Username -->

@@ -61,8 +61,6 @@ const formatDescription = (text) => {
     // Convert emojis and special characters (preserve them)
     // Convert numbered sections
     .replace(/^(\d+\.\s+.+)$/gm, '<div class="mt-2"><strong>$1</strong></div>')
-    // Convert lines that start with 🌟, 💧, 🔬, 🌿, ✨ as highlighted points
-    .replace(/^([🌟💧🔬🌿✨]\s*.+)$/gm, '<div class="flex items-start gap-2 my-2"><span class="text-xl">$1</span></div>')
     // Clean up any double <br> tags
     .replace(/<br><br>/g, '<br>')
     // Add spacing between sections
@@ -99,7 +97,6 @@ const formatDescription = (text) => {
           <h1 class="text-4xl md:text-5xl font-bold text-secondary-900 mb-4 gradient-text">
             {{ t('productDetails') || 'Product Details' }}
           </h1>
-          <div class="w-24 h-1 bg-gradient-primary mx-auto rounded-full"></div>
         </div>
 
         <!-- Main Product Card -->
@@ -156,14 +153,24 @@ const formatDescription = (text) => {
           </div>
           
           <!-- Product Description -->
-          <div class="mb-8">
-            <h3 class="text-xl font-semibold text-secondary-800 mb-3">
-              {{ t('description') || 'Description' }}
-            </h3>
-                            <div 
-                  class="text-secondary-600 leading-relaxed text-lg formatted-description"
-                  v-html="formatDescription(product.description || t('noDescription') || 'No description available.')"
-                ></div>
+          <div class="rounded-xl p-8 mb-8">
+            <div class="flex items-center gap-3 mb-6">
+              <div class="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <h3 class="text-2xl font-bold text-secondary-900">
+                {{ t('description') || 'Product Description' }}
+              </h3>
+            </div>
+
+            <div class="bg-white rounded-lg p-6">
+              <div 
+                class="text-secondary-700 leading-relaxed text-base formatted-description"
+                v-html="formatDescription(product.description || t('noDescription') || 'No description available.')"
+              ></div>
+            </div>
           </div>
         </div>
       </div>

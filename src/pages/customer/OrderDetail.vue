@@ -19,7 +19,7 @@
         <!-- Page Header -->
         <div class="mb-8">
           <div class="flex items-center justify-between flex-wrap gap-4">
-            <h1 class="text-4xl font-bold text-gray-900 mb-2">{{ t('orderDetails') }}</h1>
+            <h1 class="text-4xl font-bold text-primary-900 mb-2">{{ t('orderDetails') }}</h1>
             <p class="text-gray-600">{{ t('orderDetailsSubtitle') || 'Review your order information and products' }}</p>
           </div>
         </div>
@@ -55,7 +55,7 @@
                     </svg>
                     <span class="text-sm font-medium">{{ t('orderId') }}</span>
                   </div>
-                  <p class="text-gray-900 font-mono text-sm bg-gray-50 px-3 py-2 rounded-lg">{{ order._id }}</p>
+                  <p class="text-gray-900 font-mono text-sm bg-gray-50 px-3 py-2 rounded-lg">#{{ order._id.slice(-8) }}</p>
                 </div>
 
                 <!-- Customer -->
@@ -66,7 +66,7 @@
                     </svg>
                     <span class="text-sm font-medium">{{ t('customer') || 'Customer' }}</span>
                   </div>
-                  <p class="text-gray-900 font-semibold">{{ order.user }}</p>
+                  <p class="text-gray-900 font-semibold">{{ username || order.user }}</p>
                 </div>
 
                 <!-- Order Date -->

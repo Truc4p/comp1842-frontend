@@ -133,22 +133,22 @@ const onImageError = (event) => {
             <table class="w-full divide-y divide-secondary-100">
               <thead style="background-color: white">
                 <tr>
-                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-600 uppercase tracking-wider">
+                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-600 uppercase tracking-wider w-1/3">
                     {{ t('productName') }}
                   </th>
-                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-600 uppercase tracking-wider">
+                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-600 uppercase tracking-wider w-32">
                     Image
                   </th>
-                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-600 uppercase tracking-wider">
+                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-600 uppercase tracking-wider w-32">
                     {{ t('productCategory') }}
                   </th>
-                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-600 uppercase tracking-wider">
+                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-600 uppercase tracking-wider w-24">
                     Stock
                   </th>
-                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-600 uppercase tracking-wider">
+                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-600 uppercase tracking-wider w-24">
                     Price
                   </th>
-                  <th scope="col" class="px-6 py-4 text-center text-xs font-semibold text-secondary-600 uppercase tracking-wider">
+                  <th scope="col" class="px-6 py-4 text-center text-xs font-semibold text-secondary-600 uppercase tracking-wider w-32">
                     Actions
                   </th>
                 </tr>
@@ -157,9 +157,9 @@ const onImageError = (event) => {
                 <tr v-for="(product) in products" :key="product._id" 
                     class="hover:bg-secondary-50 transition-colors duration-200 cursor-pointer"
                     @click="router.push(`/admin/products/${product._id}`)">
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="flex items-center">
-                      <div class="text-sm font-medium text-secondary-900">{{ product.name }}</div>
+                  <td class="px-6 py-4">
+                    <div class="flex items-start">
+                      <div class="text-sm font-medium text-secondary-900 break-words max-w-xs leading-relaxed">{{ product.name }}</div>
                     </div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
@@ -200,27 +200,27 @@ const onImageError = (event) => {
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="text-lg font-semibold text-secondary-900">${{ product.price }}</div>
                   </td>
-                                     <td class="px-6 py-4 whitespace-nowrap text-center" @click.stop>
-                     <div class="flex items-center justify-center space-x-2">
-                       <router-link :to="`/admin/products/edit/${product._id}`">
-                         <button class="btn-action btn-edit" title="Edit Product">
-                           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                           </svg>
-                           <span class="hidden sm:inline ml-1">Edit</span>
-                         </button>
-                       </router-link>
+                  <td class="px-6 py-4 whitespace-nowrap text-center" @click.stop>
+                    <div class="flex items-center justify-center space-x-2">
+                      <router-link :to="`/admin/products/edit/${product._id}`">
+                        <button class="btn-action btn-edit" title="Edit Product">
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                          </svg>
+                          <span class="hidden sm:inline ml-1">Edit</span>
+                        </button>
+                      </router-link>
 
-                       <router-link :to="`/admin/products/delete/${product._id}`">
-                         <button class="btn-action btn-delete" title="Delete Product">
-                           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                           </svg>
-                           <span class="hidden sm:inline ml-1">Delete</span>
-                         </button>
-                       </router-link>
-                     </div>
-                   </td>
+                      <router-link :to="`/admin/products/delete/${product._id}`">
+                        <button class="btn-action btn-delete" title="Delete Product">
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                          </svg>
+                          <span class="hidden sm:inline ml-1">Delete</span>
+                        </button>
+                      </router-link>
+                    </div>
+                  </td>
                 </tr>
               </tbody>
             </table>

@@ -24,6 +24,9 @@
           <router-link :to="{ path: '/admin/users' }" exact-active-class="router-link-exact-active" class="navbar-link">
             {{ t('users') }}
           </router-link>
+          <router-link :to="{ path: '/admin/analytics' }" exact-active-class="router-link-exact-active" class="navbar-link">
+            Analytics
+          </router-link>
           
           <!-- Language Switcher -->
           <div class="language-selector">
@@ -62,6 +65,9 @@
         </router-link>
         <router-link :to="{ path: '/admin/users' }" exact-active-class="router-link-exact-active" class="block navbar-link py-2 px-3 rounded-lg hover:bg-secondary-50 transition-colors duration-200">
           {{ t('users') }}
+        </router-link>
+        <router-link :to="{ path: '/admin/analytics' }" exact-active-class="router-link-exact-active" class="block navbar-link py-2 px-3 rounded-lg hover:bg-secondary-50 transition-colors duration-200">
+          Analytics
         </router-link>
         
         <!-- Mobile Language Switcher -->

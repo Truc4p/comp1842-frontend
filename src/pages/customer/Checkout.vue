@@ -65,6 +65,15 @@ const updateUser = async () => {
     }
 };
 
+const getImageUrl = (relativePath) => {
+    if (!relativePath) return '/images/fallback-image.jpg';
+    return `${API_URL}/${relativePath}`;
+};
+
+const onImageError = (event) => {
+    event.target.src = '/images/fallback-image.jpg';
+};
+
 const getCustomer = async () => {
     try {
         console.log('Getting customer with ID:', userId); // Log userId
@@ -84,9 +93,17 @@ const getCustomer = async () => {
 const placeOrder = async () => {
     try {
         const totalPrice = cartItems.value.reduce((total, item) => total + item.price * item.quantity, 0);
+
+        // Transform cart items to the payload expected by the backend
+        const productsPayload = cartItems.value.map((item) => ({
+            productId: item._id || item.productId,
+            quantity: item.quantity,
+            price: item.price,
+        }));
+
         const orderData = {
             user: userId,
-            products: cartItems.value,
+            products: productsPayload,
             paymentMethod: customerDetails.value.paymentMethod,
             orderDate: new Date(),
             status: 'processing',
@@ -103,6 +120,9 @@ const placeOrder = async () => {
         });
 
         console.log('Order placed successfully:', response.data);
+
+        // Stock is now updated server-side during order creation
+
         alert("Order placed successfully!");
 
         // Remove the cart items in cart
@@ -123,7 +143,8 @@ const placeOrder = async () => {
             console.error('Error response status:', error.response.status); // Log error response status
             console.error('Error response headers:', error.response.headers); // Log error response headers
         }
-        alert('There was an error placing your order. Please try again.');
+        const message = (error.response && (error.response.data?.error || error.response.data?.message)) || 'There was an error placing your order. Please try again.';
+        alert(message);
     }
 };
 
@@ -140,45 +161,160 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="page-background">
-        <h1 class="text-2xl font-bold mb-4">Checkout</h1>
-        <div class="mb-4">
-            <h2 class="text-xl font-bold mb-2">Customer Details</h2>
-            <form @submit.prevent="handleSubmit">
-                <div class="mb-2">
-                    <label class="block mb-1">Phone</label>
-                    <input v-model="user.phone"
-                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                        id="phone" type="text" placeholder="User Phone" />
+    <div class="page-background min-h-screen py-8">
+        <div class="container mx-auto px-6 max-w-7xl">
+            <!-- Page Header -->
+            <div class="text-center mb-12">
+                <h1 class="text-4xl md:text-5xl font-bold text-secondary-900 mb-4 gradient-text">
+                    {{ t('checkout') || 'Checkout' }}
+                </h1>
+            </div>
+
+            <div class="grid grid-cols-1 xl:grid-cols-7 gap-8">
+                <!-- Customer Details Form -->
+                <div class="xl:col-span-3">
+                    <div class="bg-white rounded-2xl p-8">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                            </div>
+                            <h2 class="text-2xl font-bold text-secondary-900">
+                                {{ t('customerDetails') || 'Customer Details' }}
+                            </h2>
+                        </div>
+
+                        <form @submit.prevent="handleSubmit" class="space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-secondary-700 mb-2">
+                                        {{ t('phone') || 'Phone Number' }}
+                                    </label>
+                                    <input 
+                                        v-model="user.phone"
+                                        class="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200"
+                                        type="tel" 
+                                        placeholder="+1 (555) 123-4567" 
+                                    />
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-secondary-700 mb-2">
+                                        {{ t('email') || 'Email Address' }}
+                                    </label>
+                                    <input 
+                                        v-model="user.email" 
+                                        type="email" 
+                                        class="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200"
+                                        placeholder="your@email.com" 
+                                    />
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-secondary-700 mb-2">
+                                    {{ t('address') || 'Delivery Address' }}
+                                </label>
+                                <textarea 
+                                    v-model="user.address" 
+                                    rows="3"
+                                    class="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200"
+                                    placeholder="Enter your full delivery address"
+                                ></textarea>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-secondary-700 mb-2">
+                                    {{ t('paymentMethod') || 'Payment Method' }}
+                                </label>
+                                <select 
+                                    v-model="customerDetails.paymentMethod" 
+                                    class="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200"
+                                >
+                                    <option value="cash">{{ t('cash') || 'Cash on Delivery' }}</option>
+                                    <option value="credit_card">{{ t('creditCard') || 'Credit Card' }}</option>
+                                    <option value="zalopay">{{ t('zalopay') || 'ZaloPay' }}</option>
+                                </select>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-                <div class="mb-2">
-                    <label class="block mb-1">Email</label>
-                    <input v-model="user.email" type="text" class="input" />
+
+                <!-- Order Summary -->
+                <div class="xl:col-span-4">
+                    <div class="bg-white rounded-2xl p-6 sticky top-8">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                </svg>
+                            </div>
+                            <h3 class="text-xl font-bold text-secondary-900">
+                                {{ t('orderSummary') || 'Order Summary' }}
+                            </h3>
+                        </div>
+
+                        <!-- Cart Items -->
+                        <div class="space-y-4 mb-6">
+                            <div v-for="item in cartItems" :key="item._id" class="flex items-center gap-3 p-3 bg-secondary-50 rounded-lg">
+                                <img 
+                                    :src="getImageUrl(item.image)" 
+                                    :alt="item.name || 'Product'"
+                                    class="w-12 h-12 rounded-lg object-cover"
+                                    @error="onImageError"
+                                />
+                                <div class="flex-1 min-w-0">
+                                    <h4 class="text-sm font-medium text-secondary-900 truncate">{{ item.name }}</h4>
+                                    <p class="text-xs text-secondary-500">Qty: {{ item.quantity }}</p>
+                                </div>
+                                <span class="text-sm font-semibold text-secondary-900">${{ (item.price * item.quantity).toFixed(2) }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Total -->
+                        <div class="border-t border-secondary-200 pt-4 mb-6">
+                            <div class="flex justify-between items-center text-lg font-bold text-secondary-900">
+                                <span>{{ t('total') || 'Total' }}</span>
+                                <span>${{ cartItems.reduce((total, item) => total + item.price * item.quantity, 0).toFixed(2) }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Place Order Button -->
+                        <button 
+                            @click="handleSubmit" 
+                            class="w-full bg-primary-600 hover:bg-primary-700 text-white font-semibold py-4 px-6 rounded-xl transition-colors duration-200 flex items-center justify-center gap-2"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                            {{ t('placeOrder') || 'Place Order' }}
+                        </button>
+                    </div>
                 </div>
-                <div class="mb-2">
-                    <label class="block mb-1">Address</label>
-                    <input v-model="user.address" type="text" class="input" />
-                </div>
-                <div class="mb-2">
-                    <label class="block mb-1">Payment Method</label>
-                    <select v-model="customerDetails.paymentMethod" class="input">
-                        <option value="cash">Cash</option>
-                        <option value="credit_card">Credit Card</option>
-                        <option value="paypal">PayPal</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn-primary">Place Order</button>
-            </form>
+            </div>
         </div>
     </div>
 </template>
 
 <style scoped>
-.input {
-    @apply border border-gray-300 rounded px-2 py-1 w-full;
+.gradient-text {
+  background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-700) 50%, var(--secondary-800) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-.btn-primary {
-    @apply bg-blue-400 text-white px-4 py-2 rounded hover:bg-blue-500;
+.bg-gradient-primary {
+  background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 50%, var(--primary-700) 100%);
+}
+
+/* Custom animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.page-background {
+  animation: fadeIn 0.6s ease-out;
 }
 </style>

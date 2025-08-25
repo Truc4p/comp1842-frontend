@@ -90,11 +90,15 @@ const handleSubmitItem = async (event) => {
   
   isProcessing.value = true;
   
-  // Transform cart items to match ProductSchema
+  // Send full cart items with all necessary information for checkout display
   const transformedCartItems = cart.value.map(item => ({
-    productId: item._id,
-    quantity: item.quantity,
+    _id: item._id,
+    name: item.name,
+    image: item.image,
     price: item.price,
+    quantity: item.quantity,
+    category: item.category,
+    stockQuantity: item.stockQuantity
   }));
 
   try {

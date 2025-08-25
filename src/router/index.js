@@ -25,6 +25,7 @@ import EditProduct from '@/pages/admin/EditProduct.vue';
 import DeleteProduct from '@/pages/admin/DeleteProduct.vue';
 
 import Users from '@/pages/admin/Users.vue';
+import Analytics from '@/pages/admin/Analytics.vue';
 
 import Orders from '@/pages/admin/Orders.vue';
 import DetailOrder from '@/pages/admin/DetailOrder.vue';
@@ -71,6 +72,7 @@ const routes = [
       { path: "products/delete/:id", component: DeleteProduct },
 
       { path: "users", component: Users },
+      { path: "analytics", component: Analytics },
 
       { path: "orders", component: Orders },
       { path: "orders/order/:id", component: DetailOrder },

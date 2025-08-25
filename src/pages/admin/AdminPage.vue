@@ -45,8 +45,46 @@ onMounted(async () => {
     <div class="container mx-auto px-4">
       <!-- Page Header -->
       <div class="mb-8">
-        <h1 class="text-2xl font-bold gradient-text mb-2">Category Management</h1>
-        <p class="text-secondary-600 text-lg">Manage your product categories</p>
+        <h1 class="text-2xl font-bold gradient-text mb-2">Admin Dashboard</h1>
+        <p class="text-secondary-600 text-lg">Welcome to your admin control panel</p>
+      </div>
+
+      <!-- Quick Analytics Overview -->
+      <div class="mb-8">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-xl font-semibold text-secondary-900">Quick Overview</h2>
+          <router-link to="/admin/analytics" class="btn btn-primary">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+            </svg>
+            View Full Analytics
+          </router-link>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div class="card p-6 text-center">
+            <div class="text-3xl font-bold text-primary-600 mb-2">{{ categories.length }}</div>
+            <div class="text-sm text-secondary-600">Categories</div>
+          </div>
+          <div class="card p-6 text-center">
+            <div class="text-3xl font-bold text-blue-600 mb-2">-</div>
+            <div class="text-sm text-secondary-600">Products</div>
+          </div>
+          <div class="card p-6 text-center">
+            <div class="text-3xl font-bold text-green-600 mb-2">-</div>
+            <div class="text-sm text-secondary-600">Orders</div>
+          </div>
+          <div class="card p-6 text-center">
+            <div class="text-3xl font-bold text-orange-600 mb-2">-</div>
+            <div class="text-sm text-secondary-600">Users</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section Header -->
+      <div class="mb-8">
+        <h2 class="text-xl font-semibold text-secondary-900 mb-2">Category Management</h2>
+        <p class="text-secondary-600">Manage your product categories</p>
       </div>
 
       <!-- Action Bar -->
@@ -198,6 +236,10 @@ onMounted(async () => {
 
 .btn-delete {
   @apply text-error bg-red-50 hover:bg-red-100 hover:text-red-800 focus:ring-red-500;
+}
+
+.card {
+  @apply bg-white rounded-xl shadow-sm border border-secondary-200;
 }
 
 .bg-secondary-25 {

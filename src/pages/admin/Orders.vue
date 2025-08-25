@@ -68,6 +68,15 @@ const getStatusColor = (status) => {
       return 'bg-gray-100 text-gray-800';
   }
 };
+
+// Safely format order date-time from possible fields and include time
+const getOrderDateTime = (order) => {
+  const raw = order?.createdAt || order?.orderDate || order?.date || order?.created_at || order?.created;
+  if (!raw) return null;
+  const date = new Date(raw);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toLocaleString();
+};
 </script>
 
 <template>
@@ -203,7 +212,7 @@ const getStatusColor = (status) => {
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="text-sm text-secondary-900">
-                      {{ new Date(order.createdAt || order.date || Date.now()).toLocaleDateString() }}
+                      {{ getOrderDateTime(order) || 'N/A' }}
                     </div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">

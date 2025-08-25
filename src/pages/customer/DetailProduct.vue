@@ -134,8 +134,6 @@ const formatDescription = (text) => {
     // Convert emojis and special characters (preserve them)
     // Convert numbered sections
     .replace(/^(\d+\.\s+.+)$/gm, '<div class="mt-2"><strong>$1</strong></div>')
-    // Convert lines that start with 🌟, 💧, 🔬, 🌿, ✨ as highlighted points
-    .replace(/^([🌟💧🔬🌿✨]\s*.+)$/gm, '<div class="flex items-start gap-2 my-2"><span class="text-xl">$1</span></div>')
     // Clean up any double <br> tags
     .replace(/<br><br>/g, '<br>')
     // Add spacing between sections
@@ -179,7 +177,6 @@ const formatDescription = (text) => {
           <h1 class="text-4xl md:text-5xl font-bold text-secondary-900 mb-4 gradient-text">
             {{ t('productDetails') || 'Product Details' }}
           </h1>
-          <div class="w-24 h-1 bg-gradient-primary mx-auto rounded-full"></div>
         </div>
 
         <!-- Main Product Card -->

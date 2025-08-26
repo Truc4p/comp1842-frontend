@@ -315,6 +315,7 @@ const messages = {
 };
 
 const i18n = createI18n({
+  legacy: false, // use Composition API mode
   locale: 'en', // set locale
   fallbackLocale: 'en', // set fallback locale
   messages, // set locale messages

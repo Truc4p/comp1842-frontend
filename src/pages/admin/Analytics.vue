@@ -26,6 +26,11 @@ const salesData = ref([]);
 const productAnalytics = ref({});
 const userAnalytics = ref({});
 const orderAnalytics = ref({});
+// Entity counts for quick overview cards
+const categoriesCount = ref(0);
+const productsCount = ref(0);
+const ordersCount = ref(0);
+const usersCount = ref(0);
 const loading = ref(true);
 const error = ref(null);
 
@@ -57,14 +62,34 @@ const formattedAverageOrderValue = computed(() => {
 // Register Chart.js components
 Chart.register(CategoryScale, LinearScale, PointElement, LineElement, ChartTitle, Tooltip, Legend);
 
-// Chart data derived from salesData
-const salesChartData = computed(() => {
-  // Ensure chronological order: oldest -> newest
-  const sorted = [...salesData.value].sort((a, b) => new Date(a.date) - new Date(b.date));
-  const labels = sorted.map(d => new Date(d.date).toLocaleDateString());
-  const ordersSeries = sorted.map(d => d.orders);
-  const revenueSeries = sorted.map(d => d.revenue);
+// Prepare sorted sales data (oldest -> newest)
+const sortedSales = computed(() => {
+  return [...salesData.value].sort((a, b) => new Date(a.date) - new Date(b.date));
+});
 
+// Revenue chart
+const revenueChartData = computed(() => {
+  const labels = sortedSales.value.map(d => new Date(d.date).toLocaleDateString());
+  const revenueSeries = sortedSales.value.map(d => d.revenue);
+  return {
+    labels,
+    datasets: [
+      {
+        label: 'Revenue ($)'.trim(),
+        data: revenueSeries,
+        borderColor: '#10b981',
+        backgroundColor: 'rgba(16, 185, 129, 0.2)',
+        borderWidth: 2,
+        tension: 0.35
+      }
+    ]
+  };
+});
+
+// Orders chart
+const ordersChartData = computed(() => {
+  const labels = sortedSales.value.map(d => new Date(d.date).toLocaleDateString());
+  const ordersSeries = sortedSales.value.map(d => d.orders);
   return {
     labels,
     datasets: [
@@ -73,39 +98,27 @@ const salesChartData = computed(() => {
         data: ordersSeries,
         borderColor: '#3b82f6',
         backgroundColor: 'rgba(59, 130, 246, 0.2)',
-        tension: 0.35,
-        yAxisID: 'y-orders'
-      },
-      {
-        label: 'Revenue ($)',
-        data: revenueSeries,
-        borderColor: '#10b981',
-        backgroundColor: 'rgba(16, 185, 129, 0.2)',
-        tension: 0.35,
-        yAxisID: 'y-revenue'
+        borderWidth: 2,
+        tension: 0.35
       }
     ]
   };
 });
 
-const salesChartOptions = {
+// Shared chart options
+const revenueChartOptions = {
   responsive: true,
   maintainAspectRatio: false,
   interaction: { mode: 'index', intersect: false },
   plugins: {
-    legend: { position: 'top' },
+    legend: {
+      position: 'top',
+      labels: { usePointStyle: true, pointStyle: 'line', boxWidth: 40, boxHeight: 6 }
+    },
     title: { display: false }
   },
   scales: {
-    'y-orders': {
-      type: 'linear',
-      position: 'left',
-      ticks: { precision: 0 }
-    },
-    'y-revenue': {
-      type: 'linear',
-      position: 'right',
-      grid: { drawOnChartArea: false },
+    y: {
       ticks: {
         callback: (value) => `$${value}`
       }
@@ -113,7 +126,23 @@ const salesChartOptions = {
   }
 };
 
-
+const ordersChartOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  interaction: { mode: 'index', intersect: false },
+  plugins: {
+    legend: {
+      position: 'top',
+      labels: { usePointStyle: true, pointStyle: 'line', boxWidth: 40, boxHeight: 6 }
+    },
+    title: { display: false }
+  },
+  scales: {
+    y: {
+      ticks: { precision: 0 }
+    }
+  }
+};
 
 // Fetch dashboard statistics
 const fetchDashboardStats = async () => {
@@ -188,6 +217,30 @@ const fetchOrderAnalytics = async () => {
   }
 };
 
+// Fetch counts for categories, products, orders, users
+const fetchEntityCounts = async () => {
+  try {
+    const token = localStorage.getItem("token");
+    const [categoriesRes, productsRes, ordersRes, usersRes] = await Promise.all([
+      axios.get(`${API_URL}/categories`, { headers: { "x-auth-token": token } }),
+      axios.get(`${API_URL}/products`, { headers: { "x-auth-token": token } }),
+      axios.get(`${API_URL}/orders`, { headers: { "x-auth-token": token } }),
+      axios.get(`${API_URL}/users`, { headers: { "x-auth-token": token } })
+    ]);
+
+    categoriesCount.value = Array.isArray(categoriesRes.data) ? categoriesRes.data.length : 0;
+    productsCount.value = Array.isArray(productsRes.data) ? productsRes.data.length : 0;
+    ordersCount.value = Array.isArray(ordersRes.data) ? ordersRes.data.length : 0;
+    usersCount.value = Array.isArray(usersRes.data) ? usersRes.data.length : 0;
+  } catch (err) {
+    console.error('Error fetching entity counts:', err);
+    categoriesCount.value = 0;
+    productsCount.value = 0;
+    ordersCount.value = 0;
+    usersCount.value = 0;
+  }
+};
+
 // Handle period change
 const handlePeriodChange = () => {
   fetchSalesAnalytics();
@@ -203,7 +256,8 @@ const fetchAllData = async () => {
       fetchSalesAnalytics(),
       fetchProductAnalytics(),
       fetchUserAnalytics(),
-      fetchOrderAnalytics()
+      fetchOrderAnalytics(),
+      fetchEntityCounts()
     ]);
   } catch (err) {
     error.value = "Failed to load analytics data";
@@ -233,8 +287,6 @@ onMounted(async () => {
         <p class="text-secondary-600 text-lg">Monitor your business performance and insights</p>
       </div>
 
-
-
       <!-- Loading State -->
       <div v-if="loading" class="flex justify-center items-center py-16">
         <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
@@ -248,8 +300,29 @@ onMounted(async () => {
 
       <!-- Analytics Content -->
       <div v-else class="space-y-8">
+        <!-- Quick Overview Counts (moved from Admin page) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div class="card p-6 text-center">
+            <div class="text-3xl font-bold text-blue-600 mb-2">{{ categoriesCount }}</div>
+            <div class="text-sm text-secondary-600">Categories</div>
+          </div>
+          <div class="card p-6 text-center">
+            <div class="text-3xl font-bold text-green-600 mb-2">{{ productsCount }}</div>
+            <div class="text-sm text-secondary-600">Products</div>
+          </div>
+          <div class="card p-6 text-center">
+            <div class="text-3xl font-bold text-yellow-600 mb-2">{{ ordersCount }}</div>
+            <div class="text-sm text-secondary-600">Orders</div>
+          </div>
+          <div class="card p-6 text-center">
+            <div class="text-3xl font-bold text-orange-600 mb-2">{{ usersCount }}</div>
+            <div class="text-sm text-secondary-600">Users</div>
+          </div>
+        </div>
+
         <!-- Key Metrics Cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+
           <!-- Total Revenue -->
           <div class="card p-6">
             <div class="flex items-center">
@@ -336,8 +409,15 @@ onMounted(async () => {
             <p>No sales data available for the selected period</p>
           </div>
 
-          <div v-else class="h-72">
-            <Line :data="salesChartData" :options="salesChartOptions" />
+          <div v-else class="space-y-8">
+            <!-- Revenue chart -->
+            <div class="h-72">
+              <Line :data="revenueChartData" :options="revenueChartOptions" />
+            </div>
+            <!-- Orders chart -->
+            <div class="h-64">
+              <Line :data="ordersChartData" :options="ordersChartOptions" />
+            </div>
           </div>
         </div>
 

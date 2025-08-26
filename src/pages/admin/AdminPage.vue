@@ -258,7 +258,7 @@ onMounted(async () => {
 }
 
 .card {
-  @apply bg-white rounded-xl shadow-sm border border-secondary-200;
+  @apply bg-white rounded-xl shadow-sm;
 }
 
 .bg-secondary-25 {

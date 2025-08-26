@@ -2,6 +2,17 @@
 <script setup>
 import axios from "axios";
 import { onMounted, ref, computed } from "vue";
+import { Line } from 'vue-chartjs';
+import {
+  Chart,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title as ChartTitle,
+  Tooltip,
+  Legend
+} from 'chart.js';
 import { useRouter } from "vue-router";
 import { useI18n } from 'vue-i18n';
 import { API_URL } from '../../utils/config';
@@ -21,9 +32,11 @@ const error = ref(null);
 // Period selection
 const selectedPeriod = ref(15);
 const periods = [
-  { value: 7, label: '7 Days' },
+  { value: 15, label: '15 Days' },
   { value: 30, label: '30 Days' },
-  { value: 90, label: '90 Days' }
+  { value: 90, label: '90 Days' },
+  { value: 180, label: '180 Days' },
+  { value: 365, label: '365 Days' }
 ];
 
 // Computed properties for formatting
@@ -40,6 +53,65 @@ const formattedAverageOrderValue = computed(() => {
     currency: 'USD'
   }).format(dashboardStats.value.averageOrderValue || 0);
 });
+
+// Register Chart.js components
+Chart.register(CategoryScale, LinearScale, PointElement, LineElement, ChartTitle, Tooltip, Legend);
+
+// Chart data derived from salesData
+const salesChartData = computed(() => {
+  // Ensure chronological order: oldest -> newest
+  const sorted = [...salesData.value].sort((a, b) => new Date(a.date) - new Date(b.date));
+  const labels = sorted.map(d => new Date(d.date).toLocaleDateString());
+  const ordersSeries = sorted.map(d => d.orders);
+  const revenueSeries = sorted.map(d => d.revenue);
+
+  return {
+    labels,
+    datasets: [
+      {
+        label: 'Orders',
+        data: ordersSeries,
+        borderColor: '#3b82f6',
+        backgroundColor: 'rgba(59, 130, 246, 0.2)',
+        tension: 0.35,
+        yAxisID: 'y-orders'
+      },
+      {
+        label: 'Revenue ($)',
+        data: revenueSeries,
+        borderColor: '#10b981',
+        backgroundColor: 'rgba(16, 185, 129, 0.2)',
+        tension: 0.35,
+        yAxisID: 'y-revenue'
+      }
+    ]
+  };
+});
+
+const salesChartOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  interaction: { mode: 'index', intersect: false },
+  plugins: {
+    legend: { position: 'top' },
+    title: { display: false }
+  },
+  scales: {
+    'y-orders': {
+      type: 'linear',
+      position: 'left',
+      ticks: { precision: 0 }
+    },
+    'y-revenue': {
+      type: 'linear',
+      position: 'right',
+      grid: { drawOnChartArea: false },
+      ticks: {
+        callback: (value) => `$${value}`
+      }
+    }
+  }
+};
 
 
 
@@ -60,11 +132,11 @@ const fetchDashboardStats = async () => {
 const fetchSalesAnalytics = async () => {
   try {
     const token = localStorage.getItem("token");
-    
+
     const response = await axios.get(`${API_URL}/analytics/sales?period=${selectedPeriod.value}`, {
       headers: { "x-auth-token": token }
     });
-    
+
     if (response.data.salesData && Array.isArray(response.data.salesData) && response.data.salesData.length > 0) {
       salesData.value = response.data.salesData;
     } else {
@@ -147,7 +219,7 @@ onMounted(async () => {
     router.push("/login");
     return;
   }
-  
+
   await fetchAllData();
 });
 </script>
@@ -161,19 +233,7 @@ onMounted(async () => {
         <p class="text-secondary-600 text-lg">Monitor your business performance and insights</p>
       </div>
 
-      <!-- Period Selector -->
-      <div class="mb-6">
-        <label class="block text-sm font-medium text-secondary-700 mb-2">Analysis Period</label>
-        <select 
-          v-model="selectedPeriod" 
-          @change="handlePeriodChange"
-          class="form-select w-48"
-        >
-          <option v-for="period in periods" :key="period.value" :value="period.value">
-            {{ period.label }}
-          </option>
-        </select>
-      </div>
+
 
       <!-- Loading State -->
       <div v-if="loading" class="flex justify-center items-center py-16">
@@ -195,7 +255,9 @@ onMounted(async () => {
             <div class="flex items-center">
               <div class="p-3 rounded-full bg-green-100 text-green-600">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1">
+                  </path>
                 </svg>
               </div>
               <div class="ml-4">
@@ -210,7 +272,8 @@ onMounted(async () => {
             <div class="flex items-center">
               <div class="p-3 rounded-full bg-blue-100 text-blue-600">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
                 </svg>
               </div>
               <div class="ml-4">
@@ -225,7 +288,9 @@ onMounted(async () => {
             <div class="flex items-center">
               <div class="p-3 rounded-full bg-purple-100 text-purple-600">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                  </path>
                 </svg>
               </div>
               <div class="ml-4">
@@ -240,7 +305,9 @@ onMounted(async () => {
             <div class="flex items-center">
               <div class="p-3 rounded-full bg-orange-100 text-orange-600">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
+                  </path>
                 </svg>
               </div>
               <div class="ml-4">
@@ -251,34 +318,40 @@ onMounted(async () => {
           </div>
         </div>
 
-        <!-- Charts and Detailed Analytics -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <!-- Sales Chart -->
-          <div class="card p-6">
-            <h3 class="text-lg font-semibold text-secondary-900 mb-4">Sales Trend ({{ selectedPeriod }} Days)</h3>
-            
-            <div v-if="salesData.length === 0" class="text-center py-8 text-gray-500">
-              <p>No sales data available for the selected period</p>
-            </div>
-            
-            <div v-else class="space-y-4">
-              <div v-for="day in [...salesData].reverse()" :key="day.date" class="flex items-center justify-between">
-                <span class="text-sm text-secondary-600">{{ new Date(day.date).toLocaleDateString() }}</span>
-                <div class="flex items-center space-x-4">
-                  <span class="text-sm font-medium text-secondary-900">{{ day.orders }} orders</span>
-                  <span class="text-sm font-medium text-green-600">${{ day.revenue }}</span>
-                </div>
-              </div>
+        <!-- Sales Chart -->
+        <div class="card p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-secondary-900">Sales Trend ({{ selectedPeriod }} Days)</h3>
+            <div class="flex items-center space-x-3">
+              <label class="block text-sm font-medium text-secondary-700">Analysis Period</label>
+              <select v-model="selectedPeriod" @change="handlePeriodChange" class="form-select w-40">
+                <option v-for="period in periods" :key="period.value" :value="period.value">
+                  {{ period.label }}
+                </option>
+              </select>
             </div>
           </div>
 
+          <div v-if="salesData.length === 0" class="text-center py-8 text-gray-500">
+            <p>No sales data available for the selected period</p>
+          </div>
+
+          <div v-else class="h-72">
+            <Line :data="salesChartData" :options="salesChartOptions" />
+          </div>
+        </div>
+
+        <!-- Detailed Analytics -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <!-- Top Products -->
           <div class="card p-6">
             <h3 class="text-lg font-semibold text-secondary-900 mb-4">Top Selling Products</h3>
             <div class="space-y-3">
-              <div v-for="(product, index) in productAnalytics.topProducts" :key="product.productId" class="flex items-center justify-between">
+              <div v-for="(product, index) in productAnalytics.topProducts" :key="product.productId"
+                class="flex items-center justify-between">
                 <div class="flex items-center">
-                  <span class="w-6 h-6 bg-primary-50 text-primary-600 rounded-full flex items-center justify-center text-xs font-bold mr-3">
+                  <span
+                    class="w-6 h-6 bg-primary-50 text-primary-600 rounded-full flex items-center justify-center text-xs font-bold mr-3">
                     {{ index + 1 }}
                   </span>
                   <span class="text-sm font-medium text-secondary-900">{{ product.name }}</span>
@@ -297,7 +370,8 @@ onMounted(async () => {
           <div class="card p-6">
             <h3 class="text-lg font-semibold text-secondary-900 mb-4">Products by Category</h3>
             <div class="space-y-3">
-              <div v-for="category in productAnalytics.categoryDistribution" :key="category.categoryId" class="flex items-center justify-between">
+              <div v-for="category in productAnalytics.categoryDistribution" :key="category.categoryId"
+                class="flex items-center justify-between">
                 <span class="text-sm font-medium text-secondary-900">{{ category.name }}</span>
                 <span class="text-sm text-secondary-600">{{ category.count }} products</span>
               </div>
@@ -308,7 +382,8 @@ onMounted(async () => {
           <div class="card p-6">
             <h3 class="text-lg font-semibold text-secondary-900 mb-4">Low Stock Alert</h3>
             <div class="space-y-3">
-              <div v-for="product in productAnalytics.lowStockProducts" :key="product._id" class="flex items-center justify-between">
+              <div v-for="product in productAnalytics.lowStockProducts" :key="product._id"
+                class="flex items-center justify-between">
                 <span class="text-sm font-medium text-secondary-900">{{ product.name }}</span>
                 <div class="text-right">
                   <span class="text-sm text-error">{{ product.stockQuantity }} left</span>
@@ -326,11 +401,16 @@ onMounted(async () => {
             <table class="min-w-full divide-y divide-secondary-200">
               <thead class="bg-secondary-50">
                 <tr>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider">Order ID</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider">Customer</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider">Products</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider">Total</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider">Status</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider">Order
+                    ID</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider">Order
+                    Date</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider">
+                    Products</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider">Total
+                  </th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase tracking-wider">Status
+                  </th>
                 </tr>
               </thead>
               <tbody class="bg-white divide-y divide-secondary-100">
@@ -339,7 +419,7 @@ onMounted(async () => {
                     {{ order._id.slice(-8) }}
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-secondary-900">
-                    {{ order.user?.username || 'Unknown' }}
+                    {{ new Date(order.orderDate).toLocaleString() }}
                   </td>
                   <td class="px-6 py-4 text-sm text-secondary-900">
                     <div class="space-y-1">

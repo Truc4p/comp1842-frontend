@@ -19,7 +19,7 @@ const loading = ref(true);
 const error = ref(null);
 
 // Period selection
-const selectedPeriod = ref(30);
+const selectedPeriod = ref(15);
 const periods = [
   { value: 7, label: '7 Days' },
   { value: 30, label: '30 Days' },
@@ -41,6 +41,8 @@ const formattedAverageOrderValue = computed(() => {
   }).format(dashboardStats.value.averageOrderValue || 0);
 });
 
+
+
 // Fetch dashboard statistics
 const fetchDashboardStats = async () => {
   try {
@@ -58,12 +60,20 @@ const fetchDashboardStats = async () => {
 const fetchSalesAnalytics = async () => {
   try {
     const token = localStorage.getItem("token");
+    
     const response = await axios.get(`${API_URL}/analytics/sales?period=${selectedPeriod.value}`, {
       headers: { "x-auth-token": token }
     });
-    salesData.value = response.data.salesData;
+    
+    if (response.data.salesData && Array.isArray(response.data.salesData) && response.data.salesData.length > 0) {
+      salesData.value = response.data.salesData;
+    } else {
+      console.warn("No sales data returned from API");
+      salesData.value = [];
+    }
   } catch (err) {
     console.error("Error fetching sales analytics:", err);
+    salesData.value = [];
   }
 };
 
@@ -147,7 +157,7 @@ onMounted(async () => {
     <div class="container mx-auto px-4 py-8">
       <!-- Page Header -->
       <div class="mb-8">
-        <h1 class="text-3xl font-bold gradient-text mb-2">Analytics Dashboard</h1>
+        <h1 class="text-3xl font-bold text-primary-700 mb-2">Analytics Dashboard</h1>
         <p class="text-secondary-600 text-lg">Monitor your business performance and insights</p>
       </div>
 
@@ -246,8 +256,13 @@ onMounted(async () => {
           <!-- Sales Chart -->
           <div class="card p-6">
             <h3 class="text-lg font-semibold text-secondary-900 mb-4">Sales Trend ({{ selectedPeriod }} Days)</h3>
-            <div class="space-y-4">
-              <div v-for="day in salesData" :key="day.date" class="flex items-center justify-between">
+            
+            <div v-if="salesData.length === 0" class="text-center py-8 text-gray-500">
+              <p>No sales data available for the selected period</p>
+            </div>
+            
+            <div v-else class="space-y-4">
+              <div v-for="day in [...salesData].reverse()" :key="day.date" class="flex items-center justify-between">
                 <span class="text-sm text-secondary-600">{{ new Date(day.date).toLocaleDateString() }}</span>
                 <div class="flex items-center space-x-4">
                   <span class="text-sm font-medium text-secondary-900">{{ day.orders }} orders</span>
@@ -263,14 +278,13 @@ onMounted(async () => {
             <div class="space-y-3">
               <div v-for="(product, index) in productAnalytics.topProducts" :key="product.productId" class="flex items-center justify-between">
                 <div class="flex items-center">
-                  <span class="w-6 h-6 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center text-xs font-bold mr-3">
+                  <span class="w-6 h-6 bg-primary-50 text-primary-600 rounded-full flex items-center justify-center text-xs font-bold mr-3">
                     {{ index + 1 }}
                   </span>
                   <span class="text-sm font-medium text-secondary-900">{{ product.name }}</span>
                 </div>
                 <div class="text-right">
                   <div class="text-sm font-medium text-secondary-900">{{ product.totalSold }} sold</div>
-                  <div class="text-xs text-green-600">${{ product.totalRevenue }}</div>
                 </div>
               </div>
             </div>
@@ -359,11 +373,11 @@ onMounted(async () => {
 
 <style scoped>
 .card {
-  @apply bg-white rounded-xl shadow-sm border border-secondary-200;
+  @apply bg-white rounded-xl shadow-sm;
 }
 
 .form-select {
-  @apply block w-full px-3 py-2 border border-secondary-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500;
+  @apply block w-full px-3 py-2 rounded-lg shadow-sm focus:outline-none focus:ring-2;
 }
 
 .gradient-text {

@@ -45,7 +45,7 @@ onMounted(async () => {
     <div class="container mx-auto px-4">
       <!-- Page Header -->
       <div class="mb-8">
-        <h1 class="text-2xl font-bold gradient-text mb-2">Category Management</h1>
+        <h1 class="text-2xl font-bold text-primary-700 mb-2">Category Management</h1>
         <p class="text-secondary-600 text-lg">Manage your product categories</p>
       </div>
 
@@ -180,7 +180,7 @@ onMounted(async () => {
 }
 
 .btn-details {
-  @apply text-primary-700 bg-primary-50 hover:bg-primary-100 hover:text-primary-800 focus:ring-primary-500;
+  @apply text-primary-700 bg-primary-50 hover:bg-primary-100 hover:text-primary-800;
 }
 
 .btn-edit {

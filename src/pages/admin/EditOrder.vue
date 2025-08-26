@@ -4,7 +4,7 @@
     <div class="container mx-auto px-4 mb-8">
       <!-- Page Header -->
       <div class="mb-8">
-        <h1 class="text-2xl font-bold gradient-text mb-2">{{ t('orderDetails') }}</h1>
+        <h1 class="text-2xl font-bold text-primary-700 mb-2">{{ t('orderDetails') }}</h1>
         <p class="text-secondary-600 text-lg">{{ t('manageOrderDetails') }}</p>
       </div>
     </div>
@@ -90,7 +90,7 @@
                     {{ t('updateOrderStatus') }}
                   </label>
                   <div class="relative">
-                    <select v-model="selectedStatus" id="status" class="block w-full px-4 py-3 border border-secondary-200 rounded-lg bg-white text-secondary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200">
+                    <select v-model="selectedStatus" id="status" class="block w-full px-4 py-3 border border-secondary-200 rounded-lg bg-white text-secondary-900 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200">
                       <option v-for="statusOption in statusOptions" :key="statusOption" :value="statusOption">
                         {{ t(statusOption) }}
                       </option>
@@ -99,7 +99,7 @@
                 </div>
 
                 <div class="flex items-center gap-4">
-                  <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all duration-200">
+                  <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                     </svg>
@@ -278,7 +278,7 @@ const updateOrder = async () => {
 }
 
 .btn-details {
-  @apply text-primary-700 bg-primary-50 hover:bg-primary-100 hover:text-primary-800 focus:ring-primary-500;
+  @apply text-primary-700 bg-primary-50 hover:bg-primary-100 hover:text-primary-800;
 }
 
 .btn-edit {

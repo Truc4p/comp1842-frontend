@@ -193,7 +193,7 @@ onMounted(async () => {
                                     </label>
                                     <input 
                                         v-model="user.phone"
-                                        class="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200"
+                                        class="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 transition-colors duration-200"
                                         type="tel" 
                                         placeholder="+1 (555) 123-4567" 
                                     />
@@ -205,7 +205,7 @@ onMounted(async () => {
                                     <input 
                                         v-model="user.email" 
                                         type="email" 
-                                        class="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200"
+                                        class="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 transition-colors duration-200"
                                         placeholder="your@email.com" 
                                     />
                                 </div>
@@ -218,7 +218,7 @@ onMounted(async () => {
                                 <textarea 
                                     v-model="user.address" 
                                     rows="3"
-                                    class="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200"
+                                    class="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 transition-colors duration-200"
                                     placeholder="Enter your full delivery address"
                                 ></textarea>
                             </div>
@@ -229,7 +229,7 @@ onMounted(async () => {
                                 </label>
                                 <select 
                                     v-model="customerDetails.paymentMethod" 
-                                    class="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200"
+                                    class="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 transition-colors duration-200"
                                 >
                                     <option value="cash">{{ t('cash') || 'Cash on Delivery' }}</option>
                                     <option value="credit_card">{{ t('creditCard') || 'Credit Card' }}</option>

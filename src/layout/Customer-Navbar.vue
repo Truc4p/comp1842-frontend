@@ -49,7 +49,7 @@
         
         <!-- Mobile Menu Button -->
         <div class="md:hidden">
-          <button @click="toggleMobileMenu" class="p-2 rounded-lg text-secondary-600 hover:text-primary-600 hover:bg-secondary-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500">
+          <button @click="toggleMobileMenu" class="p-2 rounded-lg text-secondary-600 hover:text-primary-600 hover:bg-secondary-100 transition-all duration-200 focus:outline-none focus:ring-2">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path v-if="!mobileMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
               <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />

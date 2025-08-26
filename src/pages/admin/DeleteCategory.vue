@@ -3,7 +3,7 @@
     <div class="container mx-auto px-4 py-8">
       <!-- Page Header -->
       <div class="mb-8">
-        <h1 class="text-2xl font-bold gradient-text mb-2">Delete Category</h1>
+        <h1 class="text-2xl font-bold text-primary-700 mb-2">Delete Category</h1>
         <p class="text-secondary-600 text-lg">Remove category from your system</p>
       </div>
 

@@ -10,6 +10,9 @@ const { t } = useI18n();
 const router = useRouter();
 
 const categories = ref([]);
+const products = ref([]);
+const orders = ref([]);
+const users = ref([]);
 const loading = ref(true);
 const error = ref(null);
 
@@ -22,18 +25,34 @@ onMounted(async () => {
   }
 
   try {
-    // Make the api request with axios with token in header
-    const res = await axios.get(`${API_URL}/categories`, {
-      headers: {
-        "x-auth-token": `${token}`,
-      },
-    });
+    // Fetch all data in parallel for better performance
+    const [categoriesRes, productsRes, ordersRes, usersRes] = await Promise.all([
+      axios.get(`${API_URL}/categories`, {
+        headers: { "x-auth-token": `${token}` }
+      }),
+      axios.get(`${API_URL}/products`, {
+        headers: { "x-auth-token": `${token}` }
+      }),
+      axios.get(`${API_URL}/orders`, {
+        headers: { "x-auth-token": `${token}` }
+      }),
+      axios.get(`${API_URL}/users`, {
+        headers: { "x-auth-token": `${token}` }
+      })
+    ]);
 
-    console.log("Categories response:", res.data);
-    categories.value = res.data;
+    console.log("Categories response:", categoriesRes.data);
+    console.log("Products response:", productsRes.data);
+    console.log("Orders response:", ordersRes.data);
+    console.log("Users response:", usersRes.data);
+    
+    categories.value = categoriesRes.data;
+    products.value = productsRes.data;
+    orders.value = ordersRes.data;
+    users.value = usersRes.data;
   } catch (err) {
-    console.error("Error fetching categories:", err);
-    error.value = "Failed to load categories";
+    console.error("Error fetching data:", err);
+    error.value = "Failed to load dashboard data";
   } finally {
     loading.value = false;
   }
@@ -45,7 +64,7 @@ onMounted(async () => {
     <div class="container mx-auto px-4">
       <!-- Page Header -->
       <div class="mb-8">
-        <h1 class="text-2xl font-bold gradient-text mb-2">Admin Dashboard</h1>
+        <h1 class="text-2xl font-bold text-primary-700 mb-2">Admin Dashboard</h1>
         <p class="text-secondary-600 text-lg">Welcome to your admin control panel</p>
       </div>
 
@@ -67,15 +86,15 @@ onMounted(async () => {
             <div class="text-sm text-secondary-600">Categories</div>
           </div>
           <div class="card p-6 text-center">
-            <div class="text-3xl font-bold text-blue-600 mb-2">-</div>
+            <div class="text-3xl font-bold text-blue-600 mb-2">{{ products.length }}</div>
             <div class="text-sm text-secondary-600">Products</div>
           </div>
           <div class="card p-6 text-center">
-            <div class="text-3xl font-bold text-green-600 mb-2">-</div>
+            <div class="text-3xl font-bold text-green-600 mb-2">{{ orders.length }}</div>
             <div class="text-sm text-secondary-600">Orders</div>
           </div>
           <div class="card p-6 text-center">
-            <div class="text-3xl font-bold text-orange-600 mb-2">-</div>
+            <div class="text-3xl font-bold text-orange-600 mb-2">{{ users.length }}</div>
             <div class="text-sm text-secondary-600">Users</div>
           </div>
         </div>
@@ -227,7 +246,7 @@ onMounted(async () => {
 }
 
 .btn-details {
-  @apply text-primary-700 bg-green-50 hover:bg-green-100 hover:text-primary-800 focus:ring-primary-500;
+  @apply text-primary-700 bg-green-50 hover:bg-green-100 hover:text-primary-800;
 }
 
 .btn-edit {

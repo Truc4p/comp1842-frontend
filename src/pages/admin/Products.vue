@@ -57,7 +57,7 @@ const onImageError = (event) => {
       <!-- Page Header -->
       <div class="mb-8">
         <h1 class="text-2xl font-bold text-primary-600 mb-2">Product Management</h1>
-        <p class="text-secondary-600 text-lg">Manage your product inventory</p>
+        <p class="text-secondary-700 text-lg">Manage your product inventory</p>
       </div>
 
       <!-- Action Bar -->
@@ -131,24 +131,24 @@ const onImageError = (event) => {
         <div class="bg-white shadow-sm rounded-xl overflow-hidden">
           <div class="overflow-x-auto">
             <table class="w-full divide-y divide-secondary-100">
-              <thead style="background-color: white">
+              <thead style="background-color: #f8fafc">
                 <tr>
-                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-600 uppercase tracking-wider w-1/3">
+                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-700 uppercase tracking-wider w-1/3">
                     {{ t('productName') }}
                   </th>
-                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-600 uppercase tracking-wider w-32">
+                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-700 uppercase tracking-wider w-32">
                     Image
                   </th>
-                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-600 uppercase tracking-wider w-32">
+                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-700 uppercase tracking-wider w-32">
                     {{ t('productCategory') }}
                   </th>
-                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-600 uppercase tracking-wider w-24">
+                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-700 uppercase tracking-wider w-24">
                     Stock
                   </th>
-                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-600 uppercase tracking-wider w-24">
+                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-700 uppercase tracking-wider w-24">
                     Price
                   </th>
-                  <th scope="col" class="px-6 py-4 text-center text-xs font-semibold text-secondary-600 uppercase tracking-wider w-32">
+                  <th scope="col" class="px-6 py-4 text-center text-xs font-semibold text-secondary-700 uppercase tracking-wider w-32">
                     Actions
                   </th>
                 </tr>
@@ -159,7 +159,7 @@ const onImageError = (event) => {
                     @click="router.push(`/admin/products/${product._id}`)">
                   <td class="px-6 py-4">
                     <div class="flex items-start">
-                      <div class="text-sm font-medium text-secondary-900 break-words max-w-xs leading-relaxed">{{ product.name }}</div>
+                      <div class="text-base font-medium text-secondary-700 break-words max-w-xs leading-relaxed">{{ product.name }}</div>
                     </div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
@@ -186,19 +186,19 @@ const onImageError = (event) => {
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="flex items-center">
-                      <span v-if="product.stockQuantity > 10" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-primary-800">
+                      <span v-if="product.stockQuantity > 10" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-base font-medium bg-green-100 text-success">
                         {{ product.stockQuantity }} units
                       </span>
-                      <span v-else-if="product.stockQuantity > 0" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                      <span v-else-if="product.stockQuantity > 0" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-base font-medium bg-amber-100 text-amber-800">
                         {{ product.stockQuantity }} units
                       </span>
-                      <span v-else class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                      <span v-else class="inline-flex items-center px-2.5 py-0.5 rounded-full text-base font-medium bg-red-100 text-red-800">
                         Out of Stock
                       </span>
                     </div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-lg font-semibold text-secondary-900">${{ product.price }}</div>
+                    <div class="text-lg font-semibold text-success">${{ product.price }}</div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-center" @click.stop>
                     <div class="flex items-center justify-center space-x-2">
@@ -233,7 +233,7 @@ const onImageError = (event) => {
 
 <style scoped>
 .btn-action {
-  @apply inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
+  @apply inline-flex items-center px-3 py-2 border border-transparent text-base leading-4 font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
 }
 
 .btn-details {

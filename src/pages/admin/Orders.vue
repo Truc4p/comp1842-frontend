@@ -103,7 +103,7 @@ const clearFilters = () => {
       <!-- Page Header -->
       <div class="mb-8">
         <h1 class="text-2xl font-bold text-primary-600 mb-2">Order Management</h1>
-        <p class="text-secondary-600 text-lg">Manage customer orders and track their status</p>
+        <p class="text-secondary-700 text-lg">Manage customer orders and track their status</p>
       </div>
 
       <!-- Action Bar -->
@@ -152,7 +152,7 @@ const clearFilters = () => {
             <svg class="w-5 h-5 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
-            <span class="font-medium">{{ filteredOrders.filter(o => o.status?.toLowerCase() === 'completed' || o.status?.toLowerCase() === 'delivered').length }} Completed</span>
+            <span class="font-medium">{{ filteredOrders.filter(o => o.status?.toLowerCase() === 'completed').length }} Completed</span>
           </div>
         </div>
       </div>
@@ -206,25 +206,25 @@ const clearFilters = () => {
       <div v-else class="w-full">
         <div class="bg-white shadow-sm rounded-xl overflow-hidden">
           <div class="overflow-x-auto">
-            <table class="w-full divide-y divide-secondary-200">
-              <thead style="background-color: white">
+            <table class="w-full divide-y divide-secondary-100">
+              <thead style="background-color: #f8fafc">
                 <tr>
-                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-600 uppercase tracking-wider">
+                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-700 uppercase tracking-wider">
                     Order ID
                   </th>
-                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-600 uppercase tracking-wider">
+                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-700 uppercase tracking-wider">
                     Customer
                   </th>
-                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-600 uppercase tracking-wider">
+                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-700 uppercase tracking-wider">
                     Date
                   </th>
-                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-600 uppercase tracking-wider">
+                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-700 uppercase tracking-wider">
                     Status
                   </th>
-                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-600 uppercase tracking-wider">
+                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-700 uppercase tracking-wider">
                     Total
                   </th>
-                  <th scope="col" class="px-6 py-4 text-center text-xs font-semibold text-secondary-600 uppercase tracking-wider">
+                  <th scope="col" class="px-6 py-4 text-center text-xs font-semibold text-secondary-700 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
@@ -235,18 +235,18 @@ const clearFilters = () => {
                     @click="router.push(`/admin/orders/order/${order._id}`)">
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="flex items-center">
-                      <div class="text-sm font-medium text-secondary-900">#{{ order._id.slice(-8).toUpperCase() }}</div>
+                      <div class="text-base font-medium text-secondary-700">#{{ order._id.slice(-8).toUpperCase() }}</div>
                     </div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="flex items-center">
-                      <div class="text-sm font-medium text-secondary-900">
+                      <div class="text-base font-medium text-secondary-700">
                         {{ order.user.username }}
                       </div>
                     </div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-secondary-900">
+                    <div class="text-base text-secondary-700">
                       {{ getOrderDateTime(order) || 'N/A' }}
                     </div>
                   </td>
@@ -258,7 +258,7 @@ const clearFilters = () => {
                     </div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm font-semibold text-secondary-900">
+                    <div class="text-base font-semibold text-success">
                       ${{ order.totalPrice || order.total || order.totalAmount || '0.00' }}
                     </div>
                   </td>
@@ -295,7 +295,7 @@ const clearFilters = () => {
 
 <style scoped>
 .btn-action {
-  @apply inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
+  @apply inline-flex items-center px-3 py-2 border border-transparent text-base leading-4 font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
 }
 
 .btn-edit {

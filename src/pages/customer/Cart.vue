@@ -131,7 +131,7 @@ onMounted(() => {
 <template>
   <div class="page-background">
     <div class="w-full px-4 xl:px-8 2xl:px-12">
-      <h1 class="text-2xl font-bold mb-6">{{ t('yourCart') }}</h1>
+      <h1 class="text-2xl font-bold text-primary-600 mb-6">{{ t('yourCart') }}</h1>
     
     <!-- Loading State -->
     <div v-if="isLoading" class="flex justify-center items-center py-12">

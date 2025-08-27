@@ -5,7 +5,7 @@
       <!-- Page Header -->
       <div class="mb-8">
         <h1 class="text-2xl font-bold text-primary-600 mb-2">User Management</h1>
-        <p class="text-secondary-600 text-lg">Manage registered users and their information</p>
+        <p class="text-secondary-700 text-lg">Manage registered users and their information</p>
       </div>
 
       <!-- Action Bar -->
@@ -90,25 +90,25 @@
       <div v-else class="w-full">
         <div class="bg-white shadow-sm rounded-xl overflow-hidden">
           <div class="overflow-x-auto">
-            <table class="w-full divide-y divide-secondary-200">
-              <thead style="background-color: white">
+            <table class="w-full divide-y divide-secondary-100">
+              <thead style="background-color: #f8fafc">
                 <tr>
-                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-600 uppercase tracking-wider">
+                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-700 uppercase tracking-wider">
                     User
                   </th>
-                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-600 uppercase tracking-wider">
+                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-700 uppercase tracking-wider">
                     Email
                   </th>
-                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-600 uppercase tracking-wider">
+                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-700 uppercase tracking-wider">
                     Phone
                   </th>
-                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-600 uppercase tracking-wider">
+                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-700 uppercase tracking-wider">
                     Address
                   </th>
-                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-600 uppercase tracking-wider">
+                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-700 uppercase tracking-wider">
                     Status
                   </th>
-                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-600 uppercase tracking-wider">
+                  <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-700 uppercase tracking-wider">
                     Joined
                   </th>
                 </tr>
@@ -118,31 +118,24 @@
                     class="hover:bg-secondary-50 transition-colors duration-200">
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="flex items-center">
-                      <div class="flex-shrink-0 h-10 w-10">
-                        <div class="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
-                          <span class="text-sm font-medium text-primary-700">
-                            {{ getUserInitials(user.username || user.name) }}
-                          </span>
-                        </div>
-                      </div>
                       <div class="ml-4">
-                        <div class="text-sm font-medium text-secondary-900">
+                        <div class="text-base font-medium text-secondary-700">
                           {{ user.username || user.name || 'Unknown User' }}
                         </div>
-                        <div class="text-sm text-secondary-500">
+                        <div class="text-base text-secondary-500">
                           ID: #{{ user._id.slice(-6).toUpperCase() }}
                         </div>
                       </div>
                     </div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-secondary-900">{{ user.email || 'No email' }}</div>
+                    <div class="text-base text-secondary-700">{{ user.email || 'No email' }}</div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-secondary-900">{{ user.phone || 'No phone' }}</div>
+                    <div class="text-base text-secondary-700">{{ user.phone || 'No phone' }}</div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-secondary-900 max-w-xs truncate" :title="user.address">
+                    <div class="text-base text-secondary-700 max-w-xs truncate" :title="user.address">
                       {{ user.address || 'No address' }}
                     </div>
                   </td>
@@ -152,7 +145,7 @@
                     </span>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-secondary-900">
+                    <div class="text-base text-secondary-700">
                       {{ formatDate(user.createdAt || user.joinedAt) }}
                     </div>
                   </td>
@@ -236,7 +229,7 @@ const getUserStatus = (user) => {
 const getUserStatusColor = (user) => {
   if (user.isActive === false) return 'bg-error text-white';
   if (user.isVerified === false) return 'bg-warning text-white';
-  return 'bg-green-100 text-primary-800';
+  return 'bg-green-100 text-success';
 };
 
 const formatDate = (dateString) => {

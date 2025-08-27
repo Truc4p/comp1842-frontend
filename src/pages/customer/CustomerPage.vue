@@ -128,7 +128,7 @@ onMounted(() => {
       <div class="container mx-auto px-6">
         <!-- Section Header -->
         <div class="text-center mb-12">
-          <h2 class="text-4xl font-bold text-secondary-900 mb-4">{{ t('products') || 'Products' }}</h2>
+          <h1 class="text-2xl font-bold text-primary-600 mb-4">{{ t('products') || 'Products' }}</h1>
           <p class="text-lg text-secondary-600 max-w-2xl mx-auto">
             {{ t('featuredProductsDesc') || 'Explore our carefully curated collection of premium products' }}
           </p>

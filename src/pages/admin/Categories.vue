@@ -46,7 +46,7 @@ onMounted(async () => {
       <!-- Page Header -->
       <div class="mb-8">
         <h1 class="text-2xl font-bold text-primary-600 mb-2">Category Management</h1>
-        <p class="text-secondary-600 text-lg">Manage your product categories</p>
+        <p class="text-secondary-700 text-lg">Manage your product categories</p>
       </div>
 
       <!-- Action Bar -->
@@ -111,16 +111,16 @@ onMounted(async () => {
       <!-- Categories Table -->
       <div v-else class="bg-white shadow-sm rounded-xl overflow-hidden">
         <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-secondary-200">
-            <thead class="white">
+          <table class="min-w-full divide-y divide-secondary-100">
+            <thead style="background-color: #f8fafc">
               <tr>
-                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-600 uppercase tracking-wider">
+                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-700 uppercase tracking-wider">
                   Category ID
                 </th>
-                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-600 uppercase tracking-wider">
+                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-secondary-700 uppercase tracking-wider">
                   Name
                 </th>
-                <th scope="col" class="px-6 py-4 text-center text-xs font-semibold text-secondary-600 uppercase tracking-wider">
+                <th scope="col" class="px-6 py-4 text-center text-xs font-semibold text-secondary-700 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
@@ -131,7 +131,7 @@ onMounted(async () => {
                   @click="router.push(`/admin/categories/${category._id}`)">
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
-                    <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                    <div class="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center mr-3">
                       <span class="text-xs font-bold text-primary-600">{{ index + 1 }}</span>
                     </div>
                     <div class="text-sm font-mono text-secondary-500 bg-secondary-100 px-2 py-1 rounded">
@@ -140,7 +140,7 @@ onMounted(async () => {
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-lg font-semibold text-secondary-900">{{ category.name }}</div>
+                  <div class="text-base font-medium text-secondary-700">{{ category.name }}</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-center" @click.stop>
                   <div class="flex items-center justify-center space-x-2">

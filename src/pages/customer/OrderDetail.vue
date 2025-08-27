@@ -34,7 +34,7 @@
               <!-- Order Header -->
               <div class="px-6 py-8 text-gray-900" style="background: white; border-bottom: 1px solid #e5e7eb;">
                 <div class="flex items-center space-x-3">
-                  <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                  <div class="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600" fill="none"
                       viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

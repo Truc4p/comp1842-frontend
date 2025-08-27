@@ -88,7 +88,7 @@
 
       <!-- Full Width Users Table -->
       <div v-else class="w-full">
-        <div class="bg-white shadow-sm border border-secondary-200 rounded-xl overflow-hidden">
+        <div class="bg-white shadow-sm rounded-xl overflow-hidden">
           <div class="overflow-x-auto">
             <table class="w-full divide-y divide-secondary-200">
               <thead style="background-color: white">

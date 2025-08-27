@@ -12,18 +12,29 @@ const orders = ref([]);
 const loading = ref(true);
 const error = ref(null);
 const searchQuery = ref('');
+const statusFilter = ref('all'); // 'all', 'completed', 'pending', 'shipping', 'cancelled', 'refunded'
 
 // Computed property for filtered orders
 const filteredOrders = computed(() => {
-  if (!searchQuery.value) {
-    return orders.value;
+  let filtered = orders.value;
+  
+  // Apply status filter
+  if (statusFilter.value !== 'all') {
+    filtered = filtered.filter(order => 
+      order.status?.toLowerCase() === statusFilter.value.toLowerCase()
+    );
   }
   
-  const query = searchQuery.value.toLowerCase();
-  return orders.value.filter(order => 
-    order._id.toLowerCase().includes(query) ||
-    order.status.toLowerCase().includes(query)
-  );
+  // Apply search filter
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase();
+    filtered = filtered.filter(order => 
+      order._id.toLowerCase().includes(query) ||
+      order.status.toLowerCase().includes(query)
+    );
+  }
+  
+  return filtered;
 });
 
 onMounted(async () => {
@@ -77,6 +88,12 @@ const getOrderDateTime = (order) => {
   if (Number.isNaN(date.getTime())) return null;
   return date.toLocaleString();
 };
+
+// Function to clear all filters
+const clearFilters = () => {
+  searchQuery.value = '';
+  statusFilter.value = 'all';
+};
 </script>
 
 <template>
@@ -91,18 +108,36 @@ const getOrderDateTime = (order) => {
 
       <!-- Action Bar -->
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <!-- Search Bar -->
-        <div class="flex-1 max-w-md">
-          <div class="relative">
-            <input
-              v-model="searchQuery"
-              type="text"
-              placeholder="Search orders by ID or status..."
-              class="w-full pl-10 pr-4 py-2 border border-secondary-300 rounded-lg focus:ring-2 transition-colors duration-200"
-            />
-            <svg class="absolute left-3 top-2.5 h-5 w-5 text-secondary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-            </svg>
+        <!-- Search and Filter Controls -->
+        <div class="flex flex-col sm:flex-row gap-4 flex-1">
+          <!-- Search Bar -->
+          <div class="flex-1 max-w-md">
+            <div class="relative">
+              <input
+                v-model="searchQuery"
+                type="text"
+                placeholder="Search orders by ID or status..."
+                class="w-full pl-10 pr-4 py-2 border border-secondary-300 rounded-lg focus:ring-2 transition-colors duration-200"
+              />
+              <svg class="absolute left-3 top-2.5 h-5 w-5 text-secondary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+            </div>
+          </div>
+          
+          <!-- Status Filter -->
+          <div class="min-w-[200px]">
+            <select
+              v-model="statusFilter"
+              class="w-full px-4 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 bg-white"
+            >
+              <option value="all">All Statuses</option>
+              <option value="completed">Completed</option>
+              <option value="pending">Pending</option>
+              <option value="shipping">Shipping</option>
+              <option value="cancelled">Cancelled</option>
+              <option value="refunded">Refunded</option>
+            </select>
           </div>
         </div>
         
@@ -161,15 +196,15 @@ const getOrderDateTime = (order) => {
           </div>
           <h3 class="text-xl font-semibold text-secondary-700 mb-2">No Orders Match Your Search</h3>
           <p class="text-secondary-500 mb-6">Try adjusting your search terms or clear the search to see all orders</p>
-          <button @click="searchQuery = ''" class="btn btn-secondary">
-            Clear Search
+          <button @click="clearFilters" class="btn btn-secondary">
+            Clear All Filters
           </button>
         </div>
       </div>
 
       <!-- Full Width Orders Table -->
       <div v-else class="w-full">
-        <div class="bg-white shadow-sm border border-secondary-200 rounded-xl overflow-hidden">
+        <div class="bg-white shadow-sm rounded-xl overflow-hidden">
           <div class="overflow-x-auto">
             <table class="w-full divide-y divide-secondary-200">
               <thead style="background-color: white">

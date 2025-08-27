@@ -109,7 +109,7 @@ onMounted(async () => {
       </div>
 
       <!-- Categories Table -->
-      <div v-else class="card overflow-hidden">
+      <div v-else class="bg-white shadow-sm rounded-xl overflow-hidden">
         <div class="overflow-x-auto">
           <table class="min-w-full divide-y divide-secondary-200">
             <thead class="white">

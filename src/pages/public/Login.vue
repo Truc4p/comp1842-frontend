@@ -59,7 +59,7 @@ const handleLogin = async () => {
 <template>
   <div class="max-w-md mx-auto">
     <div class="text-center mb-8 mt-12">
-      <h1 class="text-3xl font-bold text-green-700">{{ t('login') }}</h1>
+      <h1 class="text-2xl font-bold text-green-700">{{ t('login') }}</h1>
       <p class="text-gray-600 mt-2">{{ t('welcomeBack') }}</p>
     </div>
     

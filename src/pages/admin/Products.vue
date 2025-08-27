@@ -56,7 +56,7 @@ const onImageError = (event) => {
     <div class="container mx-auto px-4 mb-8">
       <!-- Page Header -->
       <div class="mb-8">
-        <h1 class="text-2xl font-bold text-primary-700 mb-2">Product Management</h1>
+        <h1 class="text-2xl font-bold text-primary-600 mb-2">Product Management</h1>
         <p class="text-secondary-600 text-lg">Manage your product inventory</p>
       </div>
 

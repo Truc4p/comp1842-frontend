@@ -94,7 +94,7 @@ const formatDescription = (text) => {
       <div v-else-if="product" class="animate-fade-in">
         <!-- Header Section -->
         <div class="text-center mb-12">
-          <h1 class="text-4xl md:text-5xl font-bold text-secondary-900 mb-4 gradient-text">
+          <h1 class="text-2xl md:text-5xl font-bold text-secondary-900 mb-4 gradient-text">
             {{ t('productDetails') || 'Product Details' }}
           </h1>
         </div>

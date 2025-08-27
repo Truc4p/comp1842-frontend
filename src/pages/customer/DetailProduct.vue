@@ -174,7 +174,7 @@ const formatDescription = (text) => {
       <div v-else-if="product" class="animate-fade-in">
         <!-- Header Section -->
         <div class="text-center mb-12">
-          <h1 class="text-4xl md:text-5xl font-bold text-secondary-900 mb-4 gradient-text">
+          <h1 class="text-2xl md:text-5xl font-bold text-secondary-900 mb-4 gradient-text">
             {{ t('productDetails') || 'Product Details' }}
           </h1>
         </div>
@@ -247,9 +247,9 @@ const formatDescription = (text) => {
                     'w-48 text-lg py-3 font-medium transition-all duration-300 rounded-xl flex items-center justify-center gap-2',
                     {
                       'bg-primary-600 hover:bg-primary-700 text-white': buttonState === 'default' && product.stockQuantity > 0,
-                      'bg-yellow-500 text-white cursor-not-allowed': buttonState === 'loading',
+                      'bg-primary-300 cursor-not-allowed': buttonState === 'loading',
                       'bg-primary-600 text-white': buttonState === 'success',
-                      'bg-gray-400 text-gray-600 cursor-not-allowed': product.stockQuantity <= 0
+                      'bg-gray-200 text-gray-600 cursor-not-allowed': product.stockQuantity <= 0
                     }
                   ]">
                     <!-- Loading Spinner -->

@@ -63,11 +63,11 @@
                   <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium mt-1"
                         :class="{
                           'bg-green-100 text-green-800': order.status === 'completed',
-                          'bg-purple-100 text-purple-800': order.status === 'pending',
+                          'bg-purple-100 text-purple-800': order.status === 'processing',
                           'bg-orange-100 text-orange-800': order.status === 'shipping',
                           'bg-red-100 text-red-800': order.status === 'cancelled',
                           'bg-blue-100 text-blue-800': order.status === 'refunded',
-                          'bg-gray-100 text-gray-800': !['completed', 'pending', 'shipping', 'cancelled', 'refunded'].includes(order.status)
+                          'bg-gray-100 text-gray-800': !['completed', 'processing', 'shipping', 'cancelled', 'refunded'].includes(order.status)
                         }">
                     {{ t(order.status) }}
                   </span>
@@ -196,7 +196,7 @@ const route = useRoute();
 const router = useRouter(); // Create a router instance
 
 const selectedStatus = ref('');
-const statusOptions = ['pending', 'shipping', 'completed', 'cancelled', 'refunded'];
+const statusOptions = ['processing', 'shipping', 'completed', 'cancelled', 'refunded'];
 
 // Initialize selectedStatus when order is loaded
 const initializeForm = () => {

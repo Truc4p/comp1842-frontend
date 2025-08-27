@@ -12,7 +12,7 @@ const orders = ref([]);
 const loading = ref(true);
 const error = ref(null);
 const searchQuery = ref('');
-const statusFilter = ref('all'); // 'all', 'completed', 'pending', 'shipping', 'cancelled', 'refunded'
+const statusFilter = ref('all'); // 'all', 'completed', 'processing', 'shipping', 'cancelled', 'refunded'
 
 // Computed property for filtered orders
 const filteredOrders = computed(() => {
@@ -67,7 +67,7 @@ const getStatusColor = (status) => {
   switch (status?.toLowerCase()) {
     case 'completed':
       return 'bg-green-100 text-green-800';
-    case 'pending':
+    case 'processing':
       return 'bg-purple-100 text-purple-800';
     case 'shipping':
       return 'bg-orange-100 text-orange-800';
@@ -102,7 +102,7 @@ const clearFilters = () => {
     <div class="container mx-auto px-4 mb-8">
       <!-- Page Header -->
       <div class="mb-8">
-        <h1 class="text-2xl font-bold text-primary-700 mb-2">Order Management</h1>
+        <h1 class="text-2xl font-bold text-primary-600 mb-2">Order Management</h1>
         <p class="text-secondary-600 text-lg">Manage customer orders and track their status</p>
       </div>
 
@@ -133,7 +133,7 @@ const clearFilters = () => {
             >
               <option value="all">All Statuses</option>
               <option value="completed">Completed</option>
-              <option value="pending">Pending</option>
+              <option value="processing">Processing</option>
               <option value="shipping">Shipping</option>
               <option value="cancelled">Cancelled</option>
               <option value="refunded">Refunded</option>

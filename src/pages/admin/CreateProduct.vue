@@ -3,7 +3,7 @@
     <div class="container mx-auto px-4 py-8 max-w-2xl">
       <!-- Header Section -->
       <div class="text-center mb-8">
-        <h1 class="text-3xl md:text-4xl font-bold gradient-text mb-4">
+        <h1 class="text-2xl md:text-3xl font-bold gradient-text mb-4">
           {{ t('createProduct') }}
         </h1>
         <p class="text-secondary-600 text-lg">

@@ -3,7 +3,7 @@
     <div class="container mx-auto px-4 max-w-4xl">
       <!-- Page Header -->
       <div class="text-center mb-8">
-        <h1 class="text-4xl font-bold text-gray-900 mb-2">{{ t('profile') }}</h1>
+        <h1 class="text-2xl font-bold text-gray-900 mb-2">{{ t('profile') }}</h1>
         <p class="text-gray-600">{{ t('manageYourAccountInformation') || 'Manage your account information and preferences' }}</p>
       </div>
 
@@ -46,12 +46,12 @@
         
         <!-- Profile Card -->
         <div class="lg:col-span-2">
-          <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+          <div class="bg-white rounded-2xl overflow-hidden">
             <!-- Profile Header -->
             <div class="px-6 py-8 text-gray-900" style="background: white; border-bottom: 1px solid #e5e7eb;">
               <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
-                  <div class="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center">
+                  <div class="w-20 h-20 bg-primary-50 rounded-full flex items-center justify-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
@@ -251,7 +251,7 @@
 
         <!-- Quick Actions Sidebar -->
         <div class="lg:col-span-1">
-          <div class="bg-white rounded-2xl shadow-lg p-6">
+          <div class="bg-white rounded-2xl p-6">
             <h3 class="text-xl font-semibold text-gray-900 mb-6">{{ t('quickActions') || 'Quick Actions' }}</h3>
             
             <div class="space-y-4">
@@ -279,7 +279,7 @@
           </div>
 
           <!-- Account Stats -->
-          <div class="bg-white rounded-2xl shadow-lg p-6 mt-6">
+          <div class="bg-white rounded-2xl p-6 mt-6">
             <h3 class="text-xl font-semibold text-gray-900 mb-6">{{ t('accountStats') || 'Account Stats' }}</h3>
             
             <div class="space-y-4">
@@ -290,7 +290,7 @@
               
               <div class="flex items-center justify-between">
                 <span class="text-gray-600">{{ t('accountStatus') || 'Account Status' }}</span>
-                <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
+                <span class="px-3 py-1 bg-green-50 text-green-800 rounded-full text-sm font-medium">
                   {{ t('active') || 'Active' }}
                 </span>
               </div>
@@ -459,7 +459,7 @@ onMounted(async () => {
 }
 
 .quick-action-btn:hover {
-  @apply transform translate-y-0.5 shadow-md;
+  @apply transform translate-y-0.5;
 }
 
 .quick-action-btn svg {

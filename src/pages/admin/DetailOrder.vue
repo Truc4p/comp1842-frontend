@@ -19,7 +19,7 @@
         <!-- Page Header -->
         <div class="mb-8">
           <div class="flex items-center justify-between flex-wrap gap-4">
-            <h1 class="text-4xl font-bold text-primary-900 mb-2">{{ t('orderDetails') }}</h1>
+            <h1 class="text-2xl font-bold text-primary-900 mb-2">{{ t('orderDetails') }}</h1>
             <p class="text-gray-600">{{ t('orderDetailsSubtitle') || 'Admin view of order information and products' }}</p>
           </div>
         </div>
@@ -103,7 +103,7 @@
                   </div>
                   <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium" 
                         :class="getStatusBadgeClass(order.status)">
-                    {{ t(order.status) || order.status || 'Pending' }}
+                    {{ t(order.status) || order.status || 'Processing' }}
                   </span>
                 </div>
 
@@ -247,7 +247,7 @@ const getStatusBadgeClass = (status) => {
   switch (status?.toLowerCase()) {
     case 'completed':
       return 'bg-green-100 text-green-800';
-    case 'pending':
+    case 'processing':
       return 'bg-purple-100 text-purple-800';
     case 'shipping':
       return 'bg-orange-100 text-orange-800';

@@ -60,14 +60,10 @@ onMounted(() => {
     <!-- Enhanced Hero Section - Full Width -->
     <section class="hero-section text-white w-full">
       <div class="hero-floating-elements">
-        <div class="hero-floating-1"></div>
-        <div class="hero-floating-2"></div>
-        <div class="hero-floating-3"></div>
         <div class="hero-geometric">
           <svg viewBox="0 0 200 200">
             <polygon points="100,10 40,198 190,78 10,78 160,198" />
             <circle cx="100" cy="100" r="80" />
-            <path d="M 50,150 Q 100,100 150,150" />
           </svg>
         </div>
       </div>
@@ -87,7 +83,7 @@ onMounted(() => {
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
             </router-link>
-            <router-link to="/register" class="btn btn-outline btn-lg">
+            <router-link to="/register" class="btn btn-primary btn-lg">
               {{ t('joinToday') || 'Join Today' }}
             </router-link>
           </div>

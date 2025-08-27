@@ -165,7 +165,7 @@ onMounted(async () => {
         <div class="container mx-auto px-6 max-w-7xl">
             <!-- Page Header -->
             <div class="text-center mb-12">
-                <h1 class="text-4xl md:text-5xl font-bold text-secondary-900 mb-4 gradient-text">
+                <h1 class="text-2xl md:text-5xl font-bold text-secondary-900 mb-4 gradient-text">
                     {{ t('checkout') || 'Checkout' }}
                 </h1>
             </div>

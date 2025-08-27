@@ -5,18 +5,18 @@
 @tailwind utilities;
 
 :root {
-  /* Modern Teal/Emerald Color Palette */
-  --primary-50: #f0fdfa;
-  --primary-100: #ccfbf1;
-  --primary-200: #99f6e4;
-  --primary-300: #5eead4;
-  --primary-400: #2dd4bf;
-  --primary-500: #14b8a6;
-  --primary-600: #0d9488;
-  --primary-700: #0f766e;
-  --primary-800: #115e59;
-  --primary-900: #134e4a;
-  --primary-950: #042f2e;
+  /* Modern Pink Color Palette */
+  --primary-50: #FDFBF7;
+  --primary-100: #FDF6F0; 
+  --primary-200: #F8EAE1;
+  --primary-300: #F0D7CC;
+  --primary-400: #E4BCC0;
+  --primary-500: #C97F98;
+  --primary-600: #A44A6B;
+  --primary-700: #8C3154;
+  --primary-800: #7F2548;
+  --primary-900: #671C39;
+  --primary-950: #3E0E21;
 
   /* Slate Gray Secondary Palette */
   --secondary-50: #f8fafc;
@@ -39,7 +39,7 @@
   --accent-yellow: #f59e0b;
   
   /* Status Colors */
-  --success: #10b981;
+  --success: #008000;
   --warning: #f59e0b;
   --error: #ef4444;
   --info: #3b82f6;
@@ -424,42 +424,6 @@
   pointer-events: none;
 }
 
-.hero-floating-1 {
-  position: absolute;
-  top: 10%;
-  right: 10%;
-  width: 8rem;
-  height: 8rem;
-  background: linear-gradient(45deg, rgba(255, 255, 255, 0.1), rgba(20, 184, 166, 0.1));
-  border-radius: 50%;
-  filter: blur(20px);
-  animation: float-1 6s ease-in-out infinite;
-}
-
-.hero-floating-2 {
-  position: absolute;
-  bottom: 15%;
-  left: 8%;
-  width: 6rem;
-  height: 6rem;
-  background: linear-gradient(45deg, rgba(20, 184, 166, 0.2), rgba(94, 234, 212, 0.1));
-  border-radius: 50%;
-  filter: blur(15px);
-  animation: float-2 8s ease-in-out infinite;
-}
-
-.hero-floating-3 {
-  position: absolute;
-  top: 50%;
-  left: 30%;
-  width: 4rem;
-  height: 4rem;
-  background: linear-gradient(45deg, rgba(255, 255, 255, 0.05), rgba(20, 184, 166, 0.05));
-  border-radius: 50%;
-  filter: blur(10px);
-  animation: float-3 10s ease-in-out infinite;
-}
-
 .hero-geometric {
   position: absolute;
   top: 20%;
@@ -588,7 +552,7 @@
 
 /* Enhanced Footer Styles */
 .modern-footer {
-  background: linear-gradient(135deg, var(--secondary-900) 0%, var(--secondary-800) 50%, var(--primary-900) 100%);
+  background: linear-gradient(135deg, var(--secondary-900) 0%, var(--primary-900) 100%);
   position: relative;
   overflow: hidden;
 }

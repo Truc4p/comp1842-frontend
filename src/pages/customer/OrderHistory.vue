@@ -38,13 +38,16 @@ const formatDate = (dateString) => {
 
 const getStatusColor = (status) => {
   switch (status?.toLowerCase()) {
-    case 'processing':
-      return 'bg-blue-100 text-blue-800';
-    
     case 'completed':
       return 'bg-green-100 text-green-800';
+    case 'processing':
+      return 'bg-purple-100 text-purple-800';
+    case 'shipping':
+      return 'bg-orange-100 text-orange-800';
     case 'cancelled':
       return 'bg-red-100 text-red-800';
+    case 'refunded':
+      return 'bg-blue-100 text-blue-800';
     default:
       return 'bg-gray-100 text-gray-800';
   }
@@ -93,7 +96,7 @@ onMounted(() => {
       
       <!-- Page Header -->
       <div class="text-center mb-12">
-        <h1 class="text-4xl font-bold text-gray-900 mb-4">{{ t('orderHistory') || 'Your Order History' }}</h1>
+        <h1 class="text-2xl font-bold text-gray-900 mb-4">{{ t('orderHistory') || 'Your Order History' }}</h1>
         <p class="text-gray-500 mb-8 max-w-md mx-auto">{{ t('orderHistoryDesc') || 'View your order history and track your purchases.' }}</p>
       </div>
 
@@ -161,7 +164,7 @@ onMounted(() => {
             <div class="px-6 py-4 text-gray-900" style="background: white; border-bottom: 1px solid #e5e7eb;">
               <div class="flex items-center justify-between">
                   <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                    <div class="w-10 h-10 bg-primary-50 rounded-full flex items-center justify-center">
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>

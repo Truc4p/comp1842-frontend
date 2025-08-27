@@ -283,7 +283,7 @@ onMounted(async () => {
     <div class="container mx-auto px-4 py-8">
       <!-- Page Header -->
       <div class="mb-8">
-        <h1 class="text-3xl font-bold text-primary-700 mb-2">Analytics Dashboard</h1>
+        <h1 class="text-2xl font-bold text-primary-600 mb-2">Analytics Dashboard</h1>
         <p class="text-secondary-600 text-lg">Monitor your business performance and insights</p>
       </div>
 

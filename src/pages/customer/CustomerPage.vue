@@ -212,10 +212,10 @@ onMounted(() => {
             
             <div class="card-body flex flex-col flex-grow">
               <div class="flex justify-between items-start mb-3">
-                <h3 class="font-bold text-lg text-secondary-900 group-hover:text-primary-600 transition-colors duration-200">
+                <h3 class="font-bold text-lg text-secondary-900 group-hover:text-primary-700 transition-colors duration-200">
                   {{ product.name }}
                 </h3>
-                <span class="text-2xl font-bold text-primary-600">${{ product.price }}</span>
+                <span class="text-2xl font-bold text-success">${{ product.price }}</span>
               </div>
               
               <div class="flex items-center justify-between">

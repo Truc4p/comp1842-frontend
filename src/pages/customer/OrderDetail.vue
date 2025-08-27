@@ -21,7 +21,7 @@
         <!-- Page Header -->
         <div class="mb-8">
           <div class="flex items-center justify-between flex-wrap gap-4">
-            <h1 class="text-4xl font-bold text-primary-900 mb-2">{{ t('orderDetails') }}</h1>
+            <h1 class="text-2xl font-bold text-primary-900 mb-2">{{ t('orderDetails') }}</h1>
             <p class="text-gray-600">{{ t('orderDetailsSubtitle') || 'Review your order information and products' }}</p>
           </div>
         </div>

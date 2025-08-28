@@ -3,6 +3,7 @@ import axios from "axios";
 import { ref, onMounted, computed } from "vue";
 import { useI18n } from 'vue-i18n';
 import { API_URL } from '../../utils/config';
+import ChatWidget from '../../components/ChatWidget.vue';
 
 const { t } = useI18n();
 const products = ref([]);
@@ -249,6 +250,7 @@ onMounted(() => {
         </div>
       </div>
     </section>
+    <ChatWidget />
   </div>
 </template>
 

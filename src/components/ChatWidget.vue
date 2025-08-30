@@ -26,7 +26,6 @@ const faqCategories = ref([
 // Flow state
 const showCategories = ref(true);
 const selectedCategory = ref(null);
-const showBackToMenu = ref(false);
 
 // Generate session ID
 function generateSessionId() {
@@ -124,7 +123,6 @@ async function loadConversationHistory() {
       }));
       showCategories.value = false;
       currentFlow.value = 'chat';
-      showBackToMenu.value = true;
     }
   } catch (error) {
     console.error('Error loading conversation:', error);
@@ -155,14 +153,12 @@ function clearChat() {
   showCategories.value = true;
   selectedCategory.value = null;
   currentFlow.value = 'menu';
-  showBackToMenu.value = false;
 }
 
 function backToMenu() {
   currentFlow.value = 'menu';
   showCategories.value = true;
   selectedCategory.value = null;
-  showBackToMenu.value = false;
 }
 
 // Add message to chat
@@ -178,6 +174,11 @@ function addUserMessage(text) {
 
 function addBotMessage(text, relatedProducts = [], faq = null) {
   const formattedText = formatBotMessage(text);
+  // If the chat panel is closed, mark that there's a new message so the
+  // floating button can show a badge. This makes `hasNewMessage` meaningful.
+  if (!isOpen.value) {
+    hasNewMessage.value = true;
+  }
   messages.value.push({
     id: Date.now(),
     sender: 'bot',
@@ -227,7 +228,6 @@ async function selectFAQ(faq) {
   showCategories.value = false;
   selectedCategory.value = null;
   currentFlow.value = 'chat';
-  showBackToMenu.value = true;
   
   try {
     const response = await fetch(`${API_BASE_URL}/chat/faq/${faq._id}/answer`, {
@@ -265,7 +265,6 @@ async function sendAIMessage(message = null) {
   showCategories.value = false;
   selectedCategory.value = null;
   currentFlow.value = 'chat';
-  showBackToMenu.value = true;
   
   try {
     const response = await fetch(`${API_BASE_URL}/chat/ai`, {
@@ -768,11 +767,6 @@ onBeforeUnmount(() => {
   background: white;
 }
 
-.suggestions {
-  margin-bottom: 16px;
-  color: #333;
-}
-
 .suggestions-title {
   font-size: 14px;
   font-weight: 600;
@@ -797,13 +791,6 @@ onBeforeUnmount(() => {
 .suggestion-btn:hover {
   background: #FDF6F0;
   border-color: #c97f98;
-}
-
-.faqs-title {
-  font-size: 14px;
-  font-weight: 600;
-  margin-bottom: 8px;
-  color: #333;
 }
 
 .faqs-list {
@@ -835,14 +822,6 @@ onBeforeUnmount(() => {
   font-size: 13px;
   font-weight: 500;
   margin-bottom: 2px;
-}
-
-.faq-category {
-  font-size: 11px;
-  color: #666;
-  background: #e9ecef;
-  padding: 2px 6px;
-  border-radius: 4px;
 }
 
 .faq-categories {
@@ -891,34 +870,6 @@ onBeforeUnmount(() => {
   color: #666;
   font-style: italic;
   font-size: 14px;
-}
-
-.ai-chat-prompt {
-  text-align: center;
-  padding: 12px;
-  background: #f8f9fa;
-  border-radius: 8px;
-}
-
-.ai-chat-prompt p {
-  margin: 0 0 8px 0;
-  font-size: 13px;
-  color: #666;
-}
-
-.ai-chat-btn {
-  background: linear-gradient(135deg, #c97f98, #9b4d6b);
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 13px;
-  transition: all 0.2s ease;
-}
-
-.ai-chat-btn:hover {
-  background: linear-gradient(135deg, #b5718a, #8a4460);
 }
 
 .composer { 

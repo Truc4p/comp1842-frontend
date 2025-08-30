@@ -18,9 +18,10 @@ const messagesWrap = ref(null);
 const faqs = ref([]);
 const faqCategories = ref([
   "Questions about my order",
-  "Questions about returns", 
+  "Questions about returns",
   "Questions about shipping",
   "Questions about products",
+  "Questions about skincare",
 ]);
 
 // Flow state
@@ -35,7 +36,7 @@ function generateSessionId() {
 // Format bot messages for better readability
 function formatBotMessage(text) {
   if (!text) return text;
-  
+
   // We'll produce safe HTML: escape input, then convert markdown-like bold/italic and newlines
   function escapeHtml(str) {
     return String(str)
@@ -50,9 +51,9 @@ function formatBotMessage(text) {
   let interim = text
     .replace(/\?\s+/g, '?\n\n')
     .replace(/\s+(However|Additionally|Finally|Remember|Let me know)/g, '\n\n$1')
-  // Break before sentences that start with "This" (covers "This daily cream", "This serum", etc.)
-  .replace(/\.\s+(This\b)/gi, '.\n\n$1')
-  .replace(/\.\s+(This\s+(?:serum|cream|product|cleanser))/gi, '.\n\n$1')
+    // Break before sentences that start with "This" (covers "This daily cream", "This serum", etc.)
+    .replace(/\.\s+(This\b)/gi, '.\n\n$1')
+    .replace(/\.\s+(This\s+(?:serum|cream|product|cleanser))/gi, '.\n\n$1')
     .replace(/\.\s+(Remember\s+to)/gi, '.\n\n$1')
     .trim();
 
@@ -78,13 +79,13 @@ async function initializeChat() {
   if (!sessionId.value) {
     sessionId.value = generateSessionId();
   }
-  
+
   // Load conversation history
   await loadConversationHistory();
-  
+
   // Load FAQs
   await loadFAQs();
-  
+
   // Add welcome message if no history
   if (messages.value.length === 0) {
     addBotMessage("Hi! I'm your Wrencos Beauty Assistant.\nHow can I help you today?");
@@ -95,7 +96,7 @@ async function initializeChat() {
 // Load FAQs from backend
 async function loadFAQs() {
   try {
-  const response = await fetch(`${API_BASE_URL}/chat/faqs?limit=100`);
+    const response = await fetch(`${API_BASE_URL}/chat/faqs?limit=100`);
     const result = await response.json();
     if (result.success) {
       faqs.value = result.data;
@@ -108,7 +109,7 @@ async function loadFAQs() {
 // Load conversation history
 async function loadConversationHistory() {
   if (!sessionId.value) return;
-  
+
   try {
     const response = await fetch(`${API_BASE_URL}/chat/conversation/${sessionId.value}`);
     const result = await response.json();
@@ -199,9 +200,9 @@ function selectFAQCategory(category) {
 // Flow 1: Get FAQs filtered by category
 const filteredFAQs = computed(() => {
   if (!selectedCategory.value) return [];
-  
+
   let categoryFilter = '';
-  switch(selectedCategory.value) {
+  switch (selectedCategory.value) {
     case 'Questions about my order':
       categoryFilter = 'orders';
       break;
@@ -214,10 +215,13 @@ const filteredFAQs = computed(() => {
     case 'Questions about products':
       categoryFilter = 'products';
       break;
+    case 'Questions about skincare':
+      categoryFilter = 'skincare';
+      break;
     default:
       return faqs.value;
   }
-  
+
   return faqs.value.filter(faq => faq.category === categoryFilter);
 });
 
@@ -228,7 +232,7 @@ async function selectFAQ(faq) {
   showCategories.value = false;
   selectedCategory.value = null;
   currentFlow.value = 'chat';
-  
+
   try {
     const response = await fetch(`${API_BASE_URL}/chat/faq/${faq._id}/answer`, {
       method: 'POST',
@@ -239,7 +243,7 @@ async function selectFAQ(faq) {
         sessionId: sessionId.value
       })
     });
-    
+
     const result = await response.json();
     if (result.success) {
       addBotMessage(result.data.answer, [], faq);
@@ -258,14 +262,14 @@ async function selectFAQ(faq) {
 async function sendAIMessage(message = null) {
   const text = message || inputText.value.trim();
   if (!text) return;
-  
+
   addUserMessage(text);
   inputText.value = '';
   isLoading.value = true;
   showCategories.value = false;
   selectedCategory.value = null;
   currentFlow.value = 'chat';
-  
+
   try {
     const response = await fetch(`${API_BASE_URL}/chat/ai`, {
       method: 'POST',
@@ -277,11 +281,11 @@ async function sendAIMessage(message = null) {
         sessionId: sessionId.value
       })
     });
-    
+
     const result = await response.json();
     if (result.success) {
       addBotMessage(
-        result.data.message, 
+        result.data.message,
         result.data.relatedProducts || [],
         null
       );
@@ -328,10 +332,12 @@ onBeforeUnmount(() => {
     <!-- Floating Button -->
     <button id="chat-button" class="chat-fab" @click.stop="toggle" aria-label="Open chat">
       <svg v-if="!isOpen" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon">
-        <path fill="currentColor" d="M12 3C6.477 3 2 6.94 2 11.8c0 2.45 1.204 4.66 3.162 6.23V22l3.6-1.98c1.002.28 2.07.43 3.238.43 5.523 0 10-3.94 10-8.85S17.523 3 12 3Z"/>
+        <path fill="currentColor"
+          d="M12 3C6.477 3 2 6.94 2 11.8c0 2.45 1.204 4.66 3.162 6.23V22l3.6-1.98c1.002.28 2.07.43 3.238.43 5.523 0 10-3.94 10-8.85S17.523 3 12 3Z" />
       </svg>
       <svg v-else xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon">
-        <path fill="currentColor" d="M7.05 7.05a1 1 0 0 1 1.414 0L12 10.586l3.536-3.536a1 1 0 1 1 1.414 1.414L13.414 12l3.536 3.536a1 1 0 0 1-1.414 1.414L12 13.414l-3.536 3.536a1 1 0 0 1-1.414-1.414L10.586 12 7.05 8.464a1 1 0 0 1 0-1.414Z"/>
+        <path fill="currentColor"
+          d="M7.05 7.05a1 1 0 0 1 1.414 0L12 10.586l3.536-3.536a1 1 0 1 1 1.414 1.414L13.414 12l3.536 3.536a1 1 0 0 1-1.414 1.414L12 13.414l-3.536 3.536a1 1 0 0 1-1.414-1.414L10.586 12 7.05 8.464a1 1 0 0 1 0-1.414Z" />
       </svg>
       <span v-if="hasNewMessage" class="badge"></span>
     </button>
@@ -346,27 +352,33 @@ onBeforeUnmount(() => {
             <span v-else class="flow-indicator">Quick Help</span>
           </div>
           <div class="header-actions">
-              <button class="icon-btn" @click="backToMenu" aria-label="Back to menu">
-              <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M120-240v-80h720v80H120Zm0-200v-80h720v80H120Zm0-200v-80h720v80H120Z"/></svg>
+            <button class="icon-btn" @click="backToMenu" aria-label="Back to menu">
+              <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                fill="currentColor">
+                <path d="M120-240v-80h720v80H120Zm0-200v-80h720v80H120Zm0-200v-80h720v80H120Z" />
+              </svg>
             </button>
             <button class="icon-btn" @click="clearChat" aria-label="Clear conversation">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="header-icon">
-                <path fill="currentColor" d="M9 3h6l1 2h4v2H4V5h4l1-2Zm1 8v7h2v-7h-2Zm4 0v7h2v-7h-2ZM6 9v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V9H6Z"/>
+                <path fill="currentColor"
+                  d="M9 3h6l1 2h4v2H4V5h4l1-2Zm1 8v7h2v-7h-2Zm4 0v7h2v-7h-2ZM6 9v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V9H6Z" />
               </svg>
             </button>
           </div>
         </div>
 
-        <div class="chat-content-flex" @click="currentFlow === 'menu' ? (currentFlow = 'chat', showCategories = false, selectedCategory = null) : null">
+        <div class="chat-content-flex"
+          @click="currentFlow === 'menu' ? (currentFlow = 'chat', showCategories = false, selectedCategory = null) : null">
           <!-- Messages -->
           <div ref="messagesWrap" class="messages" aria-live="polite">
-            <div v-for="m in messages" :key="m.id" class="message" :class="m.sender === 'user' ? 'from-user' : 'from-bot'">
+            <div v-for="m in messages" :key="m.id" class="message"
+              :class="m.sender === 'user' ? 'from-user' : 'from-bot'">
               <div class="message-bubble">
                 <div class="message-text" v-if="m.sender === 'bot'" v-html="m.text"></div>
                 <div class="message-text" v-else>{{ m.text }}</div>
                 <!-- Show related products if any -->
                 <div v-if="m.relatedProducts && m.relatedProducts.length > 0" class="related-products">
-                  <div v-for="product in m.relatedProducts.slice(0, 2)" :key="product._id" class="product-card">
+                  <div v-for="product in m.relatedProducts.slice(0, 3)" :key="product._id" class="product-card">
                     <div class="product-info">
                       <span class="product-name">{{ product.name }}</span>
                       <span v-if="product.price" class="product-price">${{ product.price }}</span>
@@ -394,12 +406,8 @@ onBeforeUnmount(() => {
           <!-- FAQ Categories -->
           <div v-if="showCategories" class="faq-categories">
             <div class="suggestions-title">Frequently Asked Questions</div>
-            <button
-              v-for="category in faqCategories"
-              :key="category"
-              class="suggestion-btn"
-              @click="selectFAQCategory(category)"
-            >
+            <button v-for="category in faqCategories" :key="category" class="suggestion-btn"
+              @click="selectFAQCategory(category)">
               {{ category }}
             </button>
           </div>
@@ -408,17 +416,11 @@ onBeforeUnmount(() => {
           <div v-if="selectedCategory" class="faq-category-section">
             <div class="category-header">
               <button class="back-to-categories-btn" @click="showCategories = true; selectedCategory = null">
-                <
-              </button>
-              <h4>{{ selectedCategory }}</h4>
+                < </button>
+                  <h4>{{ selectedCategory }}</h4>
             </div>
             <div class="faqs-list">
-              <button
-                v-for="faq in filteredFAQs"
-                :key="faq._id"
-                class="faq-item"
-                @click="selectFAQ(faq)"
-              >
+              <button v-for="faq in filteredFAQs" :key="faq._id" class="faq-item" @click="selectFAQ(faq)">
                 <span class="faq-question">{{ faq.question }}</span>
               </button>
               <div v-if="filteredFAQs.length === 0" class="no-faqs">
@@ -430,23 +432,12 @@ onBeforeUnmount(() => {
 
         <!-- Flow 2: Chat Input -->
         <div v-if="currentFlow === 'chat'" class="composer">
-          <input
-            v-model="inputText"
-            class="composer-input"
-            type="text"
-            placeholder="Ask me anything about skincare..."
-            @keydown="onKeydown"
-            :disabled="isLoading"
-            aria-label="Message input"
-          />
-          <button 
-            class="send-btn" 
-            @click="sendMessage" 
-            :disabled="isLoading || !inputText.trim()"
-            aria-label="Send message"
-          >
+          <input v-model="inputText" class="composer-input" type="text" placeholder="Ask me anything about skincare..."
+            @keydown="onKeydown" :disabled="isLoading" aria-label="Message input" />
+          <button class="send-btn" @click="sendMessage" :disabled="isLoading || !inputText.trim()"
+            aria-label="Send message">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="send-icon">
-              <path fill="currentColor" d="M2 21l21-9L2 3v7l15 2l-15 2z"/>
+              <path fill="currentColor" d="M2 21l21-9L2 3v7l15 2l-15 2z" />
             </svg>
           </button>
         </div>
@@ -456,52 +447,52 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-.chat-root { 
-  position: fixed; 
-  right: 24px; 
-  bottom: 24px; 
-  z-index: 50; 
-  width: auto; 
-  height: auto; 
+.chat-root {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 50;
+  width: auto;
+  height: auto;
 }
 
-.chat-fab { 
-  position: absolute; 
-  bottom: 0; 
-  right: 0; 
-  background: linear-gradient(135deg, #c97f98, #9b4d6b); 
-  color: white; 
-  width: 64px; 
-  height: 64px; 
-  border-radius: 9999px; 
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
-  box-shadow: 0 10px 25px rgba(0,0,0,.18); 
-  border: none; 
-  cursor: pointer; 
+.chat-fab {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: linear-gradient(135deg, #c97f98, #9b4d6b);
+  color: white;
+  width: 64px;
+  height: 64px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, .18);
+  border: none;
+  cursor: pointer;
   transition: all 0.3s ease;
 }
 
-.chat-fab:hover { 
-  background: linear-gradient(135deg, #b5718a, #8a4460); 
+.chat-fab:hover {
+  background: linear-gradient(135deg, #b5718a, #8a4460);
   transform: scale(1.05);
 }
 
-.icon { 
-  width: 28px; 
-  height: 28px; 
+.icon {
+  width: 28px;
+  height: 28px;
 }
 
-.badge { 
-  position: absolute; 
-  top: -2px; 
-  right: -2px; 
-  width: 10px; 
-  height: 10px; 
-  background: #ff4757; 
-  border-radius: 9999px; 
-  border: 2px solid white; 
+.badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 10px;
+  height: 10px;
+  background: #ff4757;
+  border-radius: 9999px;
+  border: 2px solid white;
 }
 
 .chat-panel {
@@ -513,7 +504,7 @@ onBeforeUnmount(() => {
   background: white;
   color: #333;
   border-radius: 24px;
-  box-shadow: 0 20px 45px rgba(0,0,0,.25);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, .25);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -532,57 +523,57 @@ onBeforeUnmount(() => {
   background-color: rgba(201, 127, 152, 0.05);
 }
 
-.chat-header { 
-  display: flex; 
-  align-items: center; 
-  justify-content: space-between; 
-  padding: 16px 18px; 
-  background: linear-gradient(135deg, #c97f98, #9b4d6b); 
-  color: white; 
+.chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px;
+  background: linear-gradient(135deg, #c97f98, #9b4d6b);
+  color: white;
 }
 
-.header-title { 
-  display: flex; 
-  align-items: center; 
-  gap: 10px; 
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.header-title h3 { 
-  font-size: 18px; 
-  margin: 0; 
-  font-weight: 700; 
+.header-title h3 {
+  font-size: 18px;
+  margin: 0;
+  font-weight: 700;
 }
 
 .flow-indicator {
   font-size: 12px;
-  background: rgba(255,255,255,0.2);
+  background: rgba(255, 255, 255, 0.2);
   padding: 2px 8px;
   border-radius: 12px;
 }
 
-.header-actions { 
-  display: flex; 
-  align-items: center; 
-  gap: 8px; 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.icon-btn { 
-  background: transparent; 
-  border: none; 
-  color: inherit; 
-  cursor: pointer; 
-  padding: 6px; 
-  border-radius: 8px; 
+.icon-btn {
+  background: transparent;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
   transition: background 0.2s ease;
 }
 
-.icon-btn:hover { 
-  background: rgba(255,255,255,.15); 
+.icon-btn:hover {
+  background: rgba(255, 255, 255, .15);
 }
 
-.header-icon { 
-  width: 18px; 
-  height: 18px; 
+.header-icon {
+  width: 18px;
+  height: 18px;
 }
 
 .messages {
@@ -593,35 +584,36 @@ onBeforeUnmount(() => {
   min-height: 0;
 }
 
-.message { 
-  display: flex; 
-  margin-bottom: 10px; 
+.message {
+  display: flex;
+  margin-bottom: 10px;
 }
 
-.message-bubble { 
-  max-width: 85%; 
-  padding: 12px 16px; 
-  border-radius: 14px; 
-  font-size: 14px; 
-  line-height: 1.5; 
-  box-shadow: 0 4px 12px rgba(0,0,0,.06);
+.message-bubble {
+  max-width: 85%;
+  padding: 12px 16px;
+  border-radius: 14px;
+  font-size: 14px;
+  line-height: 1.5;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, .06);
   word-wrap: break-word;
   overflow-wrap: break-word;
 }
 
-.from-user { 
-  justify-content: flex-end; 
+.from-user {
+  justify-content: flex-end;
 }
 
-.from-user .message-bubble { 
-  background: #c97f98; 
-  color: white; 
-  border-bottom-right-radius: 3px; 
+.from-user .message-bubble {
+  background: #c97f98;
+  color: white;
+  border-bottom-right-radius: 3px;
 }
 
-.from-bot .message-bubble { 
-  background: #F8EAE1; /* other choice light grey #f1f3f5 */
-  color: #671C39; 
+.from-bot .message-bubble {
+  background: #F8EAE1;
+  /* other choice light grey #f1f3f5 */
+  color: #671C39;
   border-bottom-left-radius: 3px;
   white-space: pre-line;
   word-wrap: break-word;
@@ -664,7 +656,7 @@ onBeforeUnmount(() => {
 }
 
 /* ensure consecutive paragraphs have visible gap */
-.message-bubble .message-text p + p {
+.message-bubble .message-text p+p {
   margin-top: 14px !important;
 }
 
@@ -722,10 +714,14 @@ onBeforeUnmount(() => {
 }
 
 @keyframes typing {
-  0%, 80%, 100% {
+
+  0%,
+  80%,
+  100% {
     transform: scale(0.8);
     opacity: 0.5;
   }
+
   40% {
     transform: scale(1);
     opacity: 1;
@@ -735,13 +731,13 @@ onBeforeUnmount(() => {
 .related-products {
   margin-top: 8px;
   padding-top: 8px;
-  border-top: 1px solid rgba(0,0,0,0.1);
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .product-card {
   margin: 4px 0;
   padding: 4px 8px;
-  background: rgba(255,255,255,0.5);
+  background: rgba(255, 255, 255, 0.5);
   border-radius: 8px;
 }
 
@@ -872,26 +868,26 @@ onBeforeUnmount(() => {
   font-size: 14px;
 }
 
-.composer { 
-  display: flex; 
-  gap: 8px; 
-  padding: 12px; 
-  background: #fff; 
+.composer {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  background: #fff;
 }
 
-.composer-input { 
-  flex: 1; 
-  border: 1px solid #e9ecef; 
-  background: #fff; 
-  border-radius: 12px; 
-  padding: 10px 12px; 
-  outline: none; 
+.composer-input {
+  flex: 1;
+  border: 1px solid #e9ecef;
+  background: #fff;
+  border-radius: 12px;
+  padding: 10px 12px;
+  outline: none;
   font-size: 14px;
 }
 
-.composer-input:focus { 
-  border-color: #c97f98; 
-  box-shadow: 0 0 0 2px rgba(201,127,152,.25); 
+.composer-input:focus {
+  border-color: #c97f98;
+  box-shadow: 0 0 0 2px rgba(201, 127, 152, .25);
 }
 
 .composer-input:disabled {
@@ -899,23 +895,23 @@ onBeforeUnmount(() => {
   cursor: not-allowed;
 }
 
-.send-btn { 
-  width: 44px; 
-  height: 44px; 
-  border: none; 
-  border-radius: 12px; 
-  background: linear-gradient(135deg, #c97f98, #9b4d6b); 
-  color: white; 
-  cursor: pointer; 
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
-  box-shadow: 0 8px 18px rgba(0,0,0,.12); 
+.send-btn {
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #c97f98, #9b4d6b);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, .12);
   transition: all 0.2s ease;
 }
 
-.send-btn:hover:not(:disabled) { 
-  background: linear-gradient(135deg, #b5718a, #8a4460); 
+.send-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #b5718a, #8a4460);
   transform: translateY(-1px);
 }
 
@@ -925,16 +921,18 @@ onBeforeUnmount(() => {
   transform: none;
 }
 
-.send-icon { 
-  width: 20px; 
-  height: 20px; 
+.send-icon {
+  width: 20px;
+  height: 20px;
 }
 
-.chat-slide-enter-active, .chat-slide-leave-active {
+.chat-slide-enter-active,
+.chat-slide-leave-active {
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-.chat-slide-enter-from, .chat-slide-leave-to {
+.chat-slide-enter-from,
+.chat-slide-leave-to {
   opacity: 0;
   transform: translateY(20px) scale(0.95);
 }

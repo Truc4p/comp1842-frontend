@@ -99,11 +99,5 @@ const { t } = useI18n();
 </script>
 
 <style scoped>
-/* Additional custom styles for enhanced layout */
-.gradient-text {
-  background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
+
 </style>

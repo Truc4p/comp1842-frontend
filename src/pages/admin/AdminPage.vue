@@ -307,7 +307,7 @@ onMounted(async () => {
             <div class="text-sm text-secondary-600">Categories</div>
           </div>
           <div class="card p-6 text-center">
-            <div class="text-3xl font-bold text-green-600 mb-2">{{ productsCount }}</div>
+            <div class="text-3xl font-bold text-success mb-2">{{ productsCount }}</div>
             <div class="text-sm text-secondary-600">Products</div>
           </div>
           <div class="card p-6 text-center">
@@ -326,7 +326,7 @@ onMounted(async () => {
           <!-- Total Revenue -->
           <div class="card p-6">
             <div class="flex items-center">
-              <div class="p-3 rounded-full bg-green-100 text-green-600">
+              <div class="p-3 rounded-full bg-green-100 text-success">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1">
@@ -508,15 +508,18 @@ onMounted(async () => {
                       </div>
                     </div>
                   </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-success">
                     ${{ order.totalPrice }}
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <span :class="{
                       'px-2 py-1 text-xs font-medium rounded-full': true,
-                      'bg-yellow-100 text-yellow-800': order.status === 'processing',
-                      'bg-blue-100 text-blue-800': order.status === 'shipping',
-                      'bg-green-100 text-green-800': order.status === 'completed'
+                      'bg-green-100 text-green-800': order.status === 'completed',
+                      'bg-purple-100 text-purple-800': order.status === 'processing',
+                      'bg-orange-100 text-orange-800': order.status === 'shipping',
+                      'bg-red-100 text-red-800': order.status === 'cancelled',
+                      'bg-blue-100 text-blue-800': order.status === 'refunded',
+                      'bg-gray-100 text-gray-800': !['completed', 'processing', 'shipping', 'cancelled', 'refunded'].includes(order.status)
                     }">
                       {{ order.status }}
                     </span>

@@ -31,7 +31,7 @@ export default {
         },
         accent: {
           blue: '#3b82f6',
-          purple: '#8b5cf6',
+          green: '#8b5cf6',
           pink: '#ec4899',
           orange: '#f97316',
           red: '#ef4444',

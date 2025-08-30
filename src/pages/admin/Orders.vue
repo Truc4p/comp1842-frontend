@@ -253,7 +253,7 @@ const clearFilters = () => {
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="flex items-center">
                       <span :class="getStatusColor(order.status)" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize">
-                        {{ order.status || 'processing' }}
+                        {{ order.status || 'N/A' }}
                       </span>
                     </div>
                   </td>

@@ -250,7 +250,6 @@ const username = ref('');
 
 const getImageUrl = (relativePath) => {
   const url = `${API_URL}/${relativePath}`; // Adjust the base URL as needed
-  console.log('Image URL:', url); // Log the image URL
   return url;
 };
 

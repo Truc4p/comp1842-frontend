@@ -146,6 +146,191 @@
             </div>
           </div>
 
+          <!-- Additional Product Information Section -->
+          <div class="border-t border-secondary-200 pt-6">
+            <h3 class="text-lg font-semibold text-primary-600 mb-4 flex items-center gap-2">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                  d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+              </svg>
+              {{ t('additionalInfo') || 'Additional Product Information' }}
+            </h3>
+
+            <!-- Skin Type -->
+            <div class="form-group">
+              <label class="form-label">
+                {{ t('skinType') || 'Skin Type' }}
+              </label>
+              <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                <label v-for="type in ['oily', 'dry', 'combination', 'sensitive', 'normal', 'all']" 
+                       :key="type" 
+                       class="flex items-center space-x-2 p-3 border border-secondary-300 rounded-lg hover:bg-primary-50 cursor-pointer transition-colors">
+                  <input 
+                    type="checkbox" 
+                    :value="type" 
+                    v-model="skinType"
+                    class="rounded border-secondary-300 text-primary-600 focus:ring-primary-500"
+                  />
+                  <span class="text-sm font-medium capitalize">{{ type }}</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Skin Concerns -->
+            <div class="form-group">
+              <label class="form-label">
+                {{ t('skinConcerns') || 'Skin Concerns' }}
+              </label>
+              <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                <label v-for="concern in ['acne', 'aging', 'dark-spots', 'wrinkles', 'dryness', 'sensitivity', 'dullness', 'pores', 'uneven-tone']" 
+                       :key="concern" 
+                       class="flex items-center space-x-2 p-3 border border-secondary-300 rounded-lg hover:bg-primary-50 cursor-pointer transition-colors">
+                  <input 
+                    type="checkbox" 
+                    :value="concern" 
+                    v-model="skinConcerns"
+                    class="rounded border-secondary-300 text-primary-600 focus:ring-primary-500"
+                  />
+                  <span class="text-sm font-medium capitalize">{{ concern.replace('-', ' ') }}</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Ingredients -->
+            <div class="form-group">
+              <label class="form-label">
+                {{ t('ingredients') || 'Ingredients' }}
+              </label>
+              <div class="space-y-3">
+                <div class="flex gap-2">
+                  <input 
+                    type="text" 
+                    v-model="newIngredient"
+                    @keyup.enter="addIngredient"
+                    class="form-control flex-1"
+                    :placeholder="t('addIngredient') || 'Add ingredient (e.g., Retinol, Vitamin C)'"
+                  />
+                  <button 
+                    type="button" 
+                    @click="addIngredient"
+                    class="btn btn-secondary px-4"
+                    :disabled="!newIngredient.trim()"
+                  >
+                    {{ t('add') || 'Add' }}
+                  </button>
+                </div>
+                <div v-if="ingredients.length > 0" class="flex flex-wrap gap-2">
+                  <span v-for="(ingredient, index) in ingredients" 
+                        :key="index" 
+                        class="inline-flex items-center gap-1 px-3 py-1 bg-primary-100 text-primary-800 rounded-full text-sm">
+                    {{ ingredient }}
+                    <button 
+                      type="button" 
+                      @click="removeIngredient(index)"
+                      class="ml-1 text-primary-600 hover:text-primary-800"
+                    >
+                      ×
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Benefits -->
+            <div class="form-group">
+              <label class="form-label">
+                {{ t('benefits') || 'Benefits' }}
+              </label>
+              <div class="space-y-3">
+                <div class="flex gap-2">
+                  <input 
+                    type="text" 
+                    v-model="newBenefit"
+                    @keyup.enter="addBenefit"
+                    class="form-control flex-1"
+                    :placeholder="t('addBenefit') || 'Add benefit (e.g., Anti-aging, Moisturizing)'"
+                  />
+                  <button 
+                    type="button" 
+                    @click="addBenefit"
+                    class="btn btn-secondary px-4"
+                    :disabled="!newBenefit.trim()"
+                  >
+                    {{ t('add') || 'Add' }}
+                  </button>
+                </div>
+                <div v-if="benefits.length > 0" class="flex flex-wrap gap-2">
+                  <span v-for="(benefit, index) in benefits" 
+                        :key="index" 
+                        class="inline-flex items-center gap-1 px-3 py-1 bg-success-100 text-success-800 rounded-full text-sm">
+                    {{ benefit }}
+                    <button 
+                      type="button" 
+                      @click="removeBenefit(index)"
+                      class="ml-1 text-success-600 hover:text-success-800"
+                    >
+                      ×
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tags -->
+            <div class="form-group">
+              <label class="form-label">
+                {{ t('tags') || 'Tags' }}
+              </label>
+              <div class="space-y-3">
+                <div class="flex gap-2">
+                  <input 
+                    type="text" 
+                    v-model="newTag"
+                    @keyup.enter="addTag"
+                    class="form-control flex-1"
+                    :placeholder="t('addTag') || 'Add tag (e.g., organic, cruelty-free)'"
+                  />
+                  <button 
+                    type="button" 
+                    @click="addTag"
+                    class="btn btn-secondary px-4"
+                    :disabled="!newTag.trim()"
+                  >
+                    {{ t('add') || 'Add' }}
+                  </button>
+                </div>
+                <div v-if="tags.length > 0" class="flex flex-wrap gap-2">
+                  <span v-for="(tag, index) in tags" 
+                        :key="index" 
+                        class="inline-flex items-center gap-1 px-3 py-1 bg-secondary-100 text-secondary-800 rounded-full text-sm">
+                    {{ tag }}
+                    <button 
+                      type="button" 
+                      @click="removeTag(index)"
+                      class="ml-1 text-secondary-600 hover:text-secondary-800"
+                    >
+                      ×
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Usage Instructions -->
+            <div class="form-group">
+              <label for="usage" class="form-label">
+                {{ t('usage') || 'Usage Instructions' }}
+              </label>
+              <textarea 
+                id="usage" 
+                v-model="usage"
+                class="form-control min-h-[100px] resize-y"
+                :placeholder="t('enterUsage') || 'How to use this product (e.g., Apply twice daily on clean skin)'"
+                rows="3"
+              ></textarea>
+            </div>
+          </div>
+
           <!-- Image Upload -->
           <div class="form-group">
             <label for="image" class="form-label">
@@ -236,6 +421,19 @@ const categories = ref([]);
 const isSubmitting = ref(false);
 const router = useRouter();
 
+// Additional fields for AI assistant
+const ingredients = ref([]);
+const skinType = ref([]);
+const benefits = ref([]);
+const tags = ref([]);
+const usage = ref('');
+const skinConcerns = ref([]);
+
+// Input fields for adding new items
+const newIngredient = ref('');
+const newBenefit = ref('');
+const newTag = ref('');
+
 const fetchCategories = async () => {
   try {
     const token = localStorage.getItem('token');
@@ -260,6 +458,40 @@ const handleImageUpload = (event) => {
   console.log('Image was uploaded:', file);
 };
 
+// Methods for managing additional fields
+const addIngredient = () => {
+  if (newIngredient.value.trim()) {
+    ingredients.value.push(newIngredient.value.trim().toLowerCase());
+    newIngredient.value = '';
+  }
+};
+
+const removeIngredient = (index) => {
+  ingredients.value.splice(index, 1);
+};
+
+const addBenefit = () => {
+  if (newBenefit.value.trim()) {
+    benefits.value.push(newBenefit.value.trim().toLowerCase());
+    newBenefit.value = '';
+  }
+};
+
+const removeBenefit = (index) => {
+  benefits.value.splice(index, 1);
+};
+
+const addTag = () => {
+  if (newTag.value.trim()) {
+    tags.value.push(newTag.value.trim().toLowerCase());
+    newTag.value = '';
+  }
+};
+
+const removeTag = (index) => {
+  tags.value.splice(index, 1);
+};
+
 const handleSubmit = async () => {
   if (isSubmitting.value) return;
   
@@ -273,14 +505,33 @@ const handleSubmit = async () => {
     formData.append('price', price.value);
     formData.append('stockQuantity', stockQuantity.value);
     formData.append('description', description.value);
+    
+    // Additional fields - always append them, even if empty
+    formData.append('ingredients', JSON.stringify(ingredients.value));
+    formData.append('skinType', JSON.stringify(skinType.value));
+    formData.append('benefits', JSON.stringify(benefits.value));
+    formData.append('tags', JSON.stringify(tags.value));
+    formData.append('usage', usage.value || '');
+    formData.append('skinConcerns', JSON.stringify(skinConcerns.value));
+    
     if (image.value) {
       formData.append('image', image.value);
     }
 
-    // Log the contents of formData
+    // Log the contents of formData for debugging
+    console.log('FormData contents:');
     formData.forEach((value, key) => {
-      console.log(key, value);
+      console.log(`${key}:`, value);
     });
+
+    // Also log the reactive values directly
+    console.log('Reactive values:');
+    console.log('ingredients.value:', ingredients.value);
+    console.log('skinType.value:', skinType.value);
+    console.log('benefits.value:', benefits.value);
+    console.log('tags.value:', tags.value);
+    console.log('usage.value:', usage.value);
+    console.log('skinConcerns.value:', skinConcerns.value);
 
     const response = await axios.post(`${API_URL}/products`, formData, {
       headers: {

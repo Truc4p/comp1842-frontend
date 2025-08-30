@@ -53,7 +53,7 @@
   /* Gradients */
   --gradient-primary: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 50%, var(--primary-700) 100%);
   --gradient-secondary: linear-gradient(135deg, var(--secondary-100) 0%, var(--secondary-200) 100%);
-  --gradient-hero: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-800) 50%, var(--secondary-800) 100%);
+  --gradient-hero: linear-gradient(135deg, var(--primary-100) 0%, var(--primary-300) 50%, var(--primary-100) 100%);
 }
 
 @layer base {
@@ -161,7 +161,7 @@
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--primary-700);
+  background: var(--primary-600);
   box-shadow: var(--shadow-medium);
 }
 
@@ -397,7 +397,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(251, 249, 251, 0.3);
   z-index: 1;
 }
 
@@ -406,9 +406,9 @@
   position: absolute;
   inset: 0;
   background: 
-    radial-gradient(circle at 20% 80%, rgba(20, 184, 166, 0.3) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(13, 148, 136, 0.3) 0%, transparent 50%),
-    radial-gradient(circle at 40% 40%, rgba(248, 250, 252, 0.1) 0%, transparent 50%);
+    radial-gradient(circle at 20% 80%, rgba(243, 176, 250, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(230, 120, 249, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(252, 248, 252, 0.1) 0%, transparent 50%);
   z-index: 1;
 }
 
@@ -471,7 +471,7 @@
   line-height: 1.1;
   letter-spacing: -0.02em;
   margin-bottom: 1.5rem;
-  background: linear-gradient(135deg, #ffffff 0%, #f0fdfa 50%, #ccfbf1 100%);
+  background: linear-gradient(135deg, var(--primary-700) 0%, var(--primary-500) 50%, var(--primary-800) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -492,7 +492,7 @@
 .hero-subtitle {
   font-size: 1.25rem;
   line-height: 1.6;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--primary-600);
   margin-bottom: 2rem;
   max-width: 600px;
   margin-left: auto;
@@ -532,19 +532,18 @@
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
   border-radius: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .hero-stat-number {
   font-size: 2rem;
   font-weight: 700;
-  color: white;
+  color: var(--primary-600);
   display: block;
 }
 
 .hero-stat-label {
   font-size: 0.875rem;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--primary-600);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-top: 0.5rem;
@@ -1062,7 +1061,7 @@ input, select, textarea {
 }
 
 .focus\:ring-green-500:focus {
-  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1) !important;
+  box-shadow: 0 0 0 3px rgba(170, 20, 184, 0.1) !important;
 }
 
 .hover\:text-green-200:hover {

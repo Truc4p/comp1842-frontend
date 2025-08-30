@@ -291,11 +291,6 @@ onMounted(() => {
   @apply text-white px-4 py-2 rounded transition-all duration-200;
 }
 
-.btn-primary:hover {
-  background-color: var(--primary-700);
-  @apply transform translate-y-0.5 shadow-md;
-}
-
 .btn-delete {
   @apply bg-red-400 text-white px-2 py-1 rounded hover:bg-red-500 mx-1;
 }

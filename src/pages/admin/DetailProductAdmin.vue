@@ -194,28 +194,28 @@ const formatDescription = (text) => {
 
           <!-- Product Description -->
           <div class="rounded-xl p-8 mb-8">
-            <div class="flex items-center gap-3 mb-6">
-              <div class="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-600" fill="none" viewBox="0 0 24 24"
-                  stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
+
+            <!-- Product Description -->
+            <div v-if="product.description && product.description.trim()" class="bg-white rounded-xl p-6">
+              <div class="flex items-center gap-3 mb-4">
+                <div class="w-8 h-8 bg-pink-50 rounded-lg flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-pink-800" fill="none"
+                    viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <h4 class="text-lg font-semibold text-secondary-900">
+                  {{ t('description') || 'Product Description' }}
+                </h4>
               </div>
-              <h3 class="text-2xl font-bold text-secondary-900">
-                {{ t('description') || 'Product Description' }}
-              </h3>
+              <div class="bg-pink-50 rounded-lg p-4">
+                <div class="text-pink-800 leading-relaxed formatted-description"
+                  v-html="formatDescription(product.description)">
+                </div>
+              </div>
             </div>
 
-            <div class="bg-white rounded-lg p-6">
-              <div class="text-secondary-700 leading-relaxed text-base formatted-description"
-                v-html="formatDescription(product.description || t('noDescription') || 'No description available.')">
-              </div>
-            </div>
-          </div>
-
-          <!-- Additional Product Information -->
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
             <!-- Skin Type -->
             <div v-if="product.skinType && product.skinType.length > 0" class="bg-white rounded-xl p-6">
               <div class="flex items-center gap-3 mb-4">
@@ -259,57 +259,50 @@ const formatDescription = (text) => {
                 </span>
               </div>
             </div>
-          </div>
 
-          <!-- Ingredients and Benefits -->
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+
             <!-- Ingredients -->
-            <div v-if="product.ingredients && product.ingredients.length > 0" class="bg-white rounded-xl p-6">
+            <div v-if="product.ingredients && (typeof product.ingredients === 'string' ? product.ingredients.trim() : product.ingredients.length > 0)" class="bg-white rounded-xl p-6">
               <div class="flex items-center gap-3 mb-4">
-                <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-800" fill="none" viewBox="0 0 24 24"
+                <div class="w-8 h-8 bg-orange-50 rounded-lg flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-orange-800" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
                 <h4 class="text-lg font-semibold text-secondary-900">
                   {{ t('ingredients') || 'Ingredients' }}
                 </h4>
               </div>
-              <div class="flex flex-wrap gap-2">
-                <span v-for="ingredient in product.ingredients" :key="ingredient"
-                  class="inline-flex items-center px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium capitalize">
-                  {{ ingredient }}
-                </span>
+              <div class="bg-orange-50 rounded-lg p-4">
+                <div class="text-orange-800 leading-relaxed formatted-description"
+                  v-html="formatDescription(typeof product.ingredients === 'string' ? product.ingredients : product.ingredients.join(', '))">
+                </div>
               </div>
             </div>
 
             <!-- Benefits -->
-            <div v-if="product.benefits && product.benefits.length > 0" class="bg-white rounded-xl p-6">
+            <div v-if="product.benefits && (typeof product.benefits === 'string' ? product.benefits.trim() : product.benefits.length > 0)" class="bg-white rounded-xl p-6">
               <div class="flex items-center gap-3 mb-4">
-                <div class="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-800" fill="none"
-                    viewBox="0 0 24 24" stroke="currentColor">
+                <div class="w-8 h-8 bg-yellow-50 rounded-lg flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-800" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
                 <h4 class="text-lg font-semibold text-secondary-900">
                   {{ t('benefits') || 'Benefits' }}
                 </h4>
               </div>
-              <div class="flex flex-wrap gap-2">
-                <span v-for="benefit in product.benefits" :key="benefit"
-                  class="inline-flex items-center px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium capitalize">
-                  {{ benefit }}
-                </span>
+              <div class="bg-yellow-50 rounded-lg p-4">
+                <div class="text-yellow-800 leading-relaxed formatted-description"
+                  v-html="formatDescription(typeof product.benefits === 'string' ? product.benefits : product.benefits.join(', '))">
+                </div>
               </div>
             </div>
-          </div>
 
-          <!-- Tags and Usage -->
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
             <!-- Tags -->
             <div v-if="product.tags && product.tags.length > 0" class="bg-white rounded-xl p-6">
               <div class="flex items-center gap-3 mb-4">
@@ -331,25 +324,25 @@ const formatDescription = (text) => {
                 </span>
               </div>
             </div>
-          </div>
 
-          <!-- Usage Instructions -->
-          <div v-if="product.usage && product.usage.trim()" class="bg-white rounded-xl p-6">
-            <div class="flex items-center gap-3 mb-4">
-              <div class="w-8 h-8 bg-teal-50 rounded-lg flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-teal-800" fill="none" viewBox="0 0 24 24"
-                  stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+            <!-- Usage Instructions -->
+            <div v-if="product.usage && product.usage.trim()" class="bg-white rounded-xl p-6">
+              <div class="flex items-center gap-3 mb-4">
+                <div class="w-8 h-8 bg-teal-50 rounded-lg flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-teal-800" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h4 class="text-lg font-semibold text-secondary-900">
+                  {{ t('usage') || 'Usage Instructions' }}
+                </h4>
               </div>
-              <h4 class="text-lg font-semibold text-secondary-900">
-                {{ t('usage') || 'Usage Instructions' }}
-              </h4>
-            </div>
-            <div class="bg-teal-50 rounded-lg p-4">
-              <div class="text-teal-800 leading-relaxed formatted-description"
-                v-html="formatDescription(product.usage)">
+              <div class="bg-teal-50 rounded-lg p-4">
+                <div class="text-teal-800 leading-relaxed formatted-description"
+                  v-html="formatDescription(product.usage)">
+                </div>
               </div>
             </div>
           </div>

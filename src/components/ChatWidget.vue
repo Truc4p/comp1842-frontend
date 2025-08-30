@@ -33,6 +33,47 @@ function generateSessionId() {
   return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 }
 
+// Format bot messages for better readability
+function formatBotMessage(text) {
+  if (!text) return text;
+  
+  // We'll produce safe HTML: escape input, then convert markdown-like bold/italic and newlines
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  // basic readability tweaks on plain text first (preserve where to break into paragraphs)
+  let interim = text
+    .replace(/\?\s+/g, '?\n\n')
+    .replace(/\s+(However|Additionally|Finally|Remember|Let me know)/g, '\n\n$1')
+  // Break before sentences that start with "This" (covers "This daily cream", "This serum", etc.)
+  .replace(/\.\s+(This\b)/gi, '.\n\n$1')
+  .replace(/\.\s+(This\s+(?:serum|cream|product|cleanser))/gi, '.\n\n$1')
+    .replace(/\.\s+(Remember\s+to)/gi, '.\n\n$1')
+    .trim();
+
+  // escape any HTML the AI returned so we don't inject markup
+  let escaped = escapeHtml(interim);
+
+  // convert markdown bold (**text**) and italics (_text_) to HTML
+  // note: operate on escaped text so resulting tags are safe
+  escaped = escaped.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  escaped = escaped.replace(/_(.+?)_/g, '<em>$1</em>');
+
+  // convert paragraphs: split on double newlines into <p> blocks, single newlines to <br>
+  const paragraphs = escaped
+    .split(/\n\s*\n/)
+    .map(p => p.replace(/\n/g, '<br>'))
+    .filter(p => p.trim().length > 0);
+
+  return paragraphs.map(p => `<p>${p}</p>`).join('');
+}
+
 // Initialize chat
 async function initializeChat() {
   if (!sessionId.value) {
@@ -47,7 +88,7 @@ async function initializeChat() {
   
   // Add welcome message if no history
   if (messages.value.length === 0) {
-    addBotMessage("Hi! I'm your Wrencos Beauty Assistant. How can I help you today?");
+    addBotMessage("Hi! I'm your Wrencos Beauty Assistant.\nHow can I help you today?");
     showCategories.value = true;
   }
 }
@@ -76,7 +117,7 @@ async function loadConversationHistory() {
       messages.value = result.data.messages.map((msg, index) => ({
         id: index + 1,
         sender: msg.role === 'user' ? 'user' : 'bot',
-        text: msg.content,
+        text: msg.role === 'user' ? msg.content : formatBotMessage(msg.content),
         timestamp: msg.timestamp,
         relatedProducts: msg.relatedProducts || [],
         faq: msg.faq
@@ -136,10 +177,11 @@ function addUserMessage(text) {
 }
 
 function addBotMessage(text, relatedProducts = [], faq = null) {
+  const formattedText = formatBotMessage(text);
   messages.value.push({
     id: Date.now(),
     sender: 'bot',
-    text: text,
+    text: formattedText,
     timestamp: new Date(),
     relatedProducts: relatedProducts,
     faq: faq
@@ -321,7 +363,8 @@ onBeforeUnmount(() => {
           <div ref="messagesWrap" class="messages" aria-live="polite">
             <div v-for="m in messages" :key="m.id" class="message" :class="m.sender === 'user' ? 'from-user' : 'from-bot'">
               <div class="message-bubble">
-                {{ m.text }}
+                <div class="message-text" v-if="m.sender === 'bot'" v-html="m.text"></div>
+                <div class="message-text" v-else>{{ m.text }}</div>
                 <!-- Show related products if any -->
                 <div v-if="m.relatedProducts && m.relatedProducts.length > 0" class="related-products">
                   <div v-for="product in m.relatedProducts.slice(0, 2)" :key="product._id" class="product-card">
@@ -557,12 +600,14 @@ onBeforeUnmount(() => {
 }
 
 .message-bubble { 
-  max-width: 75%; 
-  padding: 10px 12px; 
+  max-width: 85%; 
+  padding: 12px 16px; 
   border-radius: 14px; 
   font-size: 14px; 
-  line-height: 1.4; 
-  box-shadow: 0 4px 12px rgba(0,0,0,.06); 
+  line-height: 1.5; 
+  box-shadow: 0 4px 12px rgba(0,0,0,.06);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .from-user { 
@@ -577,8 +622,79 @@ onBeforeUnmount(() => {
 
 .from-bot .message-bubble { 
   background: #F8EAE1; /* other choice light grey #f1f3f5 */
-  color: #333; 
+  color: #671C39; 
   border-bottom-left-radius: 3px;
+  white-space: pre-line;
+  word-wrap: break-word;
+  line-height: 1.6;
+}
+
+/* Improve readability for long bot messages */
+.from-bot .message-bubble p {
+  margin: 0 0 8px 0;
+}
+
+.from-bot .message-bubble p:last-child {
+  margin-bottom: 0;
+}
+
+/* Style for product mentions and prices */
+.from-bot .message-bubble strong {
+  font-weight: 600;
+  color: #8C3154;
+}
+
+/* Add some spacing for better readability */
+.from-bot .message-bubble {
+  text-align: left;
+}
+
+/* Styles for rendered HTML inside messages: higher specificity to override resets */
+.message-bubble .message-text {
+  line-height: 1.72;
+}
+
+.message-bubble .message-text p {
+  display: block;
+  margin: 0 0 14px 0 !important;
+  color: inherit;
+}
+
+.message-bubble .message-text p:last-child {
+  margin-bottom: 0 !important;
+}
+
+/* ensure consecutive paragraphs have visible gap */
+.message-bubble .message-text p + p {
+  margin-top: 14px !important;
+}
+
+/* The bot message HTML is injected via v-html, so those <p> elements do not
+   receive the component's scoped attribute. Use the deep selector so the
+   rules apply to injected markup and ensure clear paragraph spacing. */
+.message-bubble :deep(p) {
+  display: block;
+  margin: 0 0 14px 0;
+  color: inherit;
+  line-height: 1.72;
+}
+
+.message-bubble :deep(p:last-child) {
+  margin-bottom: 0;
+}
+
+.message-bubble :deep(p + p) {
+  margin-top: 14px;
+}
+
+.message-bubble .message-text strong {
+  font-weight: 700;
+  color: #8C3154;
+}
+
+.message-bubble .message-text em {
+  font-style: italic;
+  color: #5a2a3a;
 }
 
 .typing {

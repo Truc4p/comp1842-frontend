@@ -44,14 +44,14 @@ onMounted(async () => {
 // Format description to preserve formatting and convert common patterns to HTML
 const formatDescription = (text) => {
   if (!text) return '';
-  
+
   return text
     // Convert line breaks to <br> tags
     .replace(/\n/g, '<br>')
     // Convert bullet points (• or -) to HTML list items
     .replace(/^[•\-]\s+(.+)$/gm, '<li>$1</li>')
     // Wrap consecutive list items in <ul> tags
-    .replace(/(<li>.*<\/li>)(?:\s*<br>\s*(<li>.*<\/li>))+/g, function(match) {
+    .replace(/(<li>.*<\/li>)(?:\s*<br>\s*(<li>.*<\/li>))+/g, function (match) {
       return '<ul class="list-disc ml-6 my-2">' + match.replace(/<br>/g, '') + '</ul>';
     })
     // Convert **bold** or strong text patterns
@@ -74,18 +74,24 @@ const formatDescription = (text) => {
       <!-- Loading State -->
       <div v-if="isLoading" class="flex justify-center items-center py-20">
         <div class="text-center">
-          <svg class="loading-spinner mx-auto mb-4 h-12 w-12 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <svg class="loading-spinner mx-auto mb-4 h-12 w-12 text-primary-600" xmlns="http://www.w3.org/2000/svg"
+            fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            <path class="opacity-75" fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+            </path>
           </svg>
           <p class="text-lg text-secondary-600 font-medium">{{ t('loading') || 'Loading product details...' }}</p>
         </div>
       </div>
 
       <!-- Error State -->
-      <div v-else-if="error" class="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-xl text-center animate-fade-in">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mx-auto mb-2 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+      <div v-else-if="error"
+        class="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-xl text-center animate-fade-in">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mx-auto mb-2 text-red-500" fill="none"
+          viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
         </svg>
         <p class="font-medium">{{ error }}</p>
       </div>
@@ -105,12 +111,10 @@ const formatDescription = (text) => {
             <!-- Product Image Section -->
             <div class="relative white p-4 flex items-center justify-center">
               <div class="relative group w-full">
-                <img 
-                  :src="product.image ? getImageUrl(product.image) : '/images/fallback-image.jpg'" 
+                <img :src="product.image ? getImageUrl(product.image) : '/images/fallback-image.jpg'"
                   :alt="product.name"
                   class="relative w-full h-auto max-h-none object-contain transform group-hover:scale-105 transition-transform duration-300"
-                  @error="onImageError" 
-                />
+                  @error="onImageError" />
               </div>
             </div>
 
@@ -135,29 +139,40 @@ const formatDescription = (text) => {
               </div>
 
               <!-- Admin Actions -->
-              <div class="flex gap-4 pt-6 border-t border-secondary-200">
-                <router-link :to="`/admin/products/edit/${product._id}`" class="btn btn-primary">
-                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                  </svg>
-                  {{ t('editProduct') || 'Edit Product' }}
+              <div class="flex items-center justify-center space-x-2">
+                <router-link :to="`/admin/products/edit/${product._id}`">
+                  <button class="btn-action btn-edit" title="Edit Product">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                      </path>
+                    </svg>
+                    <span class="hidden sm:inline ml-1">Edit</span>
+                  </button>
                 </router-link>
-                <router-link :to="`/admin/products/delete/${product._id}`" class="btn btn-danger">
-                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                  </svg>
-                  {{ t('deleteProduct') || 'Delete Product' }}
+
+                <router-link :to="`/admin/products/delete/${product._id}`">
+                  <button class="btn-action btn-delete" title="Delete Product">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                      </path>
+                    </svg>
+                    <span class="hidden sm:inline ml-1">Delete</span>
+                  </button>
                 </router-link>
               </div>
             </div>
           </div>
-          
+
           <!-- Product Description -->
           <div class="rounded-xl p-8 mb-8">
             <div class="flex items-center gap-3 mb-6">
               <div class="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-600" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               </div>
               <h3 class="text-2xl font-bold text-secondary-900">
@@ -166,10 +181,9 @@ const formatDescription = (text) => {
             </div>
 
             <div class="bg-white rounded-lg p-6">
-              <div 
-                class="text-secondary-700 leading-relaxed text-base formatted-description"
-                v-html="formatDescription(product.description || t('noDescription') || 'No description available.')"
-              ></div>
+              <div class="text-secondary-700 leading-relaxed text-base formatted-description"
+                v-html="formatDescription(product.description || t('noDescription') || 'No description available.')">
+              </div>
             </div>
           </div>
         </div>
@@ -179,15 +193,41 @@ const formatDescription = (text) => {
 </template>
 
 <style scoped>
+
+
+.btn-action {
+  @apply inline-flex items-center px-3 py-2 border border-transparent text-base leading-4 font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
+}
+
+.btn-edit {
+  @apply text-warning bg-yellow-50 hover:bg-yellow-100 hover:text-yellow-800 focus:ring-yellow-500;
+}
+
+.btn-delete {
+  @apply text-error bg-red-50 hover:bg-red-100 hover:text-red-800 focus:ring-red-500;
+}
+
 /* Custom animations for this component */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .animate-fade-in {
@@ -240,4 +280,5 @@ input[type="number"]::-webkit-inner-spin-button {
 input[type="number"] {
   -moz-appearance: textfield;
 }
+
 </style>

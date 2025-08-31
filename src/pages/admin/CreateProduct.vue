@@ -125,9 +125,6 @@
                   <div class="text-xs bg-secondary-50 p-2 rounded border">
                     <strong>Formatting tips:</strong><br>
                     • Use **text** for <strong>bold</strong><br>
-                    • Start lines with • or - for bullet points<br>
-                    • Use emojis like 🌟 💧 🔬 🌿 ✨ for highlights<br>
-                    • End lines with : for section headers
                   </div>
                 </div>
               </div>
@@ -570,9 +567,6 @@ const formatDescription = (text) => {
     })
     // Convert **bold** or strong text patterns
     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    // Convert section headers (lines ending with :)
-    .replace(/^(.+):$/gm, '<h4 class="font-semibold text-secondary-800 mt-4 mb-2">$1:</h4>')
-    // Convert emojis and special characters (preserve them)
     // Convert numbered sections
     .replace(/^(\d+\.\s+.+)$/gm, '<div class="mt-2"><strong>$1</strong></div>')
     // Clean up any double <br> tags

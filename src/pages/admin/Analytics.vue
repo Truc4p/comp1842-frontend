@@ -532,7 +532,6 @@ onMounted(async () => {
         </div>
       </div>
     </div>
-
     <ChatWidget />
   </div>
 </template>

@@ -154,22 +154,30 @@ const cashPositionChartData = computed(() => {
   console.log('🔍 Sorted history for chart:', sortedHistory.slice(0, 3)); // Log first 3 items
   
   // Calculate running balance from netFlow data
-  let runningBalance = cashFlowData.value?.currentBalance || 0;
-  const labels = [];
+  const labels = sortedHistory.map(d => new Date(d.date).toLocaleDateString());
   const balances = [];
   
-  // Start from the end and work backwards to calculate historical balances
-  for (let i = sortedHistory.length - 1; i >= 0; i--) {
+  // Calculate cumulative balance from first day to last
+  let runningBalance = 0;
+  const currentBalance = cashFlowData.value?.currentBalance || 0;
+  
+  // Calculate total net flow to determine starting point
+  const totalNetFlow = sortedHistory.reduce((sum, entry) => sum + (entry.netFlow || 0), 0);
+  const startingBalance = currentBalance - totalNetFlow;
+  
+  console.log('🔍 Balance calculation debug:', {
+    currentBalance,
+    totalNetFlow,
+    startingBalance,
+    historyLength: sortedHistory.length
+  });
+  
+  // Calculate daily balances progressively
+  runningBalance = startingBalance;
+  for (let i = 0; i < sortedHistory.length; i++) {
     const entry = sortedHistory[i];
-    if (i === sortedHistory.length - 1) {
-      // For the latest entry, use current balance
-      balances.unshift(runningBalance);
-    } else {
-      // Subtract net flow to get previous day's balance
-      runningBalance -= (sortedHistory[i + 1].netFlow || 0);
-      balances.unshift(runningBalance);
-    }
-    labels.unshift(new Date(entry.date).toLocaleDateString());
+    runningBalance += (entry.netFlow || 0);
+    balances.push(Math.max(0, runningBalance)); // Ensure non-negative balance
   }
   
   console.log('🔍 Chart labels:', labels.slice(0, 5));
@@ -222,8 +230,9 @@ const inflowOutflowChartData = computed(() => {
 // Inflow category breakdown chart
 const inflowCategoryChartData = computed(() => {
   const colors = ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444'];
+  
   return {
-    labels: categoryBreakdown.value.inflows.map(cat => cat.name),
+    labels: categoryBreakdown.value.inflows.map(cat => getCategoryDisplayName(cat.category || cat.name)),
     datasets: [
       {
         data: categoryBreakdown.value.inflows.map(cat => cat.amount),
@@ -238,8 +247,9 @@ const inflowCategoryChartData = computed(() => {
 // Outflow category breakdown chart
 const outflowCategoryChartData = computed(() => {
   const colors = ['#ef4444', '#f97316', '#eab308', '#84cc16', '#06b6d4'];
+  
   return {
-    labels: categoryBreakdown.value.outflows.map(cat => cat.name),
+    labels: categoryBreakdown.value.outflows.map(cat => getCategoryDisplayName(cat.category || cat.name)),
     datasets: [
       {
         data: categoryBreakdown.value.outflows.map(cat => cat.amount),
@@ -491,6 +501,27 @@ const generateMockForecast = () => {
 
 // 🚀 PHASE 1: Real Data Integration - Replace Mock Functions
 
+// Helper function to convert category codes to display names
+const getCategoryDisplayName = (category) => {
+  const categoryLabels = {
+    'product_sales': 'Product Sales',
+    'service_revenue': 'Service Revenue', 
+    'investment_income': 'Investment Income',
+    'other_income': 'Other Income',
+    'operating_expenses': 'Operating Expenses',
+    'cost_of_goods_sold': 'Cost of Goods Sold',
+    'payroll': 'Payroll',
+    'marketing': 'Marketing',
+    'taxes': 'Taxes',
+    'rent': 'Rent',
+    'utilities': 'Utilities',
+    'shipping_costs': 'Shipping Costs',
+    'refunds': 'Refunds',
+    'other_expenses': 'Other Expenses'
+  };
+  return categoryLabels[category] || category.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+};
+
 // Fetch main cash flow dashboard data
 const fetchCashFlowData = async () => {
   try {
@@ -570,12 +601,6 @@ const fetchCashFlowData = async () => {
     
     console.log('🔍 Assigned cashFlowHistory:', cashFlowHistory.value);
     console.log('🔍 History length:', cashFlowHistory.value?.length);
-    
-    // If no history data from API, generate some sample data for the chart
-    if (!cashFlowHistory.value || cashFlowHistory.value.length === 0) {
-      console.log('⚠️ No history data from API, generating sample data for charts');
-      cashFlowHistory.value = generateSampleHistoryData();
-    }
     
     console.log("✅ Real cash flow data loaded successfully", {
       currentBalance: cashFlowData.value.currentBalance,
@@ -1164,7 +1189,7 @@ onMounted(async () => {
             <div class="space-y-3">
               <div v-for="(category, index) in categoryBreakdown.inflows" :key="index"
                 class="flex items-center justify-between">
-                <span class="text-sm font-medium text-secondary-900">{{ category.name }}</span>
+                <span class="text-sm font-medium text-secondary-900">{{ getCategoryDisplayName(category.category || category.name) }}</span>
                 <span class="text-sm font-semibold text-success">
                   ${{ category.amount.toLocaleString() }}
                 </span>
@@ -1178,7 +1203,7 @@ onMounted(async () => {
             <div class="space-y-3">
               <div v-for="(category, index) in categoryBreakdown.outflows" :key="index"
                 class="flex items-center justify-between">
-                <span class="text-sm font-medium text-secondary-900">{{ category.name }}</span>
+                <span class="text-sm font-medium text-secondary-900">{{ getCategoryDisplayName(category.category || category.name) }}</span>
                 <span class="text-sm font-semibold text-red-600">
                   ${{ category.amount.toLocaleString() }}
                 </span>

@@ -489,7 +489,7 @@ onMounted(async () => {
               </div>
               <div class="ml-4">
                 <p class="text-sm font-medium text-secondary-600">Current Balance</p>
-                <p class="text-2xl font-bold" :class="cashFlowData.currentBalance >= 0 ? 'text-green-600' : 'text-red-600'">
+                <p class="text-2xl font-bold" :class="cashFlowData.currentBalance >= 0 ? 'text-blue-600' : 'text-red-600'">
                   {{ formattedCurrentBalance }}
                 </p>
               </div>
@@ -500,7 +500,7 @@ onMounted(async () => {
           <div class="card p-6">
             <div class="flex items-center">
               <div class="p-3 rounded-full" 
-                   :class="cashFlowData.netCashFlow >= 0 ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'">
+                   :class="cashFlowData.netCashFlow >= 0 ? 'bg-green-100 text-success' : 'bg-red-100 text-red-600'">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     :d="cashFlowData.netCashFlow >= 0 ? 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6' : 'M13 17h8m0 0V9m0 8l-8-8-4 4-6-6'">
@@ -509,7 +509,7 @@ onMounted(async () => {
               </div>
               <div class="ml-4">
                 <p class="text-sm font-medium text-secondary-600">Net Cash Flow ({{ selectedPeriod }} days)</p>
-                <p class="text-2xl font-bold" :class="cashFlowData.netCashFlow >= 0 ? 'text-green-600' : 'text-red-600'">
+                <p class="text-2xl font-bold" :class="cashFlowData.netCashFlow >= 0 ? 'text-success' : 'text-red-600'">
                   {{ formattedNetCashFlow }}
                 </p>
               </div>
@@ -537,7 +537,7 @@ onMounted(async () => {
           <div class="card p-6">
             <div class="flex items-center">
               <div class="p-3 rounded-full" 
-                   :class="cashFlowData.runway > 90 ? 'bg-green-100 text-green-600' : cashFlowData.runway > 30 ? 'bg-yellow-100 text-yellow-600' : 'bg-red-100 text-red-600'">
+                   :class="cashFlowData.runway > 90 ? 'bg-green-100 text-success' : cashFlowData.runway > 30 ? 'bg-yellow-100 text-yellow-600' : 'bg-red-100 text-red-600'">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z">
@@ -547,7 +547,7 @@ onMounted(async () => {
               <div class="ml-4">
                 <p class="text-sm font-medium text-secondary-600">Runway</p>
                 <p class="text-2xl font-bold" 
-                   :class="cashFlowData.runway > 90 ? 'text-green-600' : cashFlowData.runway > 30 ? 'text-yellow-600' : 'text-red-600'">
+                   :class="cashFlowData.runway > 90 ? 'text-success' : cashFlowData.runway > 30 ? 'text-yellow-600' : 'text-red-600'">
                   {{ Math.round(cashFlowData.runway) }} days
                 </p>
               </div>
@@ -580,7 +580,7 @@ onMounted(async () => {
           <h3 class="text-lg font-semibold text-secondary-900 mb-4">📊 Cash Inflows vs Outflows</h3>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div class="text-center">
-              <div class="text-2xl font-bold text-green-600">{{ formattedTotalInflows }}</div>
+              <div class="text-2xl font-bold text-success">{{ formattedTotalInflows }}</div>
               <div class="text-sm text-secondary-600">Total Inflows</div>
             </div>
             <div class="text-center">
@@ -627,7 +627,7 @@ onMounted(async () => {
               <div v-for="(category, index) in categoryBreakdown.inflows" :key="index"
                 class="flex items-center justify-between">
                 <span class="text-sm font-medium text-secondary-900">{{ category.name }}</span>
-                <span class="text-sm font-semibold text-green-600">
+                <span class="text-sm font-semibold text-success">
                   ${{ category.amount.toLocaleString() }}
                 </span>
               </div>
@@ -671,14 +671,14 @@ onMounted(async () => {
             </div>
             <div class="text-center">
               <div class="text-lg font-semibold text-secondary-900">Operating Cash Flow Ratio</div>
-              <div class="text-2xl font-bold" :class="cashFlowData.netCashFlow / cashFlowData.totalInflows > 0.15 ? 'text-green-600' : 'text-yellow-600'">
+              <div class="text-2xl font-bold" :class="cashFlowData.netCashFlow / cashFlowData.totalInflows > 0.15 ? 'text-success' : 'text-yellow-600'">
                 {{ ((cashFlowData.netCashFlow / cashFlowData.totalInflows) * 100).toFixed(1) }}%
               </div>
               <div class="text-sm text-secondary-600">Net cash flow / Total inflows</div>
             </div>
             <div class="text-center">
               <div class="text-lg font-semibold text-secondary-900">Cash Flow Coverage</div>
-              <div class="text-2xl font-bold" :class="cashFlowData.totalInflows / cashFlowData.totalOutflows > 1.2 ? 'text-green-600' : 'text-red-600'">
+              <div class="text-2xl font-bold" :class="cashFlowData.totalInflows / cashFlowData.totalOutflows > 1.2 ? 'text-success' : 'text-red-600'">
                 {{ (cashFlowData.totalInflows / cashFlowData.totalOutflows).toFixed(2) }}x
               </div>
               <div class="text-sm text-secondary-600">Ability to cover expenses</div>

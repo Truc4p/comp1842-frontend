@@ -1,3 +1,83 @@
+<script setup>
+import axios from "axios";
+import { onMounted, ref, computed } from "vue";
+import { useRouter } from "vue-router";
+import { useI18n } from 'vue-i18n';
+import { API_URL } from '../../utils/config';
+import ChatWidget from '../../components/ChatWidget.vue';
+
+const { t } = useI18n();
+const router = useRouter();
+
+const users = ref([]);
+const loading = ref(true);
+const error = ref(null);
+const searchQuery = ref('');
+
+// Computed property for filtered users
+const filteredUsers = computed(() => {
+  if (!searchQuery.value) {
+    return users.value;
+  }
+  
+  const query = searchQuery.value.toLowerCase();
+  return users.value.filter(user => 
+    (user.username || user.name || '').toLowerCase().includes(query) ||
+    (user.email || '').toLowerCase().includes(query) ||
+    (user.phone || '').toLowerCase().includes(query) ||
+    (user.address || '').toLowerCase().includes(query)
+  );
+});
+
+onMounted(async () => {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    alert("You need to login first");
+    router.push("/login");
+    return;
+  }
+
+  try {
+    // Make the api request with axios with token in header
+    const res = await axios.get(`${API_URL}/users`, {
+      headers: {
+        "x-auth-token": `${token}`,
+      },
+    });
+
+    console.log("Users response:", res.data);
+    users.value = res.data;
+  } catch (err) {
+    console.error("Error fetching users:", err);
+    error.value = "Failed to load users";
+  } finally {
+    loading.value = false;
+  }
+});
+
+const getUserInitials = (name) => {
+  if (!name) return '?';
+  return name.split(' ').map(word => word.charAt(0)).join('').toUpperCase().slice(0, 2);
+};
+
+const getUserStatus = (user) => {
+  if (user.isActive === false) return 'Inactive';
+  if (user.isVerified === false) return 'Unverified';
+  return 'Active';
+};
+
+const getUserStatusColor = (user) => {
+  if (user.isActive === false) return 'bg-error text-white';
+  if (user.isVerified === false) return 'bg-warning text-white';
+  return 'bg-green-100 text-success';
+};
+
+const formatDate = (dateString) => {
+  if (!dateString) return 'Unknown';
+  return new Date(dateString).toLocaleDateString();
+};
+</script>
+
 <template>
   <div class="page-background min-h-screen">
     <!-- Header and Action Bar in Container -->
@@ -156,87 +236,9 @@
         </div>
       </div>
     </div>
+    <ChatWidget />
   </div>
 </template>
-
-<script setup>
-import axios from "axios";
-import { onMounted, ref, computed } from "vue";
-import { useRouter } from "vue-router";
-import { useI18n } from 'vue-i18n';
-import { API_URL } from '../../utils/config';
-
-const { t } = useI18n();
-const router = useRouter();
-
-const users = ref([]);
-const loading = ref(true);
-const error = ref(null);
-const searchQuery = ref('');
-
-// Computed property for filtered users
-const filteredUsers = computed(() => {
-  if (!searchQuery.value) {
-    return users.value;
-  }
-  
-  const query = searchQuery.value.toLowerCase();
-  return users.value.filter(user => 
-    (user.username || user.name || '').toLowerCase().includes(query) ||
-    (user.email || '').toLowerCase().includes(query) ||
-    (user.phone || '').toLowerCase().includes(query) ||
-    (user.address || '').toLowerCase().includes(query)
-  );
-});
-
-onMounted(async () => {
-  const token = localStorage.getItem("token");
-  if (!token) {
-    alert("You need to login first");
-    router.push("/login");
-    return;
-  }
-
-  try {
-    // Make the api request with axios with token in header
-    const res = await axios.get(`${API_URL}/users`, {
-      headers: {
-        "x-auth-token": `${token}`,
-      },
-    });
-
-    console.log("Users response:", res.data);
-    users.value = res.data;
-  } catch (err) {
-    console.error("Error fetching users:", err);
-    error.value = "Failed to load users";
-  } finally {
-    loading.value = false;
-  }
-});
-
-const getUserInitials = (name) => {
-  if (!name) return '?';
-  return name.split(' ').map(word => word.charAt(0)).join('').toUpperCase().slice(0, 2);
-};
-
-const getUserStatus = (user) => {
-  if (user.isActive === false) return 'Inactive';
-  if (user.isVerified === false) return 'Unverified';
-  return 'Active';
-};
-
-const getUserStatusColor = (user) => {
-  if (user.isActive === false) return 'bg-error text-white';
-  if (user.isVerified === false) return 'bg-warning text-white';
-  return 'bg-green-100 text-success';
-};
-
-const formatDate = (dateString) => {
-  if (!dateString) return 'Unknown';
-  return new Date(dateString).toLocaleDateString();
-};
-</script>
 
 <style scoped>
 /* Custom animations */

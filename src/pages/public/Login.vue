@@ -6,6 +6,7 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from 'vue-i18n';
 import { API_URL } from '../../utils/config';
+import ChatWidget from '../../components/ChatWidget.vue';
 
 const { t } = useI18n();
 const username = ref("");
@@ -129,5 +130,7 @@ const handleLogin = async () => {
         </router-link>
       </p>
     </div>
+
+    <ChatWidget />
   </div>
 </template>

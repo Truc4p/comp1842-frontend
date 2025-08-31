@@ -1,3 +1,133 @@
+
+<script setup>
+import { ref, onMounted } from 'vue';
+import axios from 'axios';
+import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+import { API_URL } from '../../utils/config';
+import ChatWidget from '../../components/ChatWidget.vue';
+
+const router = useRouter();
+const { t } = useI18n();
+const user = ref(null);
+const isEditing = ref(false);
+const editForm = ref({
+  username: '',
+  email: '',
+  phone: '',
+  address: ''
+});
+const loading = ref(false);
+const error = ref(null);
+const success = ref(null);
+
+// Get userId from localStorage
+const userId = localStorage.getItem('userId');
+if (!userId) {
+    console.error('userId is not found in localStorage');
+    router.push('/login');
+} else {
+    console.log('userId:', userId);
+}
+
+const formatDate = (dateString) => {
+  if (!dateString) return null;
+  try {
+    return new Date(dateString).getFullYear();
+  } catch {
+    return null;
+  }
+};
+
+const getCustomer = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+        alert(t('login'));
+        router.push("/login");
+        return;
+    }
+
+    try {
+        const res = await axios.get(`${API_URL}/users/${userId}`, {
+            headers: {
+                "x-auth-token": token,
+            },
+        });
+        console.log("User response:", res.data);
+        user.value = res.data;
+        // Initialize edit form with current user data
+        editForm.value = {
+          username: res.data.username || '',
+          email: res.data.email || '',
+          phone: res.data.phone || '',
+          address: res.data.address || ''
+        };
+    } catch (error) {
+        console.error("Error fetching user profile:", error);
+    }
+};
+
+const startEditing = () => {
+  isEditing.value = true;
+  // Reset form to current values
+  editForm.value = {
+    username: user.value.username || '',
+    email: user.value.email || '',
+    phone: user.value.phone || '',
+    address: user.value.address || ''
+  };
+  error.value = null;
+  success.value = null;
+};
+
+const cancelEditing = () => {
+  isEditing.value = false;
+  error.value = null;
+  success.value = null;
+};
+
+const updateProfile = async () => {
+  loading.value = true;
+  error.value = null;
+  success.value = null;
+  
+  const token = localStorage.getItem("token");
+  if (!token) {
+    error.value = "Authentication token not found";
+    loading.value = false;
+    return;
+  }
+
+  try {
+    const res = await axios.put(`${API_URL}/users/${userId}`, editForm.value, {
+      headers: {
+        "x-auth-token": token,
+      },
+    });
+    
+    console.log("Profile update response:", res.data);
+    user.value = { ...user.value, ...editForm.value };
+    success.value = "Profile updated successfully!";
+    isEditing.value = false;
+    
+    // Clear success message after 3 seconds
+    setTimeout(() => {
+      success.value = null;
+    }, 3000);
+    
+  } catch (err) {
+    console.error("Error updating profile:", err);
+    error.value = err.response?.data?.message || "Failed to update profile. Please try again.";
+  } finally {
+    loading.value = false;
+  }
+};
+
+onMounted(async () => {
+    getCustomer();
+});
+</script>
+
 <template>
   <div class="page-background">
     <div class="container mx-auto px-4 max-w-4xl">
@@ -299,136 +429,9 @@
         </div>
       </div>
     </div>
+    <ChatWidget />
   </div>
 </template>
-
-<script setup>
-import { ref, onMounted } from 'vue';
-import axios from 'axios';
-import { useRouter } from 'vue-router';
-import { useI18n } from 'vue-i18n';
-import { API_URL } from '../../utils/config';
-
-const router = useRouter();
-const { t } = useI18n();
-const user = ref(null);
-const isEditing = ref(false);
-const editForm = ref({
-  username: '',
-  email: '',
-  phone: '',
-  address: ''
-});
-const loading = ref(false);
-const error = ref(null);
-const success = ref(null);
-
-// Get userId from localStorage
-const userId = localStorage.getItem('userId');
-if (!userId) {
-    console.error('userId is not found in localStorage');
-    router.push('/login');
-} else {
-    console.log('userId:', userId);
-}
-
-const formatDate = (dateString) => {
-  if (!dateString) return null;
-  try {
-    return new Date(dateString).getFullYear();
-  } catch {
-    return null;
-  }
-};
-
-const getCustomer = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-        alert(t('login'));
-        router.push("/login");
-        return;
-    }
-
-    try {
-        const res = await axios.get(`${API_URL}/users/${userId}`, {
-            headers: {
-                "x-auth-token": token,
-            },
-        });
-        console.log("User response:", res.data);
-        user.value = res.data;
-        // Initialize edit form with current user data
-        editForm.value = {
-          username: res.data.username || '',
-          email: res.data.email || '',
-          phone: res.data.phone || '',
-          address: res.data.address || ''
-        };
-    } catch (error) {
-        console.error("Error fetching user profile:", error);
-    }
-};
-
-const startEditing = () => {
-  isEditing.value = true;
-  // Reset form to current values
-  editForm.value = {
-    username: user.value.username || '',
-    email: user.value.email || '',
-    phone: user.value.phone || '',
-    address: user.value.address || ''
-  };
-  error.value = null;
-  success.value = null;
-};
-
-const cancelEditing = () => {
-  isEditing.value = false;
-  error.value = null;
-  success.value = null;
-};
-
-const updateProfile = async () => {
-  loading.value = true;
-  error.value = null;
-  success.value = null;
-  
-  const token = localStorage.getItem("token");
-  if (!token) {
-    error.value = "Authentication token not found";
-    loading.value = false;
-    return;
-  }
-
-  try {
-    const res = await axios.put(`${API_URL}/users/${userId}`, editForm.value, {
-      headers: {
-        "x-auth-token": token,
-      },
-    });
-    
-    console.log("Profile update response:", res.data);
-    user.value = { ...user.value, ...editForm.value };
-    success.value = "Profile updated successfully!";
-    isEditing.value = false;
-    
-    // Clear success message after 3 seconds
-    setTimeout(() => {
-      success.value = null;
-    }, 3000);
-    
-  } catch (err) {
-    console.error("Error updating profile:", err);
-    error.value = err.response?.data?.message || "Failed to update profile. Please try again.";
-  } finally {
-    loading.value = false;
-  }
-};
-
-onMounted(async () => {
-    getCustomer();
-});
-</script>
 
 <style scoped>
 /* Loading spinner */

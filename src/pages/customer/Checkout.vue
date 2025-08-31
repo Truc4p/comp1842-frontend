@@ -4,6 +4,7 @@ import { useRouter, useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import axios from 'axios';
 import { API_URL } from '../../utils/config';
+import ChatWidget from '../../components/ChatWidget.vue';
 
 const router = useRouter();
 const route = useRoute();
@@ -293,6 +294,7 @@ onMounted(async () => {
                 </div>
             </div>
         </div>
+        <ChatWidget />
     </div>
 </template>
 

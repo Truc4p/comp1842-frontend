@@ -4,6 +4,7 @@ import { onMounted, ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from 'vue-i18n';
 import { API_URL } from '../../utils/config';
+import ChatWidget from '../../components/ChatWidget.vue';
 
 const { t, locale } = useI18n();
 const router = useRouter();
@@ -250,6 +251,7 @@ onMounted(() => {
         </div>
       </div>
     </div>
+    <ChatWidget />
   </div>
 </template>
 

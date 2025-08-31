@@ -218,6 +218,7 @@
         </div>
       </div>
     </div>
+    <ChatWidget />
   </div>
 </template>
 
@@ -227,6 +228,7 @@ import axios from 'axios';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { API_URL } from '../../utils/config';
+import ChatWidget from '../../components/ChatWidget.vue';
 
 const { t } = useI18n();
 const order = ref(null);

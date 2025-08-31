@@ -551,7 +551,7 @@
 
 /* Enhanced Footer Styles */
 .modern-footer {
-  background: linear-gradient(135deg, var(--secondary-900) 0%, var(--primary-900) 100%);
+  background: linear-gradient(135deg, var(--primary-100) 0%, var(--primary-300) 100%);
   position: relative;
   overflow: hidden;
 }
@@ -563,7 +563,7 @@
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(20, 184, 166, 0.5), transparent);
+  background: rgba(251, 249, 251, 0.3);
 }
 
 .modern-footer::after {
@@ -574,8 +574,9 @@
   width: 150%;
   height: 200%;
   background: 
-    radial-gradient(circle at 30% 40%, rgba(20, 184, 166, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 70% 60%, rgba(13, 148, 136, 0.05) 0%, transparent 50%);
+    radial-gradient(circle at 20% 80%, rgba(243, 176, 250, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(230, 120, 249, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(252, 248, 252, 0.1) 0%, transparent 50%);
   pointer-events: none;
 }
 
@@ -602,7 +603,7 @@
 }
 
 .footer-description {
-  color: var(--secondary-300);
+  color: var(--primary-700);
   max-width: 400px;
   line-height: 1.6;
   margin-bottom: 2rem;
@@ -623,7 +624,7 @@
 }
 
 .footer-section h3 {
-  color: white;
+  color: var(--primary-700);
   font-weight: 600;
   font-size: 1.125rem;
   margin-bottom: 1rem;
@@ -652,7 +653,7 @@
 }
 
 .footer-links a {
-  color: var(--secondary-300);
+  color: var(--primary-700);
   text-decoration: none;
   transition: all 0.3s ease;
   display: inline-flex;
@@ -661,7 +662,6 @@
 }
 
 .footer-links a:hover {
-  color: var(--primary-400);
   transform: translateX(5px);
 }
 
@@ -699,7 +699,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--secondary-300);
+  color: var(--primary-700);
   transition: all 0.3s ease;
   text-decoration: none;
 }
@@ -730,7 +730,7 @@
 }
 
 .footer-copyright {
-  color: var(--secondary-400);
+  color: var(--primary-700);
   font-size: 0.875rem;
 }
 
@@ -748,14 +748,14 @@
 }
 
 .footer-legal a {
-  color: var(--secondary-400);
+  color: var(--primary-700);
   text-decoration: none;
   font-size: 0.875rem;
   transition: color 0.3s ease;
 }
 
 .footer-legal a:hover {
-  color: var(--primary-400);
+  color: var(--primary-900);
 }
 
 /* Newsletter Signup */
@@ -769,13 +769,13 @@
 }
 
 .footer-newsletter h4 {
-  color: white;
+  color: var(--primary-600);
   font-weight: 600;
   margin-bottom: 0.5rem;
 }
 
 .footer-newsletter p {
-  color: var(--secondary-300);
+  color: var(--primary-700);
   font-size: 0.875rem;
   margin-bottom: 1rem;
 }
@@ -797,11 +797,11 @@
 }
 
 .newsletter-input::placeholder {
-  color: var(--secondary-400);
+  color: var(--primary-700);
 }
 
 .newsletter-input:focus {
-  border-color: var(--primary-500);
+  border-color: var(--primary-700);
   background: rgba(255, 255, 255, 0.15);
 }
 

@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { API_URL } from '../../utils/config';
+import ChatWidget from '../../components/ChatWidget.vue';
 
 const { t, locale } = useI18n();
 const product = ref(null);
@@ -361,6 +362,7 @@ const formatDescription = (text) => {
         </div>
       </div>
     </div>
+    <ChatWidget />
   </div>
 </template>
 

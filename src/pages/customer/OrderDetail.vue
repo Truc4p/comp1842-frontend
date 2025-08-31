@@ -1,3 +1,47 @@
+
+<script setup>
+import { ref, onMounted } from 'vue';
+import axios from 'axios';
+import { useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+import { API_URL } from '../../utils/config';
+import ChatWidget from '../../components/ChatWidget.vue';
+
+const { t } = useI18n();
+const order = ref(null);
+const route = useRoute();
+const username = ref('');
+
+const getImageUrl = (relativePath) => {
+  const url = `${API_URL}/${relativePath}`; // Adjust the base URL as needed
+  return url;
+};
+
+const onImageError = (event) => {
+  console.log('Image failed to load, using fallback image.');
+  event.target.src = '/images/fallback-image.jpg'; // Provide a fallback image URL
+};
+
+onMounted(async () => {
+  const orderId = route.params.id;
+  console.log('Fetching order with ID:', orderId); // Debugging log
+  try {
+    const response = await axios.get(`${API_URL}/orders/order/${orderId}`, {
+      headers: {
+        'x-auth-token': localStorage.getItem('token'),
+      },
+    });
+    console.log('API response:', response.data); // Debugging log
+    order.value = response.data;
+  } catch (error) {
+    console.error('Error fetching order details:', error);
+  }
+
+  username.value = localStorage.getItem('username');
+  console.log('Username:', username.value);
+});
+</script>
+
 <template>
   <div class="page-background">
     <div class="w-full px-4 xl:px-8 2xl:px-12">
@@ -233,50 +277,9 @@
         </div>
       </div>
     </div>
+    <ChatWidget />
   </div>
 </template>
-
-<script setup>
-import { ref, onMounted } from 'vue';
-import axios from 'axios';
-import { useRoute } from 'vue-router';
-import { useI18n } from 'vue-i18n';
-import { API_URL } from '../../utils/config';
-
-const { t } = useI18n();
-const order = ref(null);
-const route = useRoute();
-const username = ref('');
-
-const getImageUrl = (relativePath) => {
-  const url = `${API_URL}/${relativePath}`; // Adjust the base URL as needed
-  return url;
-};
-
-const onImageError = (event) => {
-  console.log('Image failed to load, using fallback image.');
-  event.target.src = '/images/fallback-image.jpg'; // Provide a fallback image URL
-};
-
-onMounted(async () => {
-  const orderId = route.params.id;
-  console.log('Fetching order with ID:', orderId); // Debugging log
-  try {
-    const response = await axios.get(`${API_URL}/orders/order/${orderId}`, {
-      headers: {
-        'x-auth-token': localStorage.getItem('token'),
-      },
-    });
-    console.log('API response:', response.data); // Debugging log
-    order.value = response.data;
-  } catch (error) {
-    console.error('Error fetching order details:', error);
-  }
-
-  username.value = localStorage.getItem('username');
-  console.log('Username:', username.value);
-});
-</script>
 
 <style scoped>
 /* Loading spinner */

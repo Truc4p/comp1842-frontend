@@ -27,6 +27,7 @@ import DeleteProduct from '@/pages/admin/DeleteProduct.vue';
 import Users from '@/pages/admin/Users.vue';
 import Analytics from '@/pages/admin/Analytics.vue';
 import CashFlow from '@/pages/admin/CashFlow.vue';
+import TokenDebug from '@/pages/admin/TokenDebug.vue';
 
 import Orders from '@/pages/admin/Orders.vue';
 import DetailOrder from '@/pages/admin/DetailOrder.vue';
@@ -75,6 +76,7 @@ const routes = [
       { path: "users", component: Users },
       { path: "analytics", component: Analytics },
       { path: "cashflow", component: CashFlow },
+      { path: "token-debug", component: TokenDebug },
 
       { path: "orders", component: Orders },
       { path: "orders/order/:id", component: DetailOrder },

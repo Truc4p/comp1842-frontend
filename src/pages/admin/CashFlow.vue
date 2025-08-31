@@ -1,7 +1,7 @@
 <!-- src/pages/admin/CashFlow.vue -->
 <script setup>
 import axios from "axios";
-import { onMounted, ref, computed } from "vue";
+import { onMounted, ref, computed, watch } from "vue";
 import { Line, Bar, Doughnut } from 'vue-chartjs';
 import {
   Chart,
@@ -13,7 +13,8 @@ import {
   ArcElement,
   Title as ChartTitle,
   Tooltip,
-  Legend
+  Legend,
+  Filler
 } from 'chart.js';
 import { useRouter } from "vue-router";
 import { useI18n } from 'vue-i18n';
@@ -33,7 +34,8 @@ Chart.register(
   ArcElement,
   ChartTitle,
   Tooltip,
-  Legend
+  Legend,
+  Filler
 );
 
 // Data refs
@@ -56,6 +58,42 @@ const categoryBreakdown = ref({
 const forecast = ref([]);
 const loading = ref(true);
 const error = ref(null);
+
+// 🚀 PHASE 2: Manual Transaction Entry Data
+const newTransaction = ref({
+  type: 'inflow',
+  category: 'product_sales',
+  amount: '',
+  description: ''
+});
+
+const isSubmitting = ref(false);
+const successMessage = ref('');
+
+// Available categories for transaction types
+const availableCategories = computed(() => {
+  if (newTransaction.value.type === 'inflow') {
+    return [
+      { value: 'product_sales', label: 'Product Sales' },
+      { value: 'service_revenue', label: 'Service Revenue' },
+      { value: 'investment_income', label: 'Investment Income' },
+      { value: 'other_income', label: 'Other Income' }
+    ];
+  } else {
+    return [
+      { value: 'operating_expenses', label: 'Operating Expenses' },
+      { value: 'cost_of_goods_sold', label: 'Cost of Goods Sold' },
+      { value: 'payroll', label: 'Payroll' },
+      { value: 'marketing', label: 'Marketing' },
+      { value: 'taxes', label: 'Taxes' },
+      { value: 'rent', label: 'Rent' },
+      { value: 'utilities', label: 'Utilities' },
+      { value: 'shipping_costs', label: 'Shipping Costs' },
+      { value: 'refunds', label: 'Refunds' },
+      { value: 'other_expenses', label: 'Other Expenses' }
+    ];
+  }
+});
 
 // Period selection
 const selectedPeriod = ref(30);
@@ -395,56 +433,384 @@ const generateMockForecast = () => {
   return forecast;
 };
 
-// Fetch cash flow data
+// 🚀 PHASE 1: Real Data Integration - Replace Mock Functions
+
+// Fetch main cash flow dashboard data
 const fetchCashFlowData = async () => {
   try {
-    // Since we don't have actual cashflow endpoints, we'll use mock data
-    // In a real application, you would call your cashflow API endpoints here
+    const token = localStorage.getItem("token");
     
-    const mockData = generateMockCashFlowData();
-    cashFlowData.value = {
-      currentBalance: mockData.currentBalance,
-      netCashFlow: mockData.netCashFlow,
-      totalInflows: mockData.totalInflows,
-      totalOutflows: mockData.totalOutflows,
-      cashBurnRate: mockData.cashBurnRate,
-      runway: mockData.runway
+    console.log('🔍 Token check:', {
+      hasToken: !!token,
+      tokenLength: token?.length,
+      tokenPreview: token?.substring(0, 50) + '...'
+    });
+    
+    if (!token) {
+      console.warn('🔐 No token found, redirecting to login');
+      error.value = "Authentication required";
+      router.push("/login");
+      return;
+    }
+
+    // Check if token is expired
+    try {
+      const tokenPayload = JSON.parse(atob(token.split('.')[1]));
+      const currentTime = Math.floor(Date.now() / 1000);
+      console.log('🕒 Token timing:', {
+        expires: new Date(tokenPayload.exp * 1000).toISOString(),
+        current: new Date(currentTime * 1000).toISOString(),
+        isExpired: tokenPayload.exp < currentTime,
+        timeLeft: (tokenPayload.exp - currentTime) / 3600 + ' hours'
+      });
+      
+      if (tokenPayload.exp < currentTime) {
+        console.warn('🔐 Token expired, redirecting to login');
+        localStorage.removeItem('token');
+        router.push('/login');
+        return;
+      }
+    } catch (e) {
+      console.warn('🔐 Invalid token format, redirecting to login', e);
+      localStorage.removeItem('token');
+      router.push('/login');
+      return;
+    }
+
+    // Add timestamp to prevent caching
+    const timestamp = new Date().getTime();
+    
+    // Use proper Authorization header format
+    const headers = {
+      'Authorization': `Bearer ${token}`,
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache'
     };
     
-    cashFlowHistory.value = mockData.history;
-    inflowsData.value = mockData.inflows;
-    outflowsData.value = mockData.outflows;
+    console.log('📡 Making API request:', {
+      url: `${API_URL}/cashflow/dashboard?period=${selectedPeriod.value}&_t=${timestamp}`,
+      headers: {
+        ...headers,
+        Authorization: 'Bearer ' + (token ? token.substring(0, 20) + '...' : 'missing')
+      }
+    });
     
-    categoryBreakdown.value = generateMockCategoryBreakdown();
-    forecast.value = generateMockForecast();
+    const response = await axios.get(`${API_URL}/cashflow/dashboard?period=${selectedPeriod.value}&_t=${timestamp}`, {
+      headers
+    });
+    
+    cashFlowData.value = response.data;
+    
+    // Fetch historical data with cache busting
+    const historyResponse = await axios.get(`${API_URL}/cashflow/history?period=${selectedPeriod.value}&_t=${timestamp}`, {
+      headers
+    });
+    
+    cashFlowHistory.value = historyResponse.data.history;
+    inflowsData.value = historyResponse.data.inflows || [];
+    outflowsData.value = historyResponse.data.outflows || [];
+    
+    console.log("✅ Real cash flow data loaded successfully", {
+      currentBalance: cashFlowData.value.currentBalance,
+      netCashFlow: cashFlowData.value.netCashFlow,
+      historyEntries: cashFlowHistory.value.length,
+      timestamp: new Date().toLocaleTimeString()
+    });
     
   } catch (err) {
-    console.error("Error fetching cash flow data:", err);
-    error.value = "Failed to load cash flow data";
+    console.error("❌ Error fetching cash flow data:", err);
+    console.error("❌ Error details:", {
+      status: err.response?.status,
+      statusText: err.response?.statusText,
+      data: err.response?.data,
+      config: {
+        url: err.config?.url,
+        headers: err.config?.headers
+      }
+    });
+    
+    error.value = err.response?.data?.message || err.message || 'Failed to load cash flow data';
+    
+    // Handle authentication errors
+    if (err.response?.status === 401 || err.response?.status === 403) {
+      console.warn('🔐 Authentication failed, redirecting to login');
+      localStorage.removeItem('token');
+      router.push('/login');
+      return;
+    }
+    
+    // Fallback to mock data if API fails (for development)
+    if (err.response?.status === 404 || err.code === 'ECONNREFUSED') {
+      console.warn("💡 Cash flow endpoints not available, using mock data for development");
+      const mockData = generateMockCashFlowData();
+      cashFlowData.value = {
+        currentBalance: mockData.currentBalance,
+        netCashFlow: mockData.netCashFlow,
+        totalInflows: mockData.totalInflows,
+        totalOutflows: mockData.totalOutflows,
+        cashBurnRate: mockData.cashBurnRate,
+        runway: mockData.runway
+      };
+      cashFlowHistory.value = mockData.history;
+      inflowsData.value = mockData.inflows;
+      outflowsData.value = mockData.outflows;
+      error.value = null; // Clear error when using fallback
+    } else {
+      error.value = "Failed to load cash flow data";
+    }
+  }
+};
+
+// Fetch category breakdown data
+const fetchCategoryBreakdown = async () => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await axios.get(`${API_URL}/cashflow/categories?period=${selectedPeriod.value}`, {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+    categoryBreakdown.value = response.data;
+    console.log("✅ Category breakdown data loaded successfully", {
+      inflowCategories: response.data.inflows?.length || 0,
+      outflowCategories: response.data.outflows?.length || 0
+    });
+  } catch (err) {
+    console.error("Error fetching category breakdown:", err);
+    // Fallback to mock data
+    console.warn("💡 Using mock category data");
+    categoryBreakdown.value = generateMockCategoryBreakdown();
+  }
+};
+
+// Fetch forecast data
+const fetchForecast = async () => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await axios.get(`${API_URL}/cashflow/forecast`, {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+    forecast.value = response.data;
+    console.log("✅ Forecast data loaded successfully", {
+      forecastDays: response.data.length || 0
+    });
+  } catch (err) {
+    console.error("Error fetching forecast:", err);
+    // Fallback to mock data
+    console.warn("💡 Using mock forecast data");
+    forecast.value = generateMockForecast();
+  }
+};
+
+// 🚀 PHASE 2: Manual Transaction Entry Functions
+
+// Watch transaction type changes to update category
+watch(() => newTransaction.value.type, (newType) => {
+  // Set default category when type changes
+  if (newType === 'inflow') {
+    newTransaction.value.category = 'product_sales';
+  } else {
+    newTransaction.value.category = 'operating_expenses';
+  }
+});
+
+// Add manual transaction
+const addTransaction = async () => {
+  try {
+    // Clear previous messages
+    error.value = '';
+    successMessage.value = '';
+    
+    // Validate form
+    if (!newTransaction.value.amount || newTransaction.value.amount <= 0) {
+      error.value = "Please enter a valid amount greater than 0";
+      return;
+    }
+    
+    if (!newTransaction.value.description.trim()) {
+      error.value = "Please enter a description";
+      return;
+    }
+
+    if (newTransaction.value.description.trim().length < 3) {
+      error.value = "Description must be at least 3 characters long";
+      return;
+    }
+
+    isSubmitting.value = true;
+    
+    const token = localStorage.getItem("token");
+    
+    if (!token) {
+      error.value = "Authentication required. Please log in again.";
+      router.push("/login");
+      return;
+    }
+    
+    const transactionData = {
+      type: newTransaction.value.type,
+      category: newTransaction.value.category,
+      amount: parseFloat(newTransaction.value.amount),
+      description: newTransaction.value.description.trim(),
+      date: new Date(),
+      automated: false
+    };
+
+    console.log("📝 Submitting transaction:", transactionData);
+
+    const response = await axios.post(`${API_URL}/cashflow/transactions`, transactionData, {
+      headers: { 
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      }
+    });
+
+    console.log("✅ Transaction added successfully:", response.data);
+    
+    const transactionType = newTransaction.value.type === 'inflow' ? 'Income' : 'Expense';
+    const categoryLabel = availableCategories.value.find(cat => cat.value === newTransaction.value.category)?.label || newTransaction.value.category;
+    
+    successMessage.value = `${transactionType} of $${transactionData.amount.toFixed(2)} (${categoryLabel}) added successfully!`;
+    
+    // Reset form
+    newTransaction.value = {
+      type: 'inflow',
+      category: 'product_sales',
+      amount: '',
+      description: ''
+    };
+
+    // Refresh all data to show the new transaction
+    await fetchAllData();
+    
+    // Clear success message after 5 seconds
+    setTimeout(() => {
+      successMessage.value = '';
+    }, 5000);
+
+  } catch (err) {
+    console.error("❌ Error adding transaction:", err);
+    
+    if (err.response?.status === 401) {
+      error.value = "Authentication failed. Please log in again.";
+      router.push("/login");
+    } else if (err.response?.status === 403) {
+      error.value = "Admin access required to add transactions.";
+    } else {
+      error.value = err.response?.data?.message || "Failed to add transaction. Please try again.";
+    }
+  } finally {
+    isSubmitting.value = false;
   }
 };
 
 // Handle period change
-const handlePeriodChange = () => {
-  fetchCashFlowData();
+const handlePeriodChange = async () => {
+  loading.value = true;
+  try {
+    await Promise.all([
+      fetchCashFlowData(),
+      fetchCategoryBreakdown(),
+      fetchForecast()
+    ]);
+  } catch (err) {
+    console.error("Error updating data for new period:", err);
+  } finally {
+    loading.value = false;
+  }
+};
+
+// Manual sync function for testing automation
+const syncOrdersToTransactions = async () => {
+  try {
+    loading.value = true;
+    const token = localStorage.getItem("token");
+    
+    const response = await axios.post(`${API_URL}/cashflow/sync-orders`, {}, {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+    
+    console.log("Orders synced to transactions:", response.data);
+    
+    // Refresh all data after sync
+    await fetchAllData();
+    
+  } catch (err) {
+    console.error("Error syncing orders:", err);
+    error.value = "Failed to sync order data";
+  } finally {
+    loading.value = false;
+  }
+};
+
+// Debug function to check transactions
+const debugTransactions = async () => {
+  try {
+    const token = localStorage.getItem("token");
+    
+    const response = await axios.get(`${API_URL}/cashflow/debug/recent`, {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+    
+    console.log("🐛 DEBUG: Transaction data:", response.data);
+    console.table(response.data.recentTransactions);
+    
+    alert(`Debug Info:
+Total Transactions: ${response.data.totalTransactions}
+Manual Transactions: ${response.data.manualTransactions}
+Automated Transactions: ${response.data.automatedTransactions}
+
+Check console for detailed transaction list.`);
+    
+  } catch (err) {
+    console.error("Debug error:", err);
+    alert("Debug failed - check console for details");
+  }
 };
 
 // Fetch all data
 const fetchAllData = async () => {
   loading.value = true;
   try {
-    await fetchCashFlowData();
+    // Fetch all cash flow data in parallel for better performance
+    await Promise.all([
+      fetchCashFlowData(),
+      fetchCategoryBreakdown(),
+      fetchForecast()
+    ]);
   } catch (err) {
     error.value = "Failed to load cash flow data";
+    console.error("Error loading all cash flow data:", err);
   } finally {
     loading.value = false;
   }
 };
 
 onMounted(async () => {
+  console.log('🚀 CashFlow component mounted');
+  
   const token = localStorage.getItem("token");
   if (!token) {
+    console.warn('🔐 No token found on mount, redirecting to login');
     alert("You need to login first");
+    router.push("/login");
+    return;
+  }
+
+  // Validate token expiry
+  try {
+    const tokenPayload = JSON.parse(atob(token.split('.')[1]));
+    const currentTime = Math.floor(Date.now() / 1000);
+    if (tokenPayload.exp < currentTime) {
+      console.warn('🔐 Token expired on mount, redirecting to login');
+      localStorage.removeItem('token');
+      alert("Your session has expired. Please login again.");
+      router.push("/login");
+      return;
+    }
+    console.log('✅ Valid token found, proceeding with data fetch');
+  } catch (e) {
+    console.warn('🔐 Invalid token format on mount, redirecting to login');
+    localStorage.removeItem('token');
+    alert("Invalid session. Please login again.");
     router.push("/login");
     return;
   }
@@ -555,18 +921,123 @@ onMounted(async () => {
           </div>
         </div>
 
-        <!-- Period Selector -->
+        <!-- Period Selector & Controls -->
         <div class="card p-6">
           <div class="flex items-center justify-between mb-4">
             <h3 class="text-lg font-semibold text-secondary-900">Analysis Period</h3>
-            <select v-model="selectedPeriod" @change="handlePeriodChange" class="form-select w-40">
-              <option v-for="period in periods" :key="period.value" :value="period.value">
-                {{ period.label }}
-              </option>
-            </select>
+            <div class="flex items-center gap-3">
+              <select v-model="selectedPeriod" @change="handlePeriodChange" class="form-select w-40">
+                <option v-for="period in periods" :key="period.value" :value="period.value">
+                  {{ period.label }}
+                </option>
+              </select>
+              <button 
+                @click="syncOrdersToTransactions"
+                :disabled="loading"
+                class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 flex items-center gap-2"
+              >
+                <svg v-if="loading" class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span v-else>🔄</span>
+                Sync Orders
+              </button>
+              <button 
+                @click="debugTransactions"
+                :disabled="loading"
+                class="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 disabled:opacity-50 flex items-center gap-2"
+              >
+                <span>🐛</span>
+                Debug
+              </button>
+            </div>
           </div>
         </div>
 
+        <!-- 🚀 PHASE 2: Manual Transaction Entry -->
+        <div class="card p-6">
+          <h3 class="text-lg font-semibold text-secondary-900 mb-4">➕ Add Manual Transaction</h3>
+          
+          <!-- Success Message -->
+          <div v-if="successMessage" class="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+            {{ successMessage }}
+          </div>
+          
+          <!-- Error Message -->
+          <div v-if="error" class="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+            {{ error }}
+          </div>
+
+          <form @submit.prevent="addTransaction">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <!-- Transaction Type -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                <select v-model="newTransaction.type" class="form-select w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                  <option value="inflow">💰 Income</option>
+                  <option value="outflow">💸 Expense</option>
+                </select>
+              </div>
+
+              <!-- Category -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                <select v-model="newTransaction.category" class="form-select w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                  <option v-for="cat in availableCategories" :key="cat.value" :value="cat.value">
+                    {{ cat.label }}
+                  </option>
+                </select>
+              </div>
+
+              <!-- Amount -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Amount ($)</label>
+                <input 
+                  v-model="newTransaction.amount" 
+                  type="number" 
+                  step="0.01" 
+                  min="0"
+                  placeholder="0.00" 
+                  class="form-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  required
+                >
+              </div>
+
+              <!-- Description -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <input 
+                  v-model="newTransaction.description" 
+                  type="text" 
+                  placeholder="Transaction description" 
+                  class="form-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  required
+                >
+              </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="mt-4 flex items-center gap-3">
+              <button 
+                type="submit" 
+                :disabled="isSubmitting || !newTransaction.amount || !newTransaction.description"
+                class="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                <svg v-if="isSubmitting" class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span v-else>➕</span>
+                {{ isSubmitting ? 'Adding...' : 'Add Transaction' }}
+              </button>
+              
+              <p class="text-sm text-gray-500">
+                Add {{ newTransaction.type === 'inflow' ? 'income' : 'expense' }} transactions manually to track non-automated cash flows
+              </p>
+            </div>
+          </form>
+        </div>
         <!-- Cash Position Trend (Middle Section) -->
         <div class="card p-6">
           <h3 class="text-lg font-semibold text-secondary-900 mb-4">💹 Cash Position Over Time</h3>

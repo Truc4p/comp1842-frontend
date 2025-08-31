@@ -680,9 +680,12 @@ const fetchForecast = async () => {
     const response = await axios.get(`${API_URL}/cashflow/forecast`, {
       headers: { "Authorization": `Bearer ${token}` }
     });
-    forecast.value = response.data;
+    // Extract forecast array from API response
+    forecast.value = response.data.forecast || [];
     console.log("✅ Forecast data loaded successfully", {
-      forecastDays: response.data.length || 0
+      forecastDays: forecast.value.length || 0,
+      totalDays: response.data.forecast?.length || 0,
+      summary: response.data.summary || null
     });
   } catch (err) {
     console.error("Error fetching forecast:", err);

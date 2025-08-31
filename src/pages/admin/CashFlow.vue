@@ -152,13 +152,13 @@ const cashPositionChartData = computed(() => {
   
   const sortedHistory = [...cashFlowHistory.value].sort((a, b) => new Date(a.date) - new Date(b.date));
   console.log('🔍 Sorted history for chart:', sortedHistory.slice(0, 3)); // Log first 3 items
+  console.log('🔍 Full sorted history length:', sortedHistory.length);
   
   // Calculate running balance from netFlow data
   const labels = sortedHistory.map(d => new Date(d.date).toLocaleDateString());
   const balances = [];
   
   // Calculate cumulative balance from first day to last
-  let runningBalance = 0;
   const currentBalance = cashFlowData.value?.currentBalance || 0;
   
   // Calculate total net flow to determine starting point
@@ -173,7 +173,7 @@ const cashPositionChartData = computed(() => {
   });
   
   // Calculate daily balances progressively
-  runningBalance = startingBalance;
+  let runningBalance = startingBalance;
   for (let i = 0; i < sortedHistory.length; i++) {
     const entry = sortedHistory[i];
     runningBalance += (entry.netFlow || 0);
@@ -182,6 +182,7 @@ const cashPositionChartData = computed(() => {
   
   console.log('🔍 Chart labels:', labels.slice(0, 5));
   console.log('🔍 Chart balances (calculated):', balances.slice(0, 5));
+  console.log('🔍 Final balances:', balances.slice(-5));
   
   return {
     labels,

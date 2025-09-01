@@ -159,17 +159,13 @@ const cashPositionChartData = computed(() => {
   const labels = sortedHistory.map(d => new Date(d.date).toLocaleDateString());
   const balances = [];
 
-  // Calculate cumulative balance from first day to last
+  // Use backend-provided starting balance instead of calculating incorrectly
   const currentBalance = cashFlowData.value?.currentBalance || 0;
-
-  // Calculate total net flow to determine starting point
-  const totalNetFlow = sortedHistory.reduce((sum, entry) => sum + (entry.netFlow || 0), 0);
-  const startingBalance = currentBalance - totalNetFlow;
+  const startingBalance = cashFlowData.value?.startingBalance || 0;
 
   console.log('🔍 Balance calculation debug:', {
     currentBalance,
-    totalNetFlow,
-    startingBalance,
+    startingBalance: startingBalance,
     historyLength: sortedHistory.length
   });
 
@@ -1001,7 +997,7 @@ onMounted(async () => {
           <div class="card p-6">
             <div class="flex items-center">
               <div class="p-3 rounded-full"
-                :class="cashFlowData.runway > 90 ? 'bg-red-100 text-red-600' : cashFlowData.runway > 30 ? 'bg-yellow-100 text-yellow-600' : 'bg-red-100 text-red-600'">
+                :class="cashFlowData.runway > 90 ? 'bg-green-100 text-green-600' : cashFlowData.runway > 30 ? 'bg-yellow-100 text-yellow-600' : 'bg-red-100 text-red-600'">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z">

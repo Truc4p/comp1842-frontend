@@ -166,7 +166,8 @@
                     type="checkbox" 
                     :value="type" 
                     v-model="skinType"
-                    class="rounded border-secondary-300 text-primary-600 focus:ring-primary-500"
+                    class="rounded border-secondary-300"
+                    style="accent-color: #C97F98;"
                   />
                   <span class="text-sm font-medium capitalize">{{ type }}</span>
                 </label>

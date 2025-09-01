@@ -102,7 +102,8 @@ const periods = [
   { value: 15, label: '15 Days' },
   { value: 30, label: '30 Days' },
   { value: 90, label: '90 Days' },
-  { value: 180, label: '180 Days' }
+  { value: 180, label: '180 Days' },
+  { value: 365, label: '365 Days' }
 ];
 
 // Computed properties for formatting
@@ -144,34 +145,34 @@ const formattedCashBurnRate = computed(() => {
 // Cash position chart data
 const cashPositionChartData = computed(() => {
   console.log('🔍 Chart Debug - cashFlowHistory:', cashFlowHistory.value);
-  
+
   if (!cashFlowHistory.value || cashFlowHistory.value.length === 0) {
     console.log('⚠️ No cash flow history data available for chart');
     return { labels: [], datasets: [] };
   }
-  
+
   const sortedHistory = [...cashFlowHistory.value].sort((a, b) => new Date(a.date) - new Date(b.date));
   console.log('🔍 Sorted history for chart:', sortedHistory.slice(0, 3)); // Log first 3 items
   console.log('🔍 Full sorted history length:', sortedHistory.length);
-  
+
   // Calculate running balance from netFlow data
   const labels = sortedHistory.map(d => new Date(d.date).toLocaleDateString());
   const balances = [];
-  
+
   // Calculate cumulative balance from first day to last
   const currentBalance = cashFlowData.value?.currentBalance || 0;
-  
+
   // Calculate total net flow to determine starting point
   const totalNetFlow = sortedHistory.reduce((sum, entry) => sum + (entry.netFlow || 0), 0);
   const startingBalance = currentBalance - totalNetFlow;
-  
+
   console.log('🔍 Balance calculation debug:', {
     currentBalance,
     totalNetFlow,
     startingBalance,
     historyLength: sortedHistory.length
   });
-  
+
   // Calculate daily balances progressively
   let runningBalance = startingBalance;
   for (let i = 0; i < sortedHistory.length; i++) {
@@ -179,11 +180,11 @@ const cashPositionChartData = computed(() => {
     runningBalance += (entry.netFlow || 0);
     balances.push(Math.max(0, runningBalance)); // Ensure non-negative balance
   }
-  
+
   console.log('🔍 Chart labels:', labels.slice(0, 5));
   console.log('🔍 Chart balances (calculated):', balances.slice(0, 5));
   console.log('🔍 Final balances:', balances.slice(-5));
-  
+
   return {
     labels,
     datasets: [
@@ -206,7 +207,7 @@ const inflowOutflowChartData = computed(() => {
   const labels = sortedHistory.map(d => new Date(d.date).toLocaleDateString());
   const inflows = sortedHistory.map(d => d.inflows);
   const outflows = sortedHistory.map(d => d.outflows);
-  
+
   return {
     labels,
     datasets: [
@@ -231,7 +232,7 @@ const inflowOutflowChartData = computed(() => {
 // Inflow category breakdown chart
 const inflowCategoryChartData = computed(() => {
   const colors = ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444'];
-  
+
   return {
     labels: categoryBreakdown.value.inflows.map(cat => getCategoryDisplayName(cat.category || cat.name)),
     datasets: [
@@ -248,7 +249,7 @@ const inflowCategoryChartData = computed(() => {
 // Outflow category breakdown chart
 const outflowCategoryChartData = computed(() => {
   const colors = ['#ef4444', '#f97316', '#eab308', '#84cc16', '#06b6d4'];
-  
+
   return {
     labels: categoryBreakdown.value.outflows.map(cat => getCategoryDisplayName(cat.category || cat.name)),
     datasets: [
@@ -265,10 +266,10 @@ const outflowCategoryChartData = computed(() => {
 // Forecast chart data
 const forecastChartData = computed(() => {
   if (!forecast.value || forecast.value.length === 0) return { labels: [], datasets: [] };
-  
+
   const labels = forecast.value.map(f => new Date(f.date).toLocaleDateString());
   const projectedBalance = forecast.value.map(f => f.projectedBalance);
-  
+
   return {
     labels,
     datasets: [
@@ -368,16 +369,16 @@ const generateSampleHistoryData = () => {
   const data = [];
   const currentBalance = cashFlowData.value.currentBalance || 21914;
   const days = selectedPeriod.value || 30;
-  
+
   for (let i = days; i >= 0; i--) {
     const date = new Date();
     date.setDate(date.getDate() - i);
-    
+
     // Calculate progressive balance based on current balance
     const progressRatio = (days - i) / days;
     const dailyVariation = (Math.random() - 0.5) * 1000; // Random daily changes
     const balance = (currentBalance * 0.7) + (currentBalance * 0.3 * progressRatio) + dailyVariation;
-    
+
     data.push({
       date: date.toISOString().split('T')[0],
       balance: Math.max(0, balance), // Ensure non-negative
@@ -386,7 +387,7 @@ const generateSampleHistoryData = () => {
       netFlow: Math.random() * 1000 - 500
     });
   }
-  
+
   console.log('📊 Generated sample history data:', data.slice(0, 3));
   return data;
 };
@@ -397,27 +398,27 @@ const generateMockCashFlowData = () => {
   const history = [];
   const inflows = [];
   const outflows = [];
-  
+
   // Generate historical data
   let currentBalance = 50000; // Starting balance
   for (let i = selectedPeriod.value; i >= 0; i--) {
     const date = new Date(today);
     date.setDate(date.getDate() - i);
-    
+
     // Mock inflows (revenue-based on sales data)
     const dailyRevenue = Math.random() * 5000 + 1000;
     const otherIncome = Math.random() * 500;
     const totalInflow = dailyRevenue + otherIncome;
-    
+
     // Mock outflows (expenses)
     const operatingExpenses = Math.random() * 2000 + 500;
     const cogs = dailyRevenue * 0.4; // 40% of revenue as COGS
     const taxes = dailyRevenue * 0.1; // 10% tax
     const totalOutflow = operatingExpenses + cogs + taxes;
-    
+
     const netFlow = totalInflow - totalOutflow;
     currentBalance += netFlow;
-    
+
     history.push({
       date: date.toISOString().split('T')[0],
       balance: currentBalance,
@@ -425,13 +426,13 @@ const generateMockCashFlowData = () => {
       outflows: totalOutflow,
       netFlow
     });
-    
+
     inflows.push({
       date: date.toISOString().split('T')[0],
       revenue: dailyRevenue,
       otherIncome: otherIncome
     });
-    
+
     outflows.push({
       date: date.toISOString().split('T')[0],
       operatingExpenses,
@@ -439,14 +440,14 @@ const generateMockCashFlowData = () => {
       taxes
     });
   }
-  
+
   // Calculate summary stats
   const totalInflows = inflows.reduce((sum, day) => sum + day.revenue + day.otherIncome, 0);
   const totalOutflows = outflows.reduce((sum, day) => sum + day.operatingExpenses + day.cogs + day.taxes, 0);
   const netCashFlow = totalInflows - totalOutflows;
   const avgDailyBurn = totalOutflows / selectedPeriod.value;
   const runway = currentBalance / avgDailyBurn; // days
-  
+
   return {
     currentBalance,
     netCashFlow,
@@ -482,21 +483,21 @@ const generateMockForecast = () => {
   const forecast = [];
   const today = new Date();
   let projectedBalance = cashFlowData.value.currentBalance;
-  
+
   for (let i = 1; i <= 90; i++) { // 3 months forecast
     const date = new Date(today);
     date.setDate(date.getDate() + i);
-    
+
     // Simple forecast based on current trend
     const avgDailyFlow = cashFlowData.value.netCashFlow / selectedPeriod.value;
     projectedBalance += avgDailyFlow;
-    
+
     forecast.push({
       date: date.toISOString().split('T')[0],
       projectedBalance: Math.max(0, projectedBalance) // Don't go below 0
     });
   }
-  
+
   return forecast;
 };
 
@@ -506,7 +507,7 @@ const generateMockForecast = () => {
 const getCategoryDisplayName = (category) => {
   const categoryLabels = {
     'product_sales': 'Product Sales',
-    'service_revenue': 'Service Revenue', 
+    'service_revenue': 'Service Revenue',
     'investment_income': 'Investment Income',
     'other_income': 'Other Income',
     'operating_expenses': 'Operating Expenses',
@@ -527,13 +528,13 @@ const getCategoryDisplayName = (category) => {
 const fetchCashFlowData = async () => {
   try {
     const token = localStorage.getItem("token");
-    
+
     console.log('🔍 Token check:', {
       hasToken: !!token,
       tokenLength: token?.length,
       tokenPreview: token?.substring(0, 50) + '...'
     });
-    
+
     if (!token) {
       console.warn('🔐 No token found, redirecting to login');
       error.value = "Authentication required";
@@ -551,7 +552,7 @@ const fetchCashFlowData = async () => {
         isExpired: tokenPayload.exp < currentTime,
         timeLeft: (tokenPayload.exp - currentTime) / 3600 + ' hours'
       });
-      
+
       if (tokenPayload.exp < currentTime) {
         console.warn('🔐 Token expired, redirecting to login');
         localStorage.removeItem('token');
@@ -567,14 +568,14 @@ const fetchCashFlowData = async () => {
 
     // Add timestamp to prevent caching
     const timestamp = new Date().getTime();
-    
+
     // Use proper Authorization header format
     const headers = {
       'Authorization': `Bearer ${token}`,
       'Cache-Control': 'no-cache, no-store, must-revalidate',
       'Pragma': 'no-cache'
     };
-    
+
     console.log('📡 Making API request:', {
       url: `${API_URL}/cashflow/dashboard?period=${selectedPeriod.value}&_t=${timestamp}`,
       headers: {
@@ -582,34 +583,34 @@ const fetchCashFlowData = async () => {
         Authorization: 'Bearer ' + (token ? token.substring(0, 20) + '...' : 'missing')
       }
     });
-    
+
     const response = await axios.get(`${API_URL}/cashflow/dashboard?period=${selectedPeriod.value}&_t=${timestamp}`, {
       headers
     });
-    
+
     cashFlowData.value = response.data;
-    
+
     // Fetch historical data with cache busting
     const historyResponse = await axios.get(`${API_URL}/cashflow/history?period=${selectedPeriod.value}&_t=${timestamp}`, {
       headers
     });
-    
+
     console.log('🔍 History API Response:', historyResponse.data);
-    
+
     cashFlowHistory.value = historyResponse.data.history;
     inflowsData.value = historyResponse.data.inflows || [];
     outflowsData.value = historyResponse.data.outflows || [];
-    
+
     console.log('🔍 Assigned cashFlowHistory:', cashFlowHistory.value);
     console.log('🔍 History length:', cashFlowHistory.value?.length);
-    
+
     console.log("✅ Real cash flow data loaded successfully", {
       currentBalance: cashFlowData.value.currentBalance,
       netCashFlow: cashFlowData.value.netCashFlow,
       historyEntries: cashFlowHistory.value.length,
       timestamp: new Date().toLocaleTimeString()
     });
-    
+
   } catch (err) {
     console.error("❌ Error fetching cash flow data:", err);
     console.error("❌ Error details:", {
@@ -621,9 +622,9 @@ const fetchCashFlowData = async () => {
         headers: err.config?.headers
       }
     });
-    
+
     error.value = err.response?.data?.message || err.message || 'Failed to load cash flow data';
-    
+
     // Handle authentication errors
     if (err.response?.status === 401 || err.response?.status === 403) {
       console.warn('🔐 Authentication failed, redirecting to login');
@@ -631,7 +632,7 @@ const fetchCashFlowData = async () => {
       router.push('/login');
       return;
     }
-    
+
     // Fallback to mock data if API fails (for development)
     if (err.response?.status === 404 || err.code === 'ECONNREFUSED') {
       console.warn("💡 Cash flow endpoints not available, using mock data for development");
@@ -714,13 +715,13 @@ const addTransaction = async () => {
     // Clear previous messages
     error.value = '';
     successMessage.value = '';
-    
+
     // Validate form
     if (!newTransaction.value.amount || newTransaction.value.amount <= 0) {
       error.value = "Please enter a valid amount greater than 0";
       return;
     }
-    
+
     if (!newTransaction.value.description.trim()) {
       error.value = "Please enter a description";
       return;
@@ -732,15 +733,15 @@ const addTransaction = async () => {
     }
 
     isSubmitting.value = true;
-    
+
     const token = localStorage.getItem("token");
-    
+
     if (!token) {
       error.value = "Authentication required. Please log in again.";
       router.push("/login");
       return;
     }
-    
+
     const transactionData = {
       type: newTransaction.value.type,
       category: newTransaction.value.category,
@@ -753,19 +754,19 @@ const addTransaction = async () => {
     console.log("📝 Submitting transaction:", transactionData);
 
     const response = await axios.post(`${API_URL}/cashflow/transactions`, transactionData, {
-      headers: { 
+      headers: {
         "Authorization": `Bearer ${token}`,
         "Content-Type": "application/json"
       }
     });
 
     console.log("✅ Transaction added successfully:", response.data);
-    
+
     const transactionType = newTransaction.value.type === 'inflow' ? 'Income' : 'Expense';
     const categoryLabel = availableCategories.value.find(cat => cat.value === newTransaction.value.category)?.label || newTransaction.value.category;
-    
+
     successMessage.value = `${transactionType} of $${transactionData.amount.toFixed(2)} (${categoryLabel}) added successfully!`;
-    
+
     // Reset form
     newTransaction.value = {
       type: 'inflow',
@@ -776,7 +777,7 @@ const addTransaction = async () => {
 
     // Refresh all data to show the new transaction
     await fetchAllData();
-    
+
     // Clear success message after 5 seconds
     setTimeout(() => {
       successMessage.value = '';
@@ -784,7 +785,7 @@ const addTransaction = async () => {
 
   } catch (err) {
     console.error("❌ Error adding transaction:", err);
-    
+
     if (err.response?.status === 401) {
       error.value = "Authentication failed. Please log in again.";
       router.push("/login");
@@ -819,16 +820,16 @@ const syncOrdersToTransactions = async () => {
   try {
     loading.value = true;
     const token = localStorage.getItem("token");
-    
+
     const response = await axios.post(`${API_URL}/cashflow/sync-orders`, {}, {
       headers: { "Authorization": `Bearer ${token}` }
     });
-    
+
     console.log("Orders synced to transactions:", response.data);
-    
+
     // Refresh all data after sync
     await fetchAllData();
-    
+
   } catch (err) {
     console.error("Error syncing orders:", err);
     error.value = "Failed to sync order data";
@@ -841,21 +842,21 @@ const syncOrdersToTransactions = async () => {
 const debugTransactions = async () => {
   try {
     const token = localStorage.getItem("token");
-    
+
     const response = await axios.get(`${API_URL}/cashflow/debug/recent`, {
       headers: { "Authorization": `Bearer ${token}` }
     });
-    
+
     console.log("🐛 DEBUG: Transaction data:", response.data);
     console.table(response.data.recentTransactions);
-    
+
     alert(`Debug Info:
 Total Transactions: ${response.data.totalTransactions}
 Manual Transactions: ${response.data.manualTransactions}
 Automated Transactions: ${response.data.automatedTransactions}
 
 Check console for detailed transaction list.`);
-    
+
   } catch (err) {
     console.error("Debug error:", err);
     alert("Debug failed - check console for details");
@@ -882,7 +883,7 @@ const fetchAllData = async () => {
 
 onMounted(async () => {
   console.log('🚀 CashFlow component mounted');
-  
+
   const token = localStorage.getItem("token");
   if (!token) {
     console.warn('🔐 No token found on mount, redirecting to login');
@@ -951,7 +952,8 @@ onMounted(async () => {
               </div>
               <div class="ml-4">
                 <p class="text-sm font-medium text-secondary-600">Current Balance</p>
-                <p class="text-2xl font-bold" :class="cashFlowData.currentBalance >= 0 ? 'text-blue-600' : 'text-red-600'">
+                <p class="text-2xl font-bold"
+                  :class="cashFlowData.currentBalance >= 0 ? 'text-blue-600' : 'text-red-600'">
                   {{ formattedCurrentBalance }}
                 </p>
               </div>
@@ -961,8 +963,8 @@ onMounted(async () => {
           <!-- Net Cash Flow -->
           <div class="card p-6">
             <div class="flex items-center">
-              <div class="p-3 rounded-full" 
-                   :class="cashFlowData.netCashFlow >= 0 ? 'bg-green-100 text-success' : 'bg-red-100 text-red-600'">
+              <div class="p-3 rounded-full"
+                :class="cashFlowData.netCashFlow >= 0 ? 'bg-green-100 text-success' : 'bg-red-100 text-red-600'">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     :d="cashFlowData.netCashFlow >= 0 ? 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6' : 'M13 17h8m0 0V9m0 8l-8-8-4 4-6-6'">
@@ -998,8 +1000,8 @@ onMounted(async () => {
           <!-- Runway -->
           <div class="card p-6">
             <div class="flex items-center">
-              <div class="p-3 rounded-full" 
-                   :class="cashFlowData.runway > 90 ? 'bg-green-100 text-success' : cashFlowData.runway > 30 ? 'bg-yellow-100 text-yellow-600' : 'bg-red-100 text-red-600'">
+              <div class="p-3 rounded-full"
+                :class="cashFlowData.runway > 90 ? 'bg-green-100 text-success' : cashFlowData.runway > 30 ? 'bg-yellow-100 text-yellow-600' : 'bg-red-100 text-red-600'">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z">
@@ -1008,8 +1010,8 @@ onMounted(async () => {
               </div>
               <div class="ml-4">
                 <p class="text-sm font-medium text-secondary-600">Runway</p>
-                <p class="text-2xl font-bold" 
-                   :class="cashFlowData.runway > 90 ? 'text-success' : cashFlowData.runway > 30 ? 'text-yellow-600' : 'text-red-600'">
+                <p class="text-2xl font-bold"
+                  :class="cashFlowData.runway > 90 ? 'text-success' : cashFlowData.runway > 30 ? 'text-yellow-600' : 'text-red-600'">
                   {{ Math.round(cashFlowData.runway) }} days
                 </p>
               </div>
@@ -1027,23 +1029,19 @@ onMounted(async () => {
                   {{ period.label }}
                 </option>
               </select>
-              <button 
-                @click="syncOrdersToTransactions"
-                :disabled="loading"
-                class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 flex items-center gap-2"
-              >
+              <button @click="syncOrdersToTransactions" :disabled="loading"
+                class="px-4 py-2 bg-pink-100 text-primary-700 rounded-lg hover:bg-pink-200 disabled:opacity-50 flex items-center gap-2">
                 <svg v-if="loading" class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  <path class="opacity-75" fill="currentColor"
+                    d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                  </path>
                 </svg>
                 <span v-else>🔄</span>
                 Sync Orders
               </button>
-              <button 
-                @click="debugTransactions"
-                :disabled="loading"
-                class="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 disabled:opacity-50 flex items-center gap-2"
-              >
+              <button @click="debugTransactions" :disabled="loading"
+                class="px-4 py-2 bg-orange-100 text-primary-700 rounded-lg hover:bg-orange-200 disabled:opacity-50 flex items-center gap-2">
                 <span>🐛</span>
                 Debug
               </button>
@@ -1054,12 +1052,12 @@ onMounted(async () => {
         <!-- 🚀 PHASE 2: Manual Transaction Entry -->
         <div class="card p-6">
           <h3 class="text-lg font-semibold text-secondary-900 mb-4">➕ Add Manual Transaction</h3>
-          
+
           <!-- Success Message -->
           <div v-if="successMessage" class="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-lg">
             {{ successMessage }}
           </div>
-          
+
           <!-- Error Message -->
           <div v-if="error" class="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
             {{ error }}
@@ -1070,7 +1068,8 @@ onMounted(async () => {
               <!-- Transaction Type -->
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
-                <select v-model="newTransaction.type" class="form-select w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                <select v-model="newTransaction.type"
+                  class="form-select w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                   <option value="inflow">💰 Income</option>
                   <option value="outflow">💸 Expense</option>
                 </select>
@@ -1079,7 +1078,8 @@ onMounted(async () => {
               <!-- Category -->
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                <select v-model="newTransaction.category" class="form-select w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                <select v-model="newTransaction.category"
+                  class="form-select w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                   <option v-for="cat in availableCategories" :key="cat.value" :value="cat.value">
                     {{ cat.label }}
                   </option>
@@ -1089,47 +1089,38 @@ onMounted(async () => {
               <!-- Amount -->
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Amount ($)</label>
-                <input 
-                  v-model="newTransaction.amount" 
-                  type="number" 
-                  step="0.01" 
-                  min="0"
-                  placeholder="0.00" 
-                  class="form-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                  required
-                >
+                <input v-model="newTransaction.amount" type="number" step="0.01" min="0" placeholder="0.00"
+                  class="form-input w-full px-3 py-2" required>
               </div>
 
               <!-- Description -->
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                <input 
-                  v-model="newTransaction.description" 
-                  type="text" 
-                  placeholder="Transaction description" 
-                  class="form-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                  required
-                >
+                <input v-model="newTransaction.description" type="text" placeholder="Transaction description"
+                  class="form-input w-full px-3 py-2" required>
               </div>
             </div>
 
             <!-- Submit Button -->
             <div class="mt-4 flex items-center gap-3">
-              <button 
-                type="submit" 
-                :disabled="isSubmitting || !newTransaction.amount || !newTransaction.description"
-                class="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-              >
+              <button type="submit" :disabled="isSubmitting || !newTransaction.amount || !newTransaction.description"
+                class="px-6 py-2 btn btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
                 <svg v-if="isSubmitting" class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  <path class="opacity-75" fill="currentColor"
+                    d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                  </path>
                 </svg>
-                <span v-else>➕</span>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6">
+                  </path>
+                </svg>
                 {{ isSubmitting ? 'Adding...' : 'Add Transaction' }}
               </button>
-              
+
               <p class="text-sm text-gray-500">
-                Add {{ newTransaction.type === 'inflow' ? 'income' : 'expense' }} transactions manually to track non-automated cash flows
+                Add {{ newTransaction.type === 'inflow' ? 'income' : 'expense' }} transactions manually to track
+                non-automated cash flows
               </p>
             </div>
           </form>
@@ -1193,7 +1184,8 @@ onMounted(async () => {
             <div class="space-y-3">
               <div v-for="(category, index) in categoryBreakdown.inflows" :key="index"
                 class="flex items-center justify-between">
-                <span class="text-sm font-medium text-secondary-900">{{ getCategoryDisplayName(category.category || category.name) }}</span>
+                <span class="text-sm font-medium text-secondary-900">{{ getCategoryDisplayName(category.category ||
+                  category.name) }}</span>
                 <span class="text-sm font-semibold text-success">
                   ${{ category.amount.toLocaleString() }}
                 </span>
@@ -1207,7 +1199,8 @@ onMounted(async () => {
             <div class="space-y-3">
               <div v-for="(category, index) in categoryBreakdown.outflows" :key="index"
                 class="flex items-center justify-between">
-                <span class="text-sm font-medium text-secondary-900">{{ getCategoryDisplayName(category.category || category.name) }}</span>
+                <span class="text-sm font-medium text-secondary-900">{{ getCategoryDisplayName(category.category ||
+                  category.name) }}</span>
                 <span class="text-sm font-semibold text-red-600">
                   ${{ category.amount.toLocaleString() }}
                 </span>
@@ -1238,14 +1231,16 @@ onMounted(async () => {
             </div>
             <div class="text-center">
               <div class="text-lg font-semibold text-secondary-900">Operating Cash Flow Ratio</div>
-              <div class="text-2xl font-bold" :class="cashFlowData.netCashFlow / cashFlowData.totalInflows > 0.15 ? 'text-success' : 'text-yellow-600'">
+              <div class="text-2xl font-bold"
+                :class="cashFlowData.netCashFlow / cashFlowData.totalInflows > 0.15 ? 'text-success' : 'text-yellow-600'">
                 {{ ((cashFlowData.netCashFlow / cashFlowData.totalInflows) * 100).toFixed(1) }}%
               </div>
               <div class="text-sm text-secondary-600">Net cash flow / Total inflows</div>
             </div>
             <div class="text-center">
               <div class="text-lg font-semibold text-secondary-900">Cash Flow Coverage</div>
-              <div class="text-2xl font-bold" :class="cashFlowData.totalInflows / cashFlowData.totalOutflows > 1.2 ? 'text-success' : 'text-red-600'">
+              <div class="text-2xl font-bold"
+                :class="cashFlowData.totalInflows / cashFlowData.totalOutflows > 1.2 ? 'text-success' : 'text-red-600'">
                 {{ (cashFlowData.totalInflows / cashFlowData.totalOutflows).toFixed(2) }}x
               </div>
               <div class="text-sm text-secondary-600">Ability to cover expenses</div>
@@ -1262,8 +1257,6 @@ onMounted(async () => {
 .card {
   background-color: white;
   border-radius: 0.75rem;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-  border: 1px solid #f3f4f6;
 }
 
 .form-select {
@@ -1273,7 +1266,6 @@ onMounted(async () => {
   border-radius: 0.5rem;
   border: 1px solid #d1d5db;
   background-color: white;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
 .form-select:focus {
@@ -1283,7 +1275,7 @@ onMounted(async () => {
 }
 
 .page-background {
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  background: linear-gradient(to bottom right, var(--primary-50), var(--secondary-50));
 }
 
 /* Alert styles for runway warnings */

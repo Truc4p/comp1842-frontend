@@ -161,7 +161,7 @@
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--primary-600);
+  background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-700) 50%, var(--primary-800) 100%);
   box-shadow: var(--shadow-medium);
 }
 
@@ -270,6 +270,7 @@
   font-weight: 600;
   color: var(--secondary-700);
   margin-bottom: 0.5rem;
+  margin-top: 0.9rem;
   }
 
   .form-error {

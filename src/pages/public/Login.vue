@@ -98,7 +98,12 @@ const handleLogin = async () => {
       
       <div class="flex items-center justify-between">
         <div class="flex items-center">
-          <input id="remember-me" type="checkbox" class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded" />
+          <input 
+            id="remember-me" 
+            type="checkbox" 
+            class="h-4 w-4 border-gray-300 rounded" 
+            style="accent-color: #C97F98;"
+          />
           <label for="remember-me" class="ml-2 block text-sm text-gray-700">{{ t('rememberMe') }}</label>
         </div>
         

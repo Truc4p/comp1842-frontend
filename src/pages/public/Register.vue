@@ -58,7 +58,7 @@ const register = async () => {
 <template>
   <div class="max-w-md mx-auto">
     <div class="text-center mb-8 mt-12">
-      <h1 class="text-2xl font-bold text-green-700">{{ t('register') }}</h1>
+      <h1 class="text-2xl font-bold text-primary-700">{{ t('register') }}</h1>
       <p class="text-gray-600 mt-2">{{ t('createAccount') }}</p>
     </div>
     
@@ -136,7 +136,7 @@ const register = async () => {
     <div class="mt-12 mb-8 text-center">
       <p class="text-gray-600">
         {{ t('alreadyHaveAccount') }} 
-        <router-link to="/login" class="text-green-600 hover:text-green-500 font-medium">
+        <router-link to="/login" class="text-primary-700 hover:text-primary-800 font-medium">
           {{ t('loginNow') }}
         </router-link>
       </p>

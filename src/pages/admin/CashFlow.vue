@@ -62,6 +62,8 @@ const error = ref(null);
 // Balance details modal data
 const showingBalanceDetails = ref(false);
 const balanceDetails = ref(null);
+// Toggle for collapsing Cash Balance Details table
+const showCashBalanceDetails = ref(true);
 
 // 🚀 PHASE 2: Manual Transaction Entry Data
 const newTransaction = ref({
@@ -146,6 +148,21 @@ const formattedCashBurnRate = computed(() => {
   }).format(cashFlowData.value.cashBurnRate || 0);
 });
 
+// Approximate Cash Conversion Cycle (CCC)
+// CCC ≈ Total Outflows ÷ Average Daily Inflows over the selected period
+const cccApproxDays = computed(() => {
+  const inflows = cashFlowData.value?.totalInflows || 0;
+  const outflows = cashFlowData.value?.totalOutflows || 0;
+  const periodDays = selectedPeriod.value || 1;
+
+  // Avoid division by zero; return null if not enough data
+  if (inflows <= 0 || periodDays <= 0) return null;
+
+  const avgDailyInflows = inflows / periodDays;
+  const approx = Math.round(outflows / avgDailyInflows);
+  return Math.max(0, approx);
+});
+
 // Cash position chart data
 const cashPositionChartData = computed(() => {
   console.log('🔍 Chart Debug - cashFlowHistory:', cashFlowHistory.value);
@@ -212,7 +229,7 @@ const cashBalanceTableData = computed(() => {
   
   let runningBalance = startingBalance;
   
-  return sortedHistory.map((entry, index) => {
+  const tableData = sortedHistory.map((entry, index) => {
     runningBalance += (entry.netFlow || 0);
     const balance = Math.max(0, runningBalance);
     
@@ -232,6 +249,12 @@ const cashBalanceTableData = computed(() => {
       balanceChange: index === 0 ? 0 : balance - (sortedHistory[index - 1]?.balance || startingBalance)
     };
   }).reverse(); // Show most recent first
+  
+  // Remove the oldest entry (last item in the array after reverse)
+  if (tableData.length > 0) {
+    return tableData.slice(0, -1); // Remove the last (oldest) entry
+  }
+  return tableData;
 });
 
 // Inflows vs Outflows chart data
@@ -397,143 +420,6 @@ const forecastChartOptions = {
   }
 };
 
-// Generate sample history data for charts when API doesn't provide it
-const generateSampleHistoryData = () => {
-  const data = [];
-  const currentBalance = cashFlowData.value.currentBalance || 21914;
-  const days = selectedPeriod.value || 30;
-
-  for (let i = days; i >= 0; i--) {
-    const date = new Date();
-    date.setDate(date.getDate() - i);
-
-    // Calculate progressive balance based on current balance
-    const progressRatio = (days - i) / days;
-    const dailyVariation = (Math.random() - 0.5) * 1000; // Random daily changes
-    const balance = (currentBalance * 0.7) + (currentBalance * 0.3 * progressRatio) + dailyVariation;
-
-    data.push({
-      date: date.toISOString().split('T')[0],
-      balance: Math.max(0, balance), // Ensure non-negative
-      inflows: Math.random() * 3000 + 1000,
-      outflows: Math.random() * 2000 + 800,
-      netFlow: Math.random() * 1000 - 500
-    });
-  }
-
-  console.log('📊 Generated sample history data:', data.slice(0, 3));
-  return data;
-};
-
-// Mock data generation functions (since we don't have actual cashflow endpoints)
-const generateMockCashFlowData = () => {
-  const today = new Date();
-  const history = [];
-  const inflows = [];
-  const outflows = [];
-
-  // Generate historical data
-  let currentBalance = 50000; // Starting balance
-  for (let i = selectedPeriod.value; i >= 0; i--) {
-    const date = new Date(today);
-    date.setDate(date.getDate() - i);
-
-    // Mock inflows (revenue-based on sales data)
-    const dailyRevenue = Math.random() * 5000 + 1000;
-    const otherIncome = Math.random() * 500;
-    const totalInflow = dailyRevenue + otherIncome;
-
-    // Mock outflows (expenses)
-    const operatingExpenses = Math.random() * 2000 + 500;
-    const cogs = dailyRevenue * 0.4; // 40% of revenue as COGS
-    const taxes = dailyRevenue * 0.1; // 10% tax
-    const totalOutflow = operatingExpenses + cogs + taxes;
-
-    const netFlow = totalInflow - totalOutflow;
-    currentBalance += netFlow;
-
-    history.push({
-      date: date.toISOString().split('T')[0],
-      balance: currentBalance,
-      inflows: totalInflow,
-      outflows: totalOutflow,
-      netFlow
-    });
-
-    inflows.push({
-      date: date.toISOString().split('T')[0],
-      revenue: dailyRevenue,
-      otherIncome: otherIncome
-    });
-
-    outflows.push({
-      date: date.toISOString().split('T')[0],
-      operatingExpenses,
-      cogs,
-      taxes
-    });
-  }
-
-  // Calculate summary stats
-  const totalInflows = inflows.reduce((sum, day) => sum + day.revenue + day.otherIncome, 0);
-  const totalOutflows = outflows.reduce((sum, day) => sum + day.operatingExpenses + day.cogs + day.taxes, 0);
-  const netCashFlow = totalInflows - totalOutflows;
-  const avgDailyBurn = totalOutflows / selectedPeriod.value;
-  const runway = currentBalance / avgDailyBurn; // days
-
-  return {
-    currentBalance,
-    netCashFlow,
-    totalInflows,
-    totalOutflows,
-    cashBurnRate: avgDailyBurn,
-    runway,
-    history,
-    inflows,
-    outflows
-  };
-};
-
-const generateMockCategoryBreakdown = () => {
-  return {
-    inflows: [
-      { name: 'Product Sales', amount: 45000 },
-      { name: 'Service Revenue', amount: 15000 },
-      { name: 'Investment Income', amount: 3000 },
-      { name: 'Other Income', amount: 2000 }
-    ],
-    outflows: [
-      { name: 'Operating Expenses', amount: 20000 },
-      { name: 'Cost of Goods Sold', amount: 18000 },
-      { name: 'Payroll', amount: 12000 },
-      { name: 'Marketing', amount: 5000 },
-      { name: 'Taxes', amount: 6500 }
-    ]
-  };
-};
-
-const generateMockForecast = () => {
-  const forecast = [];
-  const today = new Date();
-  let projectedBalance = cashFlowData.value.currentBalance;
-
-  for (let i = 1; i <= 90; i++) { // 3 months forecast
-    const date = new Date(today);
-    date.setDate(date.getDate() + i);
-
-    // Simple forecast based on current trend
-    const avgDailyFlow = cashFlowData.value.netCashFlow / selectedPeriod.value;
-    projectedBalance += avgDailyFlow;
-
-    forecast.push({
-      date: date.toISOString().split('T')[0],
-      projectedBalance: Math.max(0, projectedBalance) // Don't go below 0
-    });
-  }
-
-  return forecast;
-};
-
 // 🚀 PHASE 1: Real Data Integration - Replace Mock Functions
 
 // Helper function to convert category codes to display names
@@ -665,26 +551,6 @@ const fetchCashFlowData = async () => {
       router.push('/login');
       return;
     }
-
-    // Fallback to mock data if API fails (for development)
-    if (err.response?.status === 404 || err.code === 'ECONNREFUSED') {
-      console.warn("💡 Cash flow endpoints not available, using mock data for development");
-      const mockData = generateMockCashFlowData();
-      cashFlowData.value = {
-        currentBalance: mockData.currentBalance,
-        netCashFlow: mockData.netCashFlow,
-        totalInflows: mockData.totalInflows,
-        totalOutflows: mockData.totalOutflows,
-        cashBurnRate: mockData.cashBurnRate,
-        runway: mockData.runway
-      };
-      cashFlowHistory.value = mockData.history;
-      inflowsData.value = mockData.inflows;
-      outflowsData.value = mockData.outflows;
-      error.value = null; // Clear error when using fallback
-    } else {
-      error.value = "Failed to load cash flow data";
-    }
   }
 };
 
@@ -702,9 +568,6 @@ const fetchCategoryBreakdown = async () => {
     });
   } catch (err) {
     console.error("Error fetching category breakdown:", err);
-    // Fallback to mock data
-    console.warn("💡 Using mock category data");
-    categoryBreakdown.value = generateMockCategoryBreakdown();
   }
 };
 
@@ -724,9 +587,6 @@ const fetchForecast = async () => {
     });
   } catch (err) {
     console.error("Error fetching forecast:", err);
-    // Fallback to mock data
-    console.warn("💡 Using mock forecast data");
-    forecast.value = generateMockForecast();
   }
 };
 
@@ -1256,10 +1116,56 @@ onMounted(async () => {
           
           <!-- Cash Balance Details Table -->
           <div class="mt-8">
-            <h4 class="text-md font-semibold text-secondary-900 mb-4">📋 Cash Balance Details ({{ selectedPeriod }} days)</h4>
+            <div class="flex items-center justify-between mb-4">
+              <h4 class="text-md font-semibold text-secondary-900">📋 Cash Balance Details ({{ selectedPeriod }} days)</h4>
+              <button
+                @click="showCashBalanceDetails = !showCashBalanceDetails"
+                class="px-3 py-1 text-sm rounded-lg border border-gray-300 hover:bg-gray-50 text-secondary-700"
+                :aria-expanded="showCashBalanceDetails.toString()"
+              >
+                {{ showCashBalanceDetails ? 'Hide' : 'Show' }}
+              </button>
+            </div>
+
+            <!-- Table Summary -->
+            <div v-if="cashBalanceTableData.length > 0" class="mt-4 grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
+              <div class="bg-green-50 p-3 rounded-lg">
+                <div class="text-success font-medium">Total Inflows</div>
+                <div class="text-green-800 font-bold text-lg">
+                  ${{ cashBalanceTableData.reduce((sum, day) => sum + day.inflows, 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+                </div>
+              </div>
+              <div class="bg-red-50 p-3 rounded-lg">
+                <div class="text-red-700 font-medium">Total Outflows</div>
+                <div class="text-red-800 font-bold text-lg">
+                  ${{ cashBalanceTableData.reduce((sum, day) => sum + day.outflows, 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+                </div>
+              </div>
+              <div class="bg-blue-50 p-3 rounded-lg">
+                <div class="text-blue-700 font-medium">Net Flow</div>
+                <div class="text-blue-800 font-bold text-lg">
+                  ${{ cashBalanceTableData.reduce((sum, day) => sum + day.netFlow, 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+                </div>
+                <!-- Debug info -->
+                <div class="text-xs text-blue-600 mt-1">
+                  = Total Inflows ${{ cashBalanceTableData.reduce((sum, day) => sum + day.inflows, 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }} - Total Outflows ${{ cashBalanceTableData.reduce((sum, day) => sum + day.outflows, 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+                </div>
+              </div>
+              <div class="bg-purple-50 p-3 rounded-lg">
+                <div class="text-purple-700 font-medium">Avg Daily Balance</div>
+                <div class="text-purple-800 font-bold text-lg">
+                  ${{ (cashBalanceTableData.reduce((sum, day) => sum + day.balance, 0) / cashBalanceTableData.length).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+                </div>
+                <!-- Debug info -->
+                <div class="text-xs text-purple-600 mt-1">
+                  = Total Balance Sum ${{ cashBalanceTableData.reduce((sum, day) => sum + day.balance, 0).toLocaleString() }} ÷ {{ cashBalanceTableData.length }} days
+                </div>
+              </div>
+            </div>
             
-            <!-- Table Container with scroll for mobile -->
-            <div class="overflow-x-auto">
+            <div v-show="showCashBalanceDetails">
+              <!-- Table Container with scroll for mobile -->
+              <div class="overflow-x-auto mt-4">
               <table class="min-w-full bg-white border border-gray-200 rounded-lg shadow-sm">
                 <thead class="bg-gray-50">
                   <tr>
@@ -1395,38 +1301,8 @@ onMounted(async () => {
                   </tr>
                 </tbody>
               </table>
-            </div>
+              </div>
             
-            <!-- Table Summary -->
-            <div v-if="cashBalanceTableData.length > 0" class="mt-4 grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
-              <div class="bg-green-50 p-3 rounded-lg">
-                <div class="text-success font-medium">Total Inflows</div>
-                <div class="text-green-800 font-bold text-lg">
-                  ${{ cashBalanceTableData.reduce((sum, day) => sum + day.inflows, 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
-                </div>
-              </div>
-              <div class="bg-red-50 p-3 rounded-lg">
-                <div class="text-red-700 font-medium">Total Outflows</div>
-                <div class="text-red-800 font-bold text-lg">
-                  ${{ cashBalanceTableData.reduce((sum, day) => sum + day.outflows, 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
-                </div>
-              </div>
-              <div class="bg-blue-50 p-3 rounded-lg">
-                <div class="text-blue-700 font-medium">Net Flow</div>
-                <div class="text-blue-800 font-bold text-lg">
-                  ${{ cashBalanceTableData.reduce((sum, day) => sum + day.netFlow, 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
-                </div>
-              </div>
-              <div class="bg-purple-50 p-3 rounded-lg">
-                <div class="text-purple-700 font-medium">Avg Daily Balance</div>
-                <div class="text-purple-800 font-bold text-lg">
-                  ${{ (cashBalanceTableData.reduce((sum, day) => sum + day.balance, 0) / cashBalanceTableData.length).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
-                </div>
-                <!-- Debug info -->
-                <div class="text-xs text-purple-600 mt-1">
-                  = Total Balance Sum ${{ cashBalanceTableData.reduce((sum, day) => sum + day.balance, 0).toLocaleString() }} ÷ {{ cashBalanceTableData.length }} days
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -1524,17 +1400,18 @@ onMounted(async () => {
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="text-center">
               <div class="text-lg font-semibold text-secondary-900">Cash Conversion Cycle</div>
-              <div class="text-2xl font-bold text-blue-600">{{ Math.round(Math.random() * 30 + 15) }} days</div>
-              <div class="text-sm text-secondary-600">Time to convert investments to cash</div>
+              <div class="text-2xl font-bold text-blue-600">{{ cccApproxDays ?? 0 }} days</div>
+              <div class="text-sm text-secondary-600">Approx. days to recover cash spent</div>
               <!-- Debug formula -->
               <div class="text-xs text-blue-500 mt-2 p-2 bg-blue-50 rounded">
-                <strong>Debug:</strong> Random calculation (15-45 days)<br>
-                Formula: Math.round(Math.random() * 30 + 15)<br>
-                <em>Note: This is a placeholder calculation</em>
+                <strong>Debug:</strong> CCC ≈ Total Outflows ÷ Avg Daily Inflows ({{ selectedPeriod }} days)<br>
+                Total Outflows: ${{ (cashFlowData.totalOutflows || 0).toLocaleString() }}<br>
+                Avg Daily Inflows: ${{ ((cashFlowData.totalInflows || 0) / (selectedPeriod || 1)).toLocaleString(undefined, { maximumFractionDigits: 2 }) }}<br>
+                Result: {{ cccApproxDays ?? 'N/A' }} days
               </div>
             </div>
             <div class="text-center">
-              <div class="text-lg font-semibold text-secondary-900">Operating Cash Flow Ratio</div>
+              <div class="text-lg font-semibold text-secondary-900">Net Cash Flow Ratio</div>
               <div class="text-2xl font-bold"
                 :class="cashFlowData.netCashFlow / cashFlowData.totalInflows > 0.15 ? 'text-success' : 'text-yellow-600'">
                 {{ ((cashFlowData.netCashFlow / cashFlowData.totalInflows) * 100).toFixed(1) }}%
@@ -1594,6 +1471,10 @@ onMounted(async () => {
             <div class="bg-blue-50 p-4 rounded-lg">
               <div class="text-blue-700 font-medium">Net Balance</div>
               <div class="text-2xl font-bold text-blue-800">${{ balanceDetails.summary.currentBalance.toLocaleString() }}</div>
+              <!-- Debug info -->
+              <div class="text-xs text-blue-600 mt-1">
+                = Total Inflows ${{ balanceDetails.summary.totalInflows.toLocaleString() }} - Total Outflows ${{ balanceDetails.summary.totalOutflows.toLocaleString() }}
+              </div>
               <div class="text-sm text-blue-600">{{ balanceDetails.summary.inflowCount + balanceDetails.summary.outflowCount }} total transactions</div>
             </div>
           </div>
@@ -1631,13 +1512,13 @@ onMounted(async () => {
             </div>
           </div>
 
-          <!-- Recent Transactions -->
+          <!-- Transactions -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Recent Inflows -->
+            <!-- All Inflows -->
             <div>
-              <h4 class="text-lg font-semibold text-green-700 mb-3">📈 Recent Inflows</h4>
-              <div class="space-y-2 max-h-60 overflow-y-auto">
-                <div v-for="tx in balanceDetails.recentInflows" :key="tx._id" 
+              <h4 class="text-lg font-semibold text-green-700 mb-3">📈 All Inflows</h4>
+              <div class="space-y-2 max-h-96 overflow-y-auto">
+                <div v-for="tx in (balanceDetails.allInflows || balanceDetails.recentInflows)" :key="tx._id" 
                      class="bg-green-50 p-3 rounded-lg text-sm">
                   <div class="flex justify-between">
                     <span class="font-medium text-green-800">${{ tx.amount.toLocaleString() }}</span>
@@ -1645,16 +1526,16 @@ onMounted(async () => {
                   </div>
                   <div class="text-green-700">{{ getCategoryDisplayName(tx.category) }}</div>
                   <div v-if="tx.description" class="text-green-600">{{ tx.description }}</div>
-                  <div class="text-xs text-green-500">{{ tx.automated ? 'Auto' : 'Manual' }}</div>
+                  <div class="text-xs text-green-600">{{ tx.automated ? 'Auto' : 'Manual' }}</div>
                 </div>
               </div>
             </div>
 
-            <!-- Recent Outflows -->
+            <!-- All Outflows -->
             <div>
-              <h4 class="text-lg font-semibold text-red-700 mb-3">📉 Recent Outflows</h4>
-              <div class="space-y-2 max-h-60 overflow-y-auto">
-                <div v-for="tx in balanceDetails.recentOutflows" :key="tx._id" 
+              <h4 class="text-lg font-semibold text-red-700 mb-3">📉 All Outflows</h4>
+              <div class="space-y-2 max-h-96 overflow-y-auto">
+                <div v-for="tx in (balanceDetails.allOutflows || balanceDetails.recentOutflows)" :key="tx._id" 
                      class="bg-red-50 p-3 rounded-lg text-sm">
                   <div class="flex justify-between">
                     <span class="font-medium text-red-800">${{ tx.amount.toLocaleString() }}</span>
@@ -1662,7 +1543,7 @@ onMounted(async () => {
                   </div>
                   <div class="text-red-700">{{ getCategoryDisplayName(tx.category) }}</div>
                   <div v-if="tx.description" class="text-red-600">{{ tx.description }}</div>
-                  <div class="text-xs text-red-500">{{ tx.automated ? 'Auto' : 'Manual' }}</div>
+                  <div class="text-xs text-red-600">{{ tx.automated ? 'Auto' : 'Manual' }}</div>
                 </div>
               </div>
             </div>

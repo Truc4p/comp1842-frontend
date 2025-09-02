@@ -86,7 +86,7 @@ const handleLogin = async () => {
 <template>
   <div class="max-w-md mx-auto">
     <div class="text-center mb-8 mt-12">
-      <h1 class="text-2xl font-bold text-green-700">{{ t('login') }}</h1>
+      <h1 class="text-2xl font-bold text-primary-700">{{ t('login') }}</h1>
       <p class="text-gray-600 mt-2">{{ t('welcomeBack') }}</p>
     </div>
     
@@ -135,7 +135,7 @@ const handleLogin = async () => {
         </div>
         
         <div class="text-sm">
-          <a href="#" class="text-green-600 hover:text-green-500">{{ t('forgotPassword') }}</a>
+          <a href="#" class="text-primary-700 hover:text-primary-800">{{ t('forgotPassword') }}</a>
         </div>
       </div>
       
@@ -157,7 +157,7 @@ const handleLogin = async () => {
     <div class="mt-12 mb-8 text-center">
       <p class="text-gray-600">
         {{ t('dontHaveAccount') }} 
-        <router-link to="/register" class="text-green-600 hover:text-green-500 font-medium">
+        <router-link to="/register" class="text-primary-700 hover:text-primary-800 font-medium">
           {{ t('registerNow') }}
         </router-link>
       </p>

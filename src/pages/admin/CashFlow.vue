@@ -59,6 +59,10 @@ const forecast = ref([]);
 const loading = ref(true);
 const error = ref(null);
 
+// Balance details modal data
+const showingBalanceDetails = ref(false);
+const balanceDetails = ref(null);
+
 // 🚀 PHASE 2: Manual Transaction Entry Data
 const newTransaction = ref({
   type: 'inflow',
@@ -96,7 +100,7 @@ const availableCategories = computed(() => {
 });
 
 // Period selection
-const selectedPeriod = ref(30);
+const selectedPeriod = ref(7);
 const periods = [
   { value: 7, label: '7 Days' },
   { value: 15, label: '15 Days' },
@@ -195,6 +199,39 @@ const cashPositionChartData = computed(() => {
       }
     ]
   };
+});
+
+// Cash balance table data
+const cashBalanceTableData = computed(() => {
+  if (!cashFlowHistory.value || cashFlowHistory.value.length === 0) {
+    return [];
+  }
+
+  const sortedHistory = [...cashFlowHistory.value].sort((a, b) => new Date(a.date) - new Date(b.date));
+  const startingBalance = cashFlowData.value?.startingBalance || 0;
+  
+  let runningBalance = startingBalance;
+  
+  return sortedHistory.map((entry, index) => {
+    runningBalance += (entry.netFlow || 0);
+    const balance = Math.max(0, runningBalance);
+    
+    return {
+      date: new Date(entry.date).toLocaleDateString('en-US', { 
+        weekday: 'short', 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric' 
+      }),
+      inflows: entry.inflows || 0,
+      outflows: entry.outflows || 0,
+      netFlow: entry.netFlow || 0,
+      balance: balance,
+      dayOfWeek: new Date(entry.date).toLocaleDateString('en-US', { weekday: 'long' }),
+      isWeekend: [0, 6].includes(new Date(entry.date).getDay()),
+      balanceChange: index === 0 ? 0 : balance - (sortedHistory[index - 1]?.balance || startingBalance)
+    };
+  }).reverse(); // Show most recent first
 });
 
 // Inflows vs Outflows chart data
@@ -851,6 +888,65 @@ Check console for detailed transaction list.`);
   }
 };
 
+// Compare orders vs transactions
+const compareOrdersVsTransactions = async () => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const response = await axios.get(`${API_URL}/cashflow/debug/orders-vs-transactions`, {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+
+    console.log("🔍 Orders vs Transactions Analysis:", response.data);
+
+    const data = response.data;
+    
+    alert(`Orders vs Transactions Analysis:
+
+📦 Completed Orders: ${data.summary.completedOrders}
+💰 Product Sales Transactions: ${data.summary.productSalesTransactions}
+💵 Order Revenue: $${data.summary.totalOrderRevenue.toLocaleString()}
+💸 Transaction Revenue: $${data.summary.totalTransactionRevenue.toLocaleString()}
+📊 Difference: $${data.summary.revenueDifference.toLocaleString()}
+
+🔍 Analysis:
+✅ Orders with transactions: ${data.analysis.ordersWithTransactions}
+❌ Orders without transactions: ${data.analysis.ordersWithoutTransactions}
+🔄 Multiple transactions per order: ${data.analysis.multipleTransactionsPerOrder}
+⚠️ Transactions without orders: ${data.analysis.transactionsWithoutOrders}
+
+Check console for detailed breakdown.`);
+
+  } catch (err) {
+    console.error("Orders vs Transactions error:", err);
+    alert("Analysis failed - check console for details");
+  }
+};
+
+// Show detailed balance breakdown
+const showBalanceDetails = async () => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await axios.get(`${API_URL}/cashflow/debug/balance`, {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+    
+    balanceDetails.value = response.data;
+    showingBalanceDetails.value = true;
+    
+    console.log("🔍 Balance Details:", response.data);
+  } catch (err) {
+    console.error("Error fetching balance details:", err);
+    alert("Failed to load balance details");
+  }
+};
+
+// Close balance details modal
+const closeBalanceDetails = () => {
+  showingBalanceDetails.value = false;
+  balanceDetails.value = null;
+};
+
 // Fetch all data
 const fetchAllData = async () => {
   loading.value = true;
@@ -946,6 +1042,21 @@ onMounted(async () => {
                 </p>
               </div>
             </div>
+            <!-- Debug formula -->
+            <div class="text-xs text-blue-600 mt-3 p-2 bg-blue-50 rounded">
+              <strong>Debug:</strong> All-time Total Inflows - All-time Total Outflows<br>
+              <div v-if="cashFlowData.balanceBreakdown">
+                Formula: ${{ cashFlowData.balanceBreakdown.totalInflows?.toLocaleString() || 0 }} - ${{ cashFlowData.balanceBreakdown.totalOutflows?.toLocaleString() || 0 }}<br>
+                Transactions: {{ cashFlowData.balanceBreakdown.inflowCount || 0 }} inflows, {{ cashFlowData.balanceBreakdown.outflowCount || 0 }} outflows<br>
+                Result: ${{ cashFlowData.balanceBreakdown.currentBalance?.toLocaleString() || 0 }}
+              </div>
+              <div v-else>
+                <em>Calculated by backend from all CashFlowTransaction records</em>
+              </div>
+              <button @click="showBalanceDetails" class="mt-2 px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200">
+                Show All Transactions
+              </button>
+            </div>
           </div>
 
           <!-- Net Cash Flow -->
@@ -966,6 +1077,12 @@ onMounted(async () => {
                 </p>
               </div>
             </div>
+            <!-- Debug formula -->
+            <div class="text-xs text-green-600 mt-3 p-2 bg-green-50 rounded">
+              <strong>Debug:</strong> Total Inflows - Total Outflows ({{ selectedPeriod }} days)<br>
+              Formula: ${{ cashFlowData.totalInflows?.toLocaleString() || 0 }} - ${{ cashFlowData.totalOutflows?.toLocaleString() || 0 }}<br>
+              Result: ${{ cashFlowData.netCashFlow?.toLocaleString() || 0 }}
+            </div>
           </div>
 
           <!-- Cash Burn Rate -->
@@ -982,6 +1099,12 @@ onMounted(async () => {
                 <p class="text-sm font-medium text-secondary-600">Daily Burn Rate</p>
                 <p class="text-2xl font-bold text-orange-600">{{ formattedCashBurnRate }}/day</p>
               </div>
+            </div>
+            <!-- Debug formula -->
+            <div class="text-xs text-orange-600 mt-3 p-2 bg-orange-50 rounded">
+              <strong>Debug:</strong> Total Outflows ÷ Period Days<br>
+              Formula: ${{ cashFlowData.totalOutflows?.toLocaleString() || 0 }} ÷ {{ selectedPeriod }} days<br>
+              Result: ${{ (cashFlowData.cashBurnRate || 0).toLocaleString() }}/day
             </div>
           </div>
 
@@ -1003,6 +1126,12 @@ onMounted(async () => {
                   {{ Math.round(cashFlowData.runway) }} days
                 </p>
               </div>
+            </div>
+            <!-- Debug formula -->
+            <div class="text-xs text-red-600 mt-3 p-2 bg-red-50 rounded">
+              <strong>Debug:</strong> Current Balance ÷ Daily Burn Rate<br>
+              Formula: ${{ cashFlowData.currentBalance?.toLocaleString() || 0 }} ÷ ${{ (cashFlowData.cashBurnRate || 0).toLocaleString() }}/day<br>
+              Result: {{ Math.round(cashFlowData.runway || 0) }} days remaining
             </div>
           </div>
         </div>
@@ -1032,6 +1161,11 @@ onMounted(async () => {
                 class="px-4 py-2 bg-orange-100 text-primary-700 rounded-lg hover:bg-orange-200 disabled:opacity-50 flex items-center gap-2">
                 <span>🐛</span>
                 Debug
+              </button>
+              <button @click="compareOrdersVsTransactions" :disabled="loading"
+                class="px-4 py-2 bg-purple-100 text-primary-700 rounded-lg hover:bg-purple-200 disabled:opacity-50 flex items-center gap-2">
+                <span>🔍</span>
+                Orders vs Sales
               </button>
             </div>
           </div>
@@ -1116,8 +1250,184 @@ onMounted(async () => {
         <!-- Cash Position Trend (Middle Section) -->
         <div class="card p-6">
           <h3 class="text-lg font-semibold text-secondary-900 mb-4">💹 Cash Position Over Time</h3>
-          <div class="h-72">
+          <div class="h-72 mb-6">
             <Line :data="cashPositionChartData" :options="cashPositionChartOptions" />
+          </div>
+          
+          <!-- Cash Balance Details Table -->
+          <div class="mt-8">
+            <h4 class="text-md font-semibold text-secondary-900 mb-4">📋 Cash Balance Details ({{ selectedPeriod }} days)</h4>
+            
+            <!-- Table Container with scroll for mobile -->
+            <div class="overflow-x-auto">
+              <table class="min-w-full bg-white border border-gray-200 rounded-lg shadow-sm">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                      Date
+                    </th>
+                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                      Inflows
+                    </th>
+                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                      Outflows
+                    </th>
+                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                      Net Flow
+                    </th>
+                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                      Balance
+                    </th>
+                    <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                      Status
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                  <tr 
+                    v-for="(day, index) in cashBalanceTableData" 
+                    :key="index"
+                    :class="[
+                      'hover:bg-gray-50 transition-colors duration-150',
+                      day.isWeekend ? 'bg-blue-50' : '',
+                      day.netFlow < 0 ? 'border-l-4' : day.netFlow > 0 ? 'border-l-4' : ''
+                    ]"
+                    :style="{
+                      borderLeftColor: day.netFlow < 0 ? '#ef4444' : day.netFlow > 0 ? '#008000' : 'transparent',
+                      borderLeftWidth: day.netFlow !== 0 ? '3px' : '0px',
+                      borderLeftStyle: 'solid'
+                    }"
+                  >
+                    <!-- Date Column -->
+                    <td class="px-4 py-3 text-sm">
+                      <div class="font-medium text-gray-900">{{ day.date }}</div>
+                      <div class="text-xs text-gray-500">{{ day.dayOfWeek }}</div>
+                    </td>
+                    
+                    <!-- Inflows Column -->
+                    <td class="px-4 py-3 text-sm text-right">
+                      <span class="font-medium text-success">
+                        ${{ day.inflows.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+                      </span>
+                    </td>
+                    
+                    <!-- Outflows Column -->
+                    <td class="px-4 py-3 text-sm text-right">
+                      <span class="font-medium text-red-600">
+                        ${{ day.outflows.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+                      </span>
+                    </td>
+                    
+                    <!-- Net Flow Column -->
+                    <td class="px-4 py-3 text-sm text-right">
+                      <span 
+                        :class="[
+                          'font-semibold px-2 py-1 rounded-full text-xs',
+                          day.netFlow > 0 ? 'bg-green-100 text-green-800' : 
+                          day.netFlow < 0 ? 'bg-red-100 text-red-800' : 
+                          'bg-gray-100 text-gray-800'
+                        ]"
+                      >
+                        {{ day.netFlow >= 0 ? '+' : '' }}${{ day.netFlow.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+                      </span>
+                    </td>
+                    
+                    <!-- Balance Column -->
+                    <td class="px-4 py-3 text-sm text-right">
+                      <div class="font-bold text-lg" :class="day.balance >= 0 ? 'text-blue-600' : 'text-red-600'">
+                        ${{ day.balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+                      </div>
+                    </td>
+                    
+                    <!-- Status Column -->
+                    <td class="px-4 py-3 text-center">
+                      <div class="flex items-center justify-center">
+                        <span 
+                          v-if="day.netFlow > 1000" 
+                          class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-success text-white"
+                          title="Strong positive cash flow"
+                        >
+                          Strong
+                        </span>
+                        <span 
+                          v-else-if="day.netFlow > 0" 
+                          class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-success"
+                          title="Positive cash flow"
+                        >
+                          Positive
+                        </span>
+                        <span 
+                          v-else-if="day.netFlow === 0" 
+                          class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700"
+                          title="Neutral cash flow"
+                        >
+                          Neutral
+                        </span>
+                        <span 
+                          v-else-if="day.netFlow > -1000" 
+                          class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800"
+                          title="Moderate negative cash flow"
+                        >
+                          Caution
+                        </span>
+                        <span 
+                          v-else 
+                          class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800"
+                          title="Strong negative cash flow"
+                        >
+                          Alert
+                        </span>
+                      </div>
+                    </td>
+                  </tr>
+                  
+                  <!-- Empty state -->
+                  <tr v-if="cashBalanceTableData.length === 0">
+                    <td colspan="6" class="px-4 py-8 text-center text-gray-500">
+                      <div class="flex flex-col items-center">
+                        <svg class="w-12 h-12 text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                        <p class="text-sm">No cash flow data available for the selected period</p>
+                        <p class="text-xs text-gray-400 mt-1">Try selecting a different time period or add some transactions</p>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            
+            <!-- Table Summary -->
+            <div v-if="cashBalanceTableData.length > 0" class="mt-4 grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
+              <div class="bg-green-50 p-3 rounded-lg">
+                <div class="text-success font-medium">Total Inflows</div>
+                <div class="text-green-800 font-bold text-lg">
+                  ${{ cashBalanceTableData.reduce((sum, day) => sum + day.inflows, 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+                </div>
+              </div>
+              <div class="bg-red-50 p-3 rounded-lg">
+                <div class="text-red-700 font-medium">Total Outflows</div>
+                <div class="text-red-800 font-bold text-lg">
+                  ${{ cashBalanceTableData.reduce((sum, day) => sum + day.outflows, 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+                </div>
+              </div>
+              <div class="bg-blue-50 p-3 rounded-lg">
+                <div class="text-blue-700 font-medium">Net Flow</div>
+                <div class="text-blue-800 font-bold text-lg">
+                  ${{ cashBalanceTableData.reduce((sum, day) => sum + day.netFlow, 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+                </div>
+              </div>
+              <div class="bg-purple-50 p-3 rounded-lg">
+                <div class="text-purple-700 font-medium">Avg Daily Balance</div>
+                <div class="text-purple-800 font-bold text-lg">
+                  ${{ (cashBalanceTableData.reduce((sum, day) => sum + day.balance, 0) / cashBalanceTableData.length).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+                </div>
+                <!-- Debug info -->
+                <div class="text-xs text-purple-600 mt-1">
+                  = Total Balance Sum ${{ cashBalanceTableData.reduce((sum, day) => sum + day.balance, 0).toLocaleString() }} ÷ {{ cashBalanceTableData.length }} days
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -1216,6 +1526,12 @@ onMounted(async () => {
               <div class="text-lg font-semibold text-secondary-900">Cash Conversion Cycle</div>
               <div class="text-2xl font-bold text-blue-600">{{ Math.round(Math.random() * 30 + 15) }} days</div>
               <div class="text-sm text-secondary-600">Time to convert investments to cash</div>
+              <!-- Debug formula -->
+              <div class="text-xs text-blue-500 mt-2 p-2 bg-blue-50 rounded">
+                <strong>Debug:</strong> Random calculation (15-45 days)<br>
+                Formula: Math.round(Math.random() * 30 + 15)<br>
+                <em>Note: This is a placeholder calculation</em>
+              </div>
             </div>
             <div class="text-center">
               <div class="text-lg font-semibold text-secondary-900">Operating Cash Flow Ratio</div>
@@ -1224,6 +1540,12 @@ onMounted(async () => {
                 {{ ((cashFlowData.netCashFlow / cashFlowData.totalInflows) * 100).toFixed(1) }}%
               </div>
               <div class="text-sm text-secondary-600">Net cash flow / Total inflows</div>
+              <!-- Debug formula -->
+              <div class="text-xs text-green-600 mt-2 p-2 bg-green-50 rounded">
+                <strong>Debug:</strong> (Net Cash Flow ÷ Total Inflows) × 100<br>
+                Formula: ({{ cashFlowData.netCashFlow?.toLocaleString() || 0 }} ÷ {{ cashFlowData.totalInflows?.toLocaleString() || 0 }}) × 100<br>
+                Result: {{ ((cashFlowData.netCashFlow / cashFlowData.totalInflows) * 100).toFixed(1) }}%
+              </div>
             </div>
             <div class="text-center">
               <div class="text-lg font-semibold text-secondary-900">Cash Flow Coverage</div>
@@ -1232,11 +1554,123 @@ onMounted(async () => {
                 {{ (cashFlowData.totalInflows / cashFlowData.totalOutflows).toFixed(2) }}x
               </div>
               <div class="text-sm text-secondary-600">Ability to cover expenses</div>
+              <!-- Debug formula -->
+              <div class="text-xs text-purple-600 mt-2 p-2 bg-purple-50 rounded">
+                <strong>Debug:</strong> Total Inflows ÷ Total Outflows<br>
+                Formula: {{ cashFlowData.totalInflows?.toLocaleString() || 0 }} ÷ {{ cashFlowData.totalOutflows?.toLocaleString() || 0 }}<br>
+                Result: {{ (cashFlowData.totalInflows / cashFlowData.totalOutflows).toFixed(2) }}x
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
+    
+    <!-- Balance Details Modal -->
+    <div v-if="showingBalanceDetails" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" @click="closeBalanceDetails">
+      <div class="bg-white rounded-lg p-6 max-w-4xl max-h-[80vh] overflow-y-auto m-4" @click.stop>
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-bold text-gray-900">💰 Current Balance Breakdown (${{ balanceDetails?.summary?.currentBalance?.toLocaleString() || 0 }})</h3>
+          <button @click="closeBalanceDetails" class="text-gray-500 hover:text-gray-700">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+        
+        <div v-if="balanceDetails" class="space-y-6">
+          <!-- Summary -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+            <div class="bg-green-50 p-4 rounded-lg">
+              <div class="text-green-700 font-medium">Total Inflows</div>
+              <div class="text-2xl font-bold text-green-800">${{ balanceDetails.summary.totalInflows.toLocaleString() }}</div>
+              <div class="text-sm text-green-600">{{ balanceDetails.summary.inflowCount }} transactions</div>
+            </div>
+            <div class="bg-red-50 p-4 rounded-lg">
+              <div class="text-red-700 font-medium">Total Outflows</div>
+              <div class="text-2xl font-bold text-red-800">${{ balanceDetails.summary.totalOutflows.toLocaleString() }}</div>
+              <div class="text-sm text-red-600">{{ balanceDetails.summary.outflowCount }} transactions</div>
+            </div>
+            <div class="bg-blue-50 p-4 rounded-lg">
+              <div class="text-blue-700 font-medium">Net Balance</div>
+              <div class="text-2xl font-bold text-blue-800">${{ balanceDetails.summary.currentBalance.toLocaleString() }}</div>
+              <div class="text-sm text-blue-600">{{ balanceDetails.summary.inflowCount + balanceDetails.summary.outflowCount }} total transactions</div>
+            </div>
+          </div>
+
+          <!-- Category Breakdown -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Inflows by Category -->
+            <div>
+              <h4 class="text-lg font-semibold text-green-700 mb-3">💰 Inflows by Category</h4>
+              <div class="space-y-2">
+                <div v-for="(data, category) in balanceDetails.inflowsByCategory" :key="category" 
+                     class="bg-green-50 p-3 rounded-lg">
+                  <div class="flex justify-between items-center">
+                    <span class="font-medium text-green-800">{{ getCategoryDisplayName(category) }}</span>
+                    <span class="font-bold text-green-700">${{ data.total.toLocaleString() }}</span>
+                  </div>
+                  <div class="text-sm text-green-600">{{ data.count }} transactions</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Outflows by Category -->
+            <div>
+              <h4 class="text-lg font-semibold text-red-700 mb-3">💸 Outflows by Category</h4>
+              <div class="space-y-2">
+                <div v-for="(data, category) in balanceDetails.outflowsByCategory" :key="category" 
+                     class="bg-red-50 p-3 rounded-lg">
+                  <div class="flex justify-between items-center">
+                    <span class="font-medium text-red-800">{{ getCategoryDisplayName(category) }}</span>
+                    <span class="font-bold text-red-700">${{ data.total.toLocaleString() }}</span>
+                  </div>
+                  <div class="text-sm text-red-600">{{ data.count }} transactions</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Transactions -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Recent Inflows -->
+            <div>
+              <h4 class="text-lg font-semibold text-green-700 mb-3">📈 Recent Inflows</h4>
+              <div class="space-y-2 max-h-60 overflow-y-auto">
+                <div v-for="tx in balanceDetails.recentInflows" :key="tx._id" 
+                     class="bg-green-50 p-3 rounded-lg text-sm">
+                  <div class="flex justify-between">
+                    <span class="font-medium text-green-800">${{ tx.amount.toLocaleString() }}</span>
+                    <span class="text-green-600">{{ new Date(tx.date).toLocaleDateString() }}</span>
+                  </div>
+                  <div class="text-green-700">{{ getCategoryDisplayName(tx.category) }}</div>
+                  <div v-if="tx.description" class="text-green-600">{{ tx.description }}</div>
+                  <div class="text-xs text-green-500">{{ tx.automated ? 'Auto' : 'Manual' }}</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Recent Outflows -->
+            <div>
+              <h4 class="text-lg font-semibold text-red-700 mb-3">📉 Recent Outflows</h4>
+              <div class="space-y-2 max-h-60 overflow-y-auto">
+                <div v-for="tx in balanceDetails.recentOutflows" :key="tx._id" 
+                     class="bg-red-50 p-3 rounded-lg text-sm">
+                  <div class="flex justify-between">
+                    <span class="font-medium text-red-800">${{ tx.amount.toLocaleString() }}</span>
+                    <span class="text-red-600">{{ new Date(tx.date).toLocaleDateString() }}</span>
+                  </div>
+                  <div class="text-red-700">{{ getCategoryDisplayName(tx.category) }}</div>
+                  <div v-if="tx.description" class="text-red-600">{{ tx.description }}</div>
+                  <div class="text-xs text-red-500">{{ tx.automated ? 'Auto' : 'Manual' }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
     <ChatWidget />
   </div>
 </template>

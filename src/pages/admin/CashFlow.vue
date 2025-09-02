@@ -718,15 +718,7 @@ const addTransaction = async () => {
       return;
     }
 
-    if (!newTransaction.value.description.trim()) {
-      error.value = "Please enter a description";
-      return;
-    }
-
-    if (newTransaction.value.description.trim().length < 3) {
-      error.value = "Description must be at least 3 characters long";
-      return;
-    }
+    // Description is now optional - no validation required
 
     isSubmitting.value = true;
 
@@ -742,7 +734,7 @@ const addTransaction = async () => {
       type: newTransaction.value.type,
       category: newTransaction.value.category,
       amount: parseFloat(newTransaction.value.amount),
-      description: newTransaction.value.description.trim(),
+      description: newTransaction.value.description?.trim() || '',
       date: new Date(),
       automated: false
     };
@@ -1050,7 +1042,7 @@ onMounted(async () => {
           <h3 class="text-lg font-semibold text-secondary-900 mb-4">➕ Add Manual Transaction</h3>
 
           <!-- Success Message -->
-          <div v-if="successMessage" class="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+          <div v-if="successMessage" class="mb-4 p-3 bg-green-100 border border-green-400 text-success rounded-lg">
             {{ successMessage }}
           </div>
 
@@ -1091,15 +1083,15 @@ onMounted(async () => {
 
               <!-- Description -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Description <span class="text-gray-400 text-xs">(Optional)</span></label>
                 <input v-model="newTransaction.description" type="text" placeholder="Transaction description"
-                  class="form-input w-full px-3 py-2" required>
+                  class="form-input w-full px-3 py-2">
               </div>
             </div>
 
             <!-- Submit Button -->
             <div class="mt-4 flex items-center gap-3">
-              <button type="submit" :disabled="isSubmitting || !newTransaction.amount || !newTransaction.description"
+              <button type="submit" :disabled="isSubmitting || !newTransaction.amount"
                 class="px-6 py-2 btn btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
                 <svg v-if="isSubmitting" class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>

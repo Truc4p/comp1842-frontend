@@ -2,7 +2,7 @@
 
 <script setup>
 import axios from "axios";
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from 'vue-i18n';
 import { API_URL } from '../../utils/config';
@@ -11,9 +11,23 @@ import ChatWidget from '../../components/ChatWidget.vue';
 const { t } = useI18n();
 const username = ref("");
 const password = ref("");
+const rememberMe = ref(false);
 const isLoading = ref(false);
 const errorMessage = ref("");
 const router = useRouter();
+
+// Load saved credentials on component mount
+onMounted(() => {
+  const savedUsername = localStorage.getItem('rememberedUsername');
+  const savedPassword = localStorage.getItem('rememberedPassword');
+  const isRemembered = localStorage.getItem('rememberMe') === 'true';
+  
+  if (isRemembered && savedUsername && savedPassword) {
+    username.value = savedUsername;
+    password.value = savedPassword;
+    rememberMe.value = true;
+  }
+});
 
 const handleLogin = async () => {
   // Reset error message
@@ -40,6 +54,18 @@ const handleLogin = async () => {
     localStorage.setItem("username", username.value);
     localStorage.setItem("role", res.data.role);
     localStorage.setItem("userId", res.data.userId);
+
+    // Handle "Remember Me" functionality
+    if (rememberMe.value) {
+      localStorage.setItem('rememberedUsername', username.value);
+      localStorage.setItem('rememberedPassword', password.value);
+      localStorage.setItem('rememberMe', 'true');
+    } else {
+      // Clear remembered credentials if "Remember Me" is unchecked
+      localStorage.removeItem('rememberedUsername');
+      localStorage.removeItem('rememberedPassword');
+      localStorage.removeItem('rememberMe');
+    }
 
     // Check if the user is an admin
     if (res.data.role === "admin") {
@@ -100,6 +126,7 @@ const handleLogin = async () => {
         <div class="flex items-center">
           <input 
             id="remember-me" 
+            v-model="rememberMe"
             type="checkbox" 
             class="h-4 w-4 border-gray-300 rounded" 
             style="accent-color: #C97F98;"

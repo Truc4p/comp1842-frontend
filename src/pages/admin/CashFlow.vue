@@ -1386,11 +1386,45 @@ onMounted(async () => {
         <!-- Cash Flow Forecast -->
         <div class="card p-6">
           <h3 class="text-lg font-semibold text-secondary-900 mb-4">🔮 3-Month Cash Flow Forecast</h3>
-          <div v-if="forecast.length > 0" class="h-72">
+          <div v-if="forecast.length > 0" class="h-72 mb-6">
             <Line :data="forecastChartData" :options="forecastChartOptions" />
           </div>
           <div v-else class="text-center py-8 text-gray-500">
             <p>No forecast data available</p>
+          </div>
+          
+          <!-- Debug: Forecast Calculation Details -->
+          <div v-if="forecast.length > 0" class="mt-6 p-4 bg-purple-50 rounded-lg border border-purple-200">
+            <h4 class="text-sm font-semibold text-purple-800 mb-3">Forecast Calculation Details</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <!-- Left Column: Assumptions -->
+              <div class="space-y-2">
+                <div class="font-medium text-purple-700">Historical Analysis (30 days):</div>
+                <div class="text-purple-600 text-xs space-y-1">
+                  <div v-if="forecast[0]">• Avg Daily Inflow: ${{ forecast[0].projectedInflow?.toLocaleString() || 'N/A' }} (= Total Inflows ${{ cashFlowData.totalInflows?.toLocaleString() || 0 }} ÷ 30 days)</div> 
+                  <div v-if="forecast[0]">• Avg Daily Outflow: ${{ forecast[0].projectedOutflow?.toLocaleString() || 'N/A' }} (= Total Outflows ${{ cashFlowData.totalOutflows?.toLocaleString() || 0 }} ÷ 30 days)</div>
+                  <div v-if="forecast[0]">• Net Daily Flow: ${{ forecast[0].netProjectedFlow?.toLocaleString() || 'N/A' }} (= Avg Daily Inflow ${{ forecast[0].projectedInflow?.toLocaleString() || 'N/A' }} - Avg Daily Outflow ${{ forecast[0].projectedOutflow?.toLocaleString() || 'N/A' }})</div>
+                  <div>• Based on: Last 30 days of transactions</div>
+                </div>
+              </div>
+              
+              <!-- Right Column: Projection -->
+              <div class="space-y-2">
+                <div class="font-medium text-purple-700">Projection Logic:</div>
+                <div class="text-purple-600 text-xs space-y-1">
+                  <div>• Starting Balance: ${{ cashFlowData.currentBalance?.toLocaleString() || 0 }}</div>
+                  <div>• Each Day: Balance += Net Daily Flow</div>
+                  <div>• Forecast Period: {{ forecast.length }} days</div>
+                  <div v-if="forecast[forecast.length - 1]">• Projected End Balance: ${{ forecast[forecast.length - 1].projectedBalance?.toLocaleString() || 'N/A' }}</div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Formula -->
+            <div class="mt-3 p-2 bg-purple-100 rounded text-xs text-purple-700">
+              <strong>Formula:</strong> Daily Balance = Previous Balance + (Avg Daily Inflow - Avg Daily Outflow)<br>
+              <strong>Note:</strong> Assumes consistent cash flow patterns based on recent 30-day history
+            </div>
           </div>
         </div>
 

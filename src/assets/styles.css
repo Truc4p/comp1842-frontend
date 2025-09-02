@@ -217,11 +217,9 @@
   border-radius: 1rem;
   overflow: hidden;
   transition: all 0.3s ease;
-  box-shadow: var(--shadow-soft);
 }
 
 .card:hover {
-  box-shadow: var(--shadow-medium);
   transform: translateY(-2px);
 }
 

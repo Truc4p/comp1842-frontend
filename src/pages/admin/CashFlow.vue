@@ -787,7 +787,7 @@ Check console for detailed breakdown.`);
 const showBalanceDetails = async () => {
   try {
     const token = localStorage.getItem("token");
-    const response = await axios.get(`${API_URL}/cashflow/debug/balance`, {
+    const response = await axios.get(`${API_URL}/cashflow/debug/balance?period=${selectedPeriod.value}`, {
       headers: { "Authorization": `Bearer ${token}` }
     });
     
@@ -914,7 +914,7 @@ onMounted(async () => {
                 <em>Calculated by backend from all CashFlowTransaction records</em>
               </div>
               <button @click="showBalanceDetails" class="mt-2 px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200">
-                Show All Transactions
+                Show Transactions ({{ selectedPeriod }} days)
               </button>
             </div>
           </div>

@@ -143,11 +143,11 @@ const profitMarginClass = computed(() => {
 // Chart data
 const expenseCategoryChartData = computed(() => {
   if (!expenseCategories.value?.breakdown) return { labels: [], datasets: [] };
-  
+
   const colors = ['#ef4444', '#f97316', '#eab308', '#84cc16', '#06b6d4', '#8b5cf6', '#ec4899', '#6b7280'];
-  
+
   return {
-    labels: expenseCategories.value.breakdown.map(cat => 
+    labels: expenseCategories.value.breakdown.map(cat =>
       expenseCategories_options.find(opt => opt.value === cat._id)?.label || cat._id
     ),
     datasets: [
@@ -163,12 +163,12 @@ const expenseCategoryChartData = computed(() => {
 
 const expenseTrendsChartData = computed(() => {
   if (!expenseTrends.value?.dailyTrends) return { labels: [], datasets: [] };
-  
-  const labels = expenseTrends.value.dailyTrends.map(day => 
+
+  const labels = expenseTrends.value.dailyTrends.map(day =>
     new Date(day._id).toLocaleDateString()
   );
   const amounts = expenseTrends.value.dailyTrends.map(day => day.dailyTotal);
-  
+
   return {
     labels,
     datasets: [
@@ -187,10 +187,10 @@ const expenseTrendsChartData = computed(() => {
 
 const vendorSpendingChartData = computed(() => {
   if (!vendorAnalysis.value?.vendorAnalysis) return { labels: [], datasets: [] };
-  
+
   const topVendors = vendorAnalysis.value.vendorAnalysis.slice(0, 10);
   const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#84cc16', '#f97316', '#ec4899', '#6b7280'];
-  
+
   return {
     labels: topVendors.map(vendor => vendor._id),
     datasets: [
@@ -412,7 +412,7 @@ const saveExpense = async () => {
 
 const deleteExpense = async (expenseId) => {
   if (!confirm('Are you sure you want to delete this expense?')) return;
-  
+
   try {
     const token = localStorage.getItem("token");
     await axios.delete(`${API_URL}/advanced-finance/expenses/${expenseId}`, {
@@ -523,7 +523,8 @@ watch(selectedPeriod, handlePeriodChange);
       <!-- Page Header -->
       <div class="mb-8">
         <h1 class="text-3xl font-bold text-primary-600 mb-2">💼 Advanced Finance Management</h1>
-        <p class="text-secondary-600 text-lg">Comprehensive financial oversight, expense tracking, and business analytics</p>
+        <p class="text-secondary-600 text-lg">Comprehensive financial oversight, expense tracking, and business
+          analytics</p>
       </div>
 
       <!-- Loading State -->
@@ -555,23 +556,18 @@ watch(selectedPeriod, handlePeriodChange);
         <div class="card">
           <div class="border-b border-gray-200">
             <nav class="flex space-x-8 px-6" aria-label="Tabs">
-              <button
-                v-for="tab in [
-                  { id: 'overview', name: 'Financial Overview', icon: '📊' },
-                  { id: 'expenses', name: 'Business Expenses', icon: '💸' },
-                  { id: 'recurring', name: 'Recurring Payments', icon: '🔄' },
-                  { id: 'vendors', name: 'Vendor Analysis', icon: '🏪' },
-                  { id: 'performance', name: 'Performance', icon: '📈' }
-                ]"
-                :key="tab.id"
-                @click="activeTab = tab.id"
-                :class="[
+              <button v-for="tab in [
+                { id: 'overview', name: 'Financial Overview', icon: '📊' },
+                { id: 'expenses', name: 'Business Expenses', icon: '💸' },
+                { id: 'recurring', name: 'Recurring Payments', icon: '🔄' },
+                { id: 'vendors', name: 'Vendor Analysis', icon: '🏪' },
+                { id: 'performance', name: 'Performance', icon: '📈' }
+              ]" :key="tab.id" @click="activeTab = tab.id" :class="[
                   'py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2',
                   activeTab === tab.id
                     ? 'border-primary-500 text-primary-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                ]"
-              >
+                ]">
                 <span>{{ tab.icon }}</span>
                 {{ tab.name }}
               </button>
@@ -582,82 +578,6 @@ watch(selectedPeriod, handlePeriodChange);
           <div class="p-6">
             <!-- Overview Tab -->
             <div v-if="activeTab === 'overview'" class="space-y-8">
-              <!-- Key Financial Metrics -->
-              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <!-- Current Balance -->
-                <div class="card p-6 border-l-4 border-blue-500">
-                  <div class="flex items-center">
-                    <div class="p-3 rounded-full bg-blue-100 text-blue-600">
-                      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z">
-                        </path>
-                      </svg>
-                    </div>
-                    <div class="ml-4">
-                      <p class="text-sm font-medium text-secondary-600">Current Balance</p>
-                      <p class="text-2xl font-bold text-blue-600">{{ formattedCurrentBalance }}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Gross Profit -->
-                <div class="card p-6 border-l-4" :class="financialOverview.profitability?.grossProfit >= 0 ? 'border-green-500' : 'border-red-500'">
-                  <div class="flex items-center">
-                    <div class="p-3 rounded-full" :class="financialOverview.profitability?.grossProfit >= 0 ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'">
-                      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6">
-                        </path>
-                      </svg>
-                    </div>
-                    <div class="ml-4">
-                      <p class="text-sm font-medium text-secondary-600">Gross Profit</p>
-                      <p class="text-2xl font-bold" :class="financialOverview.profitability?.grossProfit >= 0 ? 'text-green-600' : 'text-red-600'">
-                        {{ formattedGrossProfit }}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Profit Margin -->
-                <div class="card p-6 border-l-4 border-purple-500">
-                  <div class="flex items-center">
-                    <div class="p-3 rounded-full bg-purple-100 text-purple-600">
-                      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
-                        </path>
-                      </svg>
-                    </div>
-                    <div class="ml-4">
-                      <p class="text-sm font-medium text-secondary-600">Profit Margin</p>
-                      <p class="text-2xl font-bold" :class="profitMarginClass">
-                        {{ (financialOverview.profitability?.profitMargin || 0).toFixed(1) }}%
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Cash Runway -->
-                <div class="card p-6 border-l-4 border-orange-500">
-                  <div class="flex items-center">
-                    <div class="p-3 rounded-full bg-orange-100 text-orange-600">
-                      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z">
-                        </path>
-                      </svg>
-                    </div>
-                    <div class="ml-4">
-                      <p class="text-sm font-medium text-secondary-600">Cash Runway</p>
-                      <p class="text-2xl font-bold text-orange-600">
-                        {{ Math.round(financialOverview.cashFlow?.runway || 0) }} days
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
 
               <!-- Financial Health Indicators -->
               <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -666,21 +586,55 @@ watch(selectedPeriod, handlePeriodChange);
                   <div class="space-y-4">
                     <div class="flex justify-between">
                       <span class="text-sm text-secondary-600">Current Ratio</span>
-                      <span class="font-semibold" :class="financialOverview.healthIndicators?.currentRatio >= 1.2 ? 'text-green-600' : 'text-red-600'">
+                      <span class="font-semibold"
+                        :class="financialOverview.healthIndicators?.currentRatio >= 1.2 ? 'text-green-600' : 'text-red-600'">
                         {{ (financialOverview.healthIndicators?.currentRatio || 0).toFixed(2) }}
                       </span>
                     </div>
+                    <!-- Current Ratio Formula -->
+                    <div class="text-xs text-primary-600 p-2 bg-primary-50 rounded mb-3">
+                      = Current Assets ÷ Current Liabilities<br>
+                      <div v-if="financialOverview.healthIndicators">
+                        = ${{ (financialOverview.healthIndicators.currentAssets || 0).toLocaleString() }} ÷ ${{ (financialOverview.healthIndicators.currentLiabilities || 1).toLocaleString() }}
+                      </div>
+                      <div v-else>
+                        <em>Measures ability to pay short-term obligations</em>
+                      </div>
+                    </div>
+
                     <div class="flex justify-between">
                       <span class="text-sm text-secondary-600">Working Capital</span>
-                      <span class="font-semibold" :class="financialOverview.healthIndicators?.workingCapital >= 0 ? 'text-green-600' : 'text-red-600'">
+                      <span class="font-semibold"
+                        :class="financialOverview.healthIndicators?.workingCapital >= 0 ? 'text-green-600' : 'text-red-600'">
                         {{ formatCurrency(financialOverview.healthIndicators?.workingCapital) }}
                       </span>
                     </div>
+                    <!-- Working Capital Formula -->
+                    <div class="text-xs text-primary-600 p-2 bg-primary-50 rounded mb-3">
+                      = Current Assets - Current Liabilities<br>
+                      <div v-if="financialOverview.healthIndicators">
+                        = ${{ (financialOverview.healthIndicators.currentAssets || 0).toLocaleString() }} - ${{ (financialOverview.healthIndicators.currentLiabilities || 0).toLocaleString() }}
+                      </div>
+                      <div v-else>
+                        <em>Cash available for daily operations</em>
+                      </div>
+                    </div>
+
                     <div class="flex justify-between">
                       <span class="text-sm text-secondary-600">Pending Expenses</span>
                       <span class="font-semibold text-yellow-600">
                         {{ formatCurrency(financialOverview.healthIndicators?.totalPendingExpenses) }}
                       </span>
+                    </div>
+                    <!-- Pending Expenses Formula -->
+                    <div class="text-xs text-primary-600 p-2 bg-primary-50 rounded">
+                      = Sum of all unpaid business expenses<br>
+                      <div v-if="financialOverview.healthIndicators">
+                        = {{ financialOverview.healthIndicators.pendingExpenseCount || 0 }} pending expenses
+                      </div>
+                      <div v-else>
+                        <em>Outstanding obligations requiring payment</em>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -716,7 +670,8 @@ watch(selectedPeriod, handlePeriodChange);
                 <h3 class="text-xl font-semibold text-secondary-900">Business Expenses Management</h3>
                 <button @click="openExpenseModal()" class="btn btn-primary flex items-center gap-2">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                   </svg>
                   Add New Expense
                 </button>
@@ -728,13 +683,20 @@ watch(selectedPeriod, handlePeriodChange);
                   <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                       <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vendor</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Category</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Description</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Amount</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Vendor</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Actions</th>
                       </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
@@ -743,19 +705,23 @@ watch(selectedPeriod, handlePeriodChange);
                           <div class="flex items-center">
                             <span class="text-lg mr-2">{{ getCategoryIcon(expense.category) }}</span>
                             <span class="text-sm font-medium text-gray-900">
-                              {{ expenseCategories_options.find(cat => cat.value === expense.category)?.label || expense.category }}
+                              {{expenseCategories_options.find(cat => cat.value === expense.category)?.label ||
+                              expense.category }}
                             </span>
                           </div>
                           <div v-if="expense.isRecurring" class="text-xs text-purple-600 flex items-center gap-1">
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
+                              </path>
                             </svg>
                             {{ expense.frequency }}
                           </div>
                         </td>
                         <td class="px-6 py-4">
                           <div class="text-sm text-gray-900">{{ expense.description }}</div>
-                          <div v-if="expense.invoiceNumber" class="text-xs text-gray-500">Invoice: {{ expense.invoiceNumber }}</div>
+                          <div v-if="expense.invoiceNumber" class="text-xs text-gray-500">Invoice: {{
+                            expense.invoiceNumber }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                           <div class="text-sm font-semibold text-gray-900">{{ formatCurrency(expense.amount) }}</div>
@@ -771,7 +737,8 @@ watch(selectedPeriod, handlePeriodChange);
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                           <div class="text-sm text-gray-900">{{ formatDate(expense.date) }}</div>
-                          <div v-if="expense.dueDate" class="text-xs text-gray-500">Due: {{ formatDate(expense.dueDate) }}</div>
+                          <div v-if="expense.dueDate" class="text-xs text-gray-500">Due: {{ formatDate(expense.dueDate)
+                            }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <button @click="openExpenseModal(expense)" class="text-indigo-600 hover:text-indigo-900 mr-3">
@@ -795,8 +762,8 @@ watch(selectedPeriod, handlePeriodChange);
                 <div class="card p-6">
                   <h4 class="text-lg font-semibold text-secondary-900 mb-4">🔄 Active Recurring Expenses</h4>
                   <div class="space-y-3">
-                    <div v-for="expense in recurringExpenses.recurringExpenses" :key="expense._id" 
-                         class="border border-gray-200 rounded-lg p-4">
+                    <div v-for="expense in recurringExpenses.recurringExpenses" :key="expense._id"
+                      class="border border-gray-200 rounded-lg p-4">
                       <div class="flex items-center justify-between mb-2">
                         <span class="font-medium text-gray-900">{{ expense.description }}</span>
                         <span class="text-lg font-bold text-gray-900">{{ formatCurrency(expense.amount) }}</span>
@@ -813,8 +780,8 @@ watch(selectedPeriod, handlePeriodChange);
                 <div class="card p-6">
                   <h4 class="text-lg font-semibold text-secondary-900 mb-4">📅 Upcoming Payments (90 days)</h4>
                   <div class="space-y-3">
-                    <div v-for="expense in recurringExpenses.upcomingExpenses" :key="expense._id" 
-                         class="border-l-4 border-orange-400 bg-orange-50 p-4 rounded-r-lg">
+                    <div v-for="expense in recurringExpenses.upcomingExpenses" :key="expense._id"
+                      class="border-l-4 border-orange-400 bg-orange-50 p-4 rounded-r-lg">
                       <div class="flex items-center justify-between mb-2">
                         <span class="font-medium text-gray-900">{{ expense.description }}</span>
                         <span class="text-lg font-bold text-orange-600">{{ formatCurrency(expense.amount) }}</span>
@@ -823,8 +790,8 @@ watch(selectedPeriod, handlePeriodChange);
                         <span class="text-gray-600">{{ expense.vendor || 'No vendor' }}</span>
                         <span :class="[
                           'font-semibold',
-                          expense.daysUntilDue <= 7 ? 'text-red-600' : 
-                          expense.daysUntilDue <= 30 ? 'text-yellow-600' : 'text-gray-600'
+                          expense.daysUntilDue <= 7 ? 'text-red-600' :
+                            expense.daysUntilDue <= 30 ? 'text-yellow-600' : 'text-gray-600'
                         ]">
                           {{ expense.daysUntilDue }} days
                         </span>
@@ -863,8 +830,8 @@ watch(selectedPeriod, handlePeriodChange);
                 <div class="card p-6">
                   <h4 class="text-lg font-semibold text-secondary-900 mb-4">📊 Vendor Details</h4>
                   <div class="space-y-3 max-h-80 overflow-y-auto">
-                    <div v-for="vendor in vendorAnalysis.vendorAnalysis" :key="vendor._id" 
-                         class="border border-gray-200 rounded-lg p-4">
+                    <div v-for="vendor in vendorAnalysis.vendorAnalysis" :key="vendor._id"
+                      class="border border-gray-200 rounded-lg p-4">
                       <div class="flex items-center justify-between mb-2">
                         <span class="font-medium text-gray-900">{{ vendor._id }}</span>
                         <span class="text-lg font-bold text-gray-900">{{ formatCurrency(vendor.totalSpent) }}</span>
@@ -886,16 +853,48 @@ watch(selectedPeriod, handlePeriodChange);
                 <div class="card p-6 text-center">
                   <div class="text-2xl font-bold text-blue-600 mb-2">{{ vendorAnalysis.totalVendors || 0 }}</div>
                   <div class="text-sm text-secondary-600">Active Vendors</div>
+                  <!-- Formula explanation -->
+                  <div class="text-xs text-primary-600 mt-3 p-2 bg-primary-50 rounded">
+                    = Count of unique vendors with transactions<br>
+                    <div v-if="vendorAnalysis.vendorAnalysis">
+                      = {{ vendorAnalysis.vendorAnalysis.length || 0 }} vendors ({{ selectedPeriod }} days)
+                    </div>
+                    <div v-else>
+                      <em>Vendors with at least one transaction</em>
+                    </div>
+                  </div>
                 </div>
                 <div class="card p-6 text-center">
-                  <div class="text-2xl font-bold text-red-600 mb-2">{{ formatCurrency(vendorAnalysis.totalVendorSpending) }}</div>
+                  <div class="text-2xl font-bold text-red-600 mb-2">{{
+                    formatCurrency(vendorAnalysis.totalVendorSpending) }}</div>
                   <div class="text-sm text-secondary-600">Total Vendor Spending</div>
+                  <!-- Formula explanation -->
+                  <div class="text-xs text-primary-600 mt-3 p-2 bg-primary-50 rounded">
+                    = Sum of all vendor transactions<br>
+                    <div v-if="vendorAnalysis.vendorAnalysis">
+                      = Σ({{ vendorAnalysis.vendorAnalysis.map(v => `$${v.totalSpent.toLocaleString()}`).slice(0, 3).join(' + ') }}{{ vendorAnalysis.vendorAnalysis.length > 3 ? '...' : '' }})
+                    </div>
+                    <div v-else>
+                      <em>Total amount paid to all vendors</em>
+                    </div>
+                  </div>
                 </div>
                 <div class="card p-6 text-center">
                   <div class="text-2xl font-bold text-purple-600 mb-2">
-                    {{ vendorAnalysis.totalVendors > 0 ? formatCurrency(vendorAnalysis.totalVendorSpending / vendorAnalysis.totalVendors) : '$0' }}
+                    {{ vendorAnalysis.totalVendors > 0 ? formatCurrency(vendorAnalysis.totalVendorSpending /
+                      vendorAnalysis.totalVendors) : '$0' }}
                   </div>
                   <div class="text-sm text-secondary-600">Average per Vendor</div>
+                  <!-- Formula explanation -->
+                  <div class="text-xs text-primary-600 mt-3 p-2 bg-primary-50 rounded">
+                    = Total Spending ÷ Total Vendors<br>
+                    <div v-if="vendorAnalysis.totalVendors > 0">
+                      = ${{ (vendorAnalysis.totalVendorSpending || 0).toLocaleString() }} ÷ {{ vendorAnalysis.totalVendors }}
+                    </div>
+                    <div v-else>
+                      <em>Average amount spent per vendor</em>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -907,8 +906,10 @@ watch(selectedPeriod, handlePeriodChange);
                 <div class="card p-6">
                   <h4 class="text-lg font-semibold text-secondary-900 mb-4">📈 Revenue Growth</h4>
                   <div class="text-center">
-                    <div class="text-3xl font-bold mb-2" :class="performanceMetrics.growth?.revenue >= 0 ? 'text-green-600' : 'text-red-600'">
-                      {{ performanceMetrics.growth?.revenue >= 0 ? '+' : '' }}{{ (performanceMetrics.growth?.revenue || 0).toFixed(1) }}%
+                    <div class="text-3xl font-bold mb-2"
+                      :class="performanceMetrics.growth?.revenue >= 0 ? 'text-green-600' : 'text-red-600'">
+                      {{ performanceMetrics.growth?.revenue >= 0 ? '+' : '' }}{{ (performanceMetrics.growth?.revenue ||
+                      0).toFixed(1) }}%
                     </div>
                     <div class="text-sm text-gray-600">vs Previous Period</div>
                     <div class="mt-4 text-sm">
@@ -922,24 +923,48 @@ watch(selectedPeriod, handlePeriodChange);
                       </div>
                     </div>
                   </div>
+                  <!-- Formula explanation -->
+                  <div class="text-xs text-primary-600 mt-4 p-2 bg-primary-50 rounded">
+                    = ((Current Revenue - Previous Revenue) ÷ Previous Revenue) × 100<br>
+                    <div v-if="performanceMetrics.current && performanceMetrics.previous">
+                      = ((${{ (performanceMetrics.current.revenue || 0).toLocaleString() }} - ${{ (performanceMetrics.previous.revenue || 0).toLocaleString() }}) ÷ ${{ (performanceMetrics.previous.revenue || 1).toLocaleString() }}) × 100
+                    </div>
+                    <div v-else>
+                      <em>Percentage change in revenue over periods</em>
+                    </div>
+                  </div>
                 </div>
 
                 <div class="card p-6">
                   <h4 class="text-lg font-semibold text-secondary-900 mb-4">💸 Expense Growth</h4>
                   <div class="text-center">
-                    <div class="text-3xl font-bold mb-2" :class="performanceMetrics.growth?.expenses <= 0 ? 'text-green-600' : 'text-red-600'">
-                      {{ performanceMetrics.growth?.expenses >= 0 ? '+' : '' }}{{ (performanceMetrics.growth?.expenses || 0).toFixed(1) }}%
+                    <div class="text-3xl font-bold mb-2"
+                      :class="performanceMetrics.growth?.expenses <= 0 ? 'text-green-600' : 'text-red-600'">
+                      {{ performanceMetrics.growth?.expenses >= 0 ? '+' : '' }}{{ (performanceMetrics.growth?.expenses
+                      || 0).toFixed(1) }}%
                     </div>
                     <div class="text-sm text-gray-600">vs Previous Period</div>
                     <div class="mt-4 text-sm">
                       <div class="flex justify-between">
                         <span>Current:</span>
-                        <span class="font-semibold">{{ formatCurrency(performanceMetrics.current?.totalExpenses) }}</span>
+                        <span class="font-semibold">{{ formatCurrency(performanceMetrics.current?.totalExpenses)
+                          }}</span>
                       </div>
                       <div class="flex justify-between">
                         <span>Previous:</span>
-                        <span class="font-semibold">{{ formatCurrency(performanceMetrics.previous?.totalExpenses) }}</span>
+                        <span class="font-semibold">{{ formatCurrency(performanceMetrics.previous?.totalExpenses)
+                          }}</span>
                       </div>
+                    </div>
+                  </div>
+                  <!-- Formula explanation -->
+                  <div class="text-xs text-primary-600 mt-4 p-2 bg-primary-50 rounded">
+                    = ((Current Expenses - Previous Expenses) ÷ Previous Expenses) × 100<br>
+                    <div v-if="performanceMetrics.current && performanceMetrics.previous">
+                      = ((${{ (performanceMetrics.current.totalExpenses || 0).toLocaleString() }} - ${{ (performanceMetrics.previous.totalExpenses || 0).toLocaleString() }}) ÷ ${{ (performanceMetrics.previous.totalExpenses || 1).toLocaleString() }}) × 100
+                    </div>
+                    <div v-else>
+                      <em>Percentage change in expenses over periods</em>
                     </div>
                   </div>
                 </div>
@@ -947,8 +972,10 @@ watch(selectedPeriod, handlePeriodChange);
                 <div class="card p-6">
                   <h4 class="text-lg font-semibold text-secondary-900 mb-4">💰 Profit Growth</h4>
                   <div class="text-center">
-                    <div class="text-3xl font-bold mb-2" :class="performanceMetrics.growth?.profit >= 0 ? 'text-green-600' : 'text-red-600'">
-                      {{ performanceMetrics.growth?.profit >= 0 ? '+' : '' }}{{ (performanceMetrics.growth?.profit || 0).toFixed(1) }}%
+                    <div class="text-3xl font-bold mb-2"
+                      :class="performanceMetrics.growth?.profit >= 0 ? 'text-green-600' : 'text-red-600'">
+                      {{ performanceMetrics.growth?.profit >= 0 ? '+' : '' }}{{ (performanceMetrics.growth?.profit ||
+                      0).toFixed(1) }}%
                     </div>
                     <div class="text-sm text-gray-600">vs Previous Period</div>
                     <div class="mt-4 text-sm">
@@ -958,8 +985,19 @@ watch(selectedPeriod, handlePeriodChange);
                       </div>
                       <div class="flex justify-between">
                         <span>Previous:</span>
-                        <span class="font-semibold">{{ formatCurrency(performanceMetrics.previous?.grossProfit) }}</span>
+                        <span class="font-semibold">{{ formatCurrency(performanceMetrics.previous?.grossProfit)
+                          }}</span>
                       </div>
+                    </div>
+                  </div>
+                  <!-- Formula explanation -->
+                  <div class="text-xs text-primary-600 mt-4 p-2 bg-primary-50 rounded">
+                    = ((Current Profit - Previous Profit) ÷ Previous Profit) × 100<br>
+                    <div v-if="performanceMetrics.current && performanceMetrics.previous">
+                      = ((${{ (performanceMetrics.current.grossProfit || 0).toLocaleString() }} - ${{ (performanceMetrics.previous.grossProfit || 0).toLocaleString() }}) ÷ ${{ (performanceMetrics.previous.grossProfit || 1).toLocaleString() }}) × 100
+                    </div>
+                    <div v-else>
+                      <em>Percentage change in gross profit over periods</em>
                     </div>
                   </div>
                 </div>
@@ -975,19 +1013,23 @@ watch(selectedPeriod, handlePeriodChange);
                     <div class="space-y-3">
                       <div class="flex justify-between py-2 border-b border-gray-100">
                         <span class="text-gray-600">Revenue</span>
-                        <span class="font-semibold text-green-600">{{ formatCurrency(performanceMetrics.current?.revenue) }}</span>
+                        <span class="font-semibold text-green-600">{{
+                          formatCurrency(performanceMetrics.current?.revenue) }}</span>
                       </div>
                       <div class="flex justify-between py-2 border-b border-gray-100">
                         <span class="text-gray-600">Business Expenses</span>
-                        <span class="font-semibold text-red-600">{{ formatCurrency(performanceMetrics.current?.businessExpenses) }}</span>
+                        <span class="font-semibold text-red-600">{{
+                          formatCurrency(performanceMetrics.current?.businessExpenses) }}</span>
                       </div>
                       <div class="flex justify-between py-2 border-b border-gray-100">
                         <span class="text-gray-600">Other Expenses</span>
-                        <span class="font-semibold text-red-600">{{ formatCurrency(performanceMetrics.current?.otherExpenses) }}</span>
+                        <span class="font-semibold text-red-600">{{
+                          formatCurrency(performanceMetrics.current?.otherExpenses) }}</span>
                       </div>
                       <div class="flex justify-between py-2 border-b-2 border-gray-300">
                         <span class="font-semibold text-gray-800">Gross Profit</span>
-                        <span class="font-bold text-lg" :class="performanceMetrics.current?.grossProfit >= 0 ? 'text-green-600' : 'text-red-600'">
+                        <span class="font-bold text-lg"
+                          :class="performanceMetrics.current?.grossProfit >= 0 ? 'text-green-600' : 'text-red-600'">
                           {{ formatCurrency(performanceMetrics.current?.grossProfit) }}
                         </span>
                       </div>
@@ -1000,23 +1042,28 @@ watch(selectedPeriod, handlePeriodChange);
 
                   <!-- Previous Period -->
                   <div>
-                    <h5 class="text-md font-semibold text-gray-700 mb-4">Previous Period ({{ selectedPeriod }} days)</h5>
+                    <h5 class="text-md font-semibold text-gray-700 mb-4">Previous Period ({{ selectedPeriod }} days)
+                    </h5>
                     <div class="space-y-3">
                       <div class="flex justify-between py-2 border-b border-gray-100">
                         <span class="text-gray-600">Revenue</span>
-                        <span class="font-semibold text-green-600">{{ formatCurrency(performanceMetrics.previous?.revenue) }}</span>
+                        <span class="font-semibold text-green-600">{{
+                          formatCurrency(performanceMetrics.previous?.revenue) }}</span>
                       </div>
                       <div class="flex justify-between py-2 border-b border-gray-100">
                         <span class="text-gray-600">Business Expenses</span>
-                        <span class="font-semibold text-red-600">{{ formatCurrency(performanceMetrics.previous?.businessExpenses) }}</span>
+                        <span class="font-semibold text-red-600">{{
+                          formatCurrency(performanceMetrics.previous?.businessExpenses) }}</span>
                       </div>
                       <div class="flex justify-between py-2 border-b border-gray-100">
                         <span class="text-gray-600">Other Expenses</span>
-                        <span class="font-semibold text-red-600">{{ formatCurrency(performanceMetrics.previous?.otherExpenses) }}</span>
+                        <span class="font-semibold text-red-600">{{
+                          formatCurrency(performanceMetrics.previous?.otherExpenses) }}</span>
                       </div>
                       <div class="flex justify-between py-2 border-b-2 border-gray-300">
                         <span class="font-semibold text-gray-800">Gross Profit</span>
-                        <span class="font-bold text-lg" :class="performanceMetrics.previous?.grossProfit >= 0 ? 'text-green-600' : 'text-red-600'">
+                        <span class="font-bold text-lg"
+                          :class="performanceMetrics.previous?.grossProfit >= 0 ? 'text-green-600' : 'text-red-600'">
                           {{ formatCurrency(performanceMetrics.previous?.grossProfit) }}
                         </span>
                       </div>
@@ -1035,7 +1082,8 @@ watch(selectedPeriod, handlePeriodChange);
     </div>
 
     <!-- Expense Modal -->
-    <div v-if="showExpenseModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" @click="closeExpenseModal">
+    <div v-if="showExpenseModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      @click="closeExpenseModal">
       <div class="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto" @click.stop>
         <div class="flex justify-between items-center mb-6">
           <h3 class="text-xl font-bold text-gray-900">
@@ -1121,7 +1169,7 @@ watch(selectedPeriod, handlePeriodChange);
               <input v-model="expenseForm.isRecurring" type="checkbox" class="mr-2">
               <label class="text-sm font-medium text-gray-700">This is a recurring expense</label>
             </div>
-            
+
             <div v-if="expenseForm.isRecurring" class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Frequency</label>
@@ -1142,7 +1190,8 @@ watch(selectedPeriod, handlePeriodChange);
 
           <!-- Form Actions -->
           <div class="flex justify-end space-x-3 pt-4 border-t">
-            <button type="button" @click="closeExpenseModal" class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
+            <button type="button" @click="closeExpenseModal"
+              class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
               Cancel
             </button>
             <button type="submit" class="btn btn-primary">
@@ -1165,7 +1214,7 @@ watch(selectedPeriod, handlePeriodChange);
 .card {
   background-color: white;
   border-radius: 0.75rem;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--secondary-100);
 }
 
 .form-input {
@@ -1180,7 +1229,6 @@ watch(selectedPeriod, handlePeriodChange);
 
 .form-input:focus {
   outline: none;
-  border-color: #3b82f6;
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
 
@@ -1194,17 +1242,6 @@ watch(selectedPeriod, handlePeriodChange);
   transition: all 0.2s;
 }
 
-.btn-primary {
-  background-color: #3b82f6;
-  color: white;
-  border: 1px solid #3b82f6;
-}
-
-.btn-primary:hover {
-  background-color: #2563eb;
-  border-color: #2563eb;
-}
-
 .form-select {
   display: block;
   width: 100%;
@@ -1216,7 +1253,6 @@ watch(selectedPeriod, handlePeriodChange);
 
 .form-select:focus {
   outline: none;
-  border-color: #3b82f6;
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
 </style>

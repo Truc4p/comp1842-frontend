@@ -140,27 +140,27 @@ const payFrequencies = [
 // Computed properties
 const filteredEmployees = computed(() => {
   return employees.value.filter(emp => {
-    const matchesSearch = !searchQuery.value || 
+    const matchesSearch = !searchQuery.value ||
       emp.firstName.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
       emp.lastName.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
       emp.email.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
       emp.employeeId.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
       emp.position.toLowerCase().includes(searchQuery.value.toLowerCase());
-    
+
     const matchesDepartment = !selectedDepartment.value || emp.department === selectedDepartment.value;
     const matchesStatus = !selectedStatus.value || emp.status === selectedStatus.value;
-    
+
     return matchesSearch && matchesDepartment && matchesStatus;
   });
 });
 
 const departmentChartData = computed(() => {
   if (!hrAnalytics.value.departmentBreakdown) return { labels: [], datasets: [] };
-  
+
   const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#84cc16', '#f97316', '#ec4899'];
-  
+
   return {
-    labels: hrAnalytics.value.departmentBreakdown.map(dept => 
+    labels: hrAnalytics.value.departmentBreakdown.map(dept =>
       departments.find(d => d.value === dept._id)?.label || dept._id
     ),
     datasets: [
@@ -176,9 +176,9 @@ const departmentChartData = computed(() => {
 
 const payrollChartData = computed(() => {
   if (!departmentStats.value.length) return { labels: [], datasets: [] };
-  
+
   return {
-    labels: departmentStats.value.map(dept => 
+    labels: departmentStats.value.map(dept =>
       departments.find(d => d.value === dept.department)?.label || dept.department
     ),
     datasets: [
@@ -233,14 +233,14 @@ const fetchEmployees = async () => {
       page: currentPage.value,
       limit: itemsPerPage.value
     });
-    
+
     if (selectedDepartment.value) params.append('department', selectedDepartment.value);
     if (selectedStatus.value) params.append('status', selectedStatus.value);
-    
+
     const response = await axios.get(`${API_URL}/hr/employees?${params}`, {
       headers: { "Authorization": `Bearer ${token}` }
     });
-    
+
     employees.value = response.data.employees;
     totalPages.value = response.data.totalPages;
   } catch (err) {
@@ -434,7 +434,7 @@ const saveEmployee = async () => {
 
 const deleteEmployee = async (employeeId) => {
   if (!confirm('Are you sure you want to delete this employee? This action cannot be undone.')) return;
-  
+
   try {
     const token = localStorage.getItem("token");
     await axios.delete(`${API_URL}/hr/employees/${employeeId}`, {
@@ -542,7 +542,8 @@ watch([selectedDepartment, selectedStatus, currentPage], fetchEmployees);
       <!-- Page Header -->
       <div class="mb-8">
         <h1 class="text-3xl font-bold text-primary-600 mb-2">👥 Human Resource Management</h1>
-        <p class="text-secondary-600 text-lg">Comprehensive employee management, analytics, and organizational insights</p>
+        <p class="text-secondary-600 text-lg">Comprehensive employee management, analytics, and organizational insights
+        </p>
       </div>
 
       <!-- Loading State -->
@@ -562,23 +563,18 @@ watch([selectedDepartment, selectedStatus, currentPage], fetchEmployees);
         <div class="card">
           <div class="border-b border-gray-200">
             <nav class="flex space-x-8 px-6" aria-label="Tabs">
-              <button
-                v-for="tab in [
-                  { id: 'dashboard', name: 'Dashboard', icon: '📊' },
-                  { id: 'employees', name: 'Employee Directory', icon: '👥' },
-                  { id: 'departments', name: 'Departments', icon: '🏢' },
-                  { id: 'payroll', name: 'Payroll', icon: '💰' },
-                  { id: 'reports', name: 'Reports', icon: '📈' }
-                ]"
-                :key="tab.id"
-                @click="activeTab = tab.id"
-                :class="[
+              <button v-for="tab in [
+                { id: 'dashboard', name: 'Dashboard', icon: '📊' },
+                { id: 'employees', name: 'Employee Directory', icon: '👥' },
+                { id: 'departments', name: 'Departments', icon: '🏢' },
+                { id: 'payroll', name: 'Payroll', icon: '💰' },
+                { id: 'reports', name: 'Reports', icon: '📈' }
+              ]" :key="tab.id" @click="activeTab = tab.id" :class="[
                   'py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2',
                   activeTab === tab.id
                     ? 'border-primary-500 text-primary-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                ]"
-              >
+                ]">
                 <span>{{ tab.icon }}</span>
                 {{ tab.name }}
               </button>
@@ -597,7 +593,7 @@ watch([selectedDepartment, selectedStatus, currentPage], fetchEmployees);
                     <div class="p-3 rounded-full bg-blue-100 text-blue-600">
                       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z">
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z">
                         </path>
                       </svg>
                     </div>
@@ -637,7 +633,8 @@ watch([selectedDepartment, selectedStatus, currentPage], fetchEmployees);
                     </div>
                     <div class="ml-4">
                       <p class="text-sm font-medium text-secondary-600">Monthly Payroll</p>
-                      <p class="text-2xl font-bold text-purple-600">{{ formatCurrency(payrollSummary.totalMonthlyPayroll) }}</p>
+                      <p class="text-2xl font-bold text-purple-600">{{
+                        formatCurrency(payrollSummary.totalMonthlyPayroll) }}</p>
                     </div>
                   </div>
                 </div>
@@ -654,7 +651,8 @@ watch([selectedDepartment, selectedStatus, currentPage], fetchEmployees);
                     </div>
                     <div class="ml-4">
                       <p class="text-sm font-medium text-secondary-600">Average Salary</p>
-                      <p class="text-2xl font-bold text-orange-600">{{ formatCurrency(hrAnalytics.overview?.averageSalary) }}</p>
+                      <p class="text-2xl font-bold text-orange-600">{{
+                        formatCurrency(hrAnalytics.overview?.averageSalary) }}</p>
                     </div>
                   </div>
                 </div>
@@ -691,8 +689,8 @@ watch([selectedDepartment, selectedStatus, currentPage], fetchEmployees);
                 <div class="card p-6">
                   <h4 class="text-lg font-semibold text-secondary-900 mb-4">🆕 Recent Hires (Last 30 days)</h4>
                   <div v-if="hrAnalytics.recentHires?.length > 0" class="space-y-3 max-h-64 overflow-y-auto">
-                    <div v-for="employee in hrAnalytics.recentHires" :key="employee._id" 
-                         class="border border-gray-200 rounded-lg p-4">
+                    <div v-for="employee in hrAnalytics.recentHires" :key="employee._id"
+                      class="border border-gray-200 rounded-lg p-4">
                       <div class="flex items-center justify-between">
                         <div>
                           <div class="font-medium text-gray-900">{{ employee.firstName }} {{ employee.lastName }}</div>
@@ -712,13 +710,14 @@ watch([selectedDepartment, selectedStatus, currentPage], fetchEmployees);
                 <div class="card p-6">
                   <h4 class="text-lg font-semibold text-secondary-900 mb-4">🎉 Upcoming Anniversaries</h4>
                   <div v-if="hrAnalytics.upcomingAnniversaries?.length > 0" class="space-y-3 max-h-64 overflow-y-auto">
-                    <div v-for="employee in hrAnalytics.upcomingAnniversaries" :key="employee._id" 
-                         class="border-l-4 border-purple-400 bg-purple-50 p-4 rounded-r-lg">
+                    <div v-for="employee in hrAnalytics.upcomingAnniversaries" :key="employee._id"
+                      class="border-l-4 border-purple-400 bg-purple-50 p-4 rounded-r-lg">
                       <div class="flex items-center justify-between">
                         <div>
                           <div class="font-medium text-gray-900">{{ employee.firstName }} {{ employee.lastName }}</div>
                           <div class="text-sm text-gray-600">{{ employee.position }}</div>
-                          <div class="text-xs text-purple-600">{{ getYearsOfService(employee.startDate) }} years of service</div>
+                          <div class="text-xs text-purple-600">{{ getYearsOfService(employee.startDate) }} years of
+                            service</div>
                         </div>
                         <div class="text-right">
                           <div class="text-sm font-semibold text-purple-600">Anniversary</div>
@@ -741,13 +740,15 @@ watch([selectedDepartment, selectedStatus, currentPage], fetchEmployees);
                 <div class="flex flex-col md:flex-row gap-4">
                   <!-- Search -->
                   <div class="relative">
-                    <input v-model="searchQuery" type="text" placeholder="Search employees..." 
-                           class="form-input pl-10 w-64">
-                    <svg class="w-5 h-5 text-gray-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    <input v-model="searchQuery" type="text" placeholder="Search employees..."
+                      class="form-input pl-10 w-64">
+                    <svg class="w-5 h-5 text-gray-400 absolute left-3 top-3" fill="none" stroke="currentColor"
+                      viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                     </svg>
                   </div>
-                  
+
                   <!-- Department Filter -->
                   <select v-model="selectedDepartment" class="form-select w-48">
                     <option value="">All Departments</option>
@@ -755,7 +756,7 @@ watch([selectedDepartment, selectedStatus, currentPage], fetchEmployees);
                       {{ dept.icon }} {{ dept.label }}
                     </option>
                   </select>
-                  
+
                   <!-- Status Filter -->
                   <select v-model="selectedStatus" class="form-select w-40">
                     <option value="">All Status</option>
@@ -764,10 +765,11 @@ watch([selectedDepartment, selectedStatus, currentPage], fetchEmployees);
                     </option>
                   </select>
                 </div>
-                
+
                 <button @click="openEmployeeModal()" class="btn btn-primary flex items-center gap-2">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                   </svg>
                   Add New Employee
                 </button>
@@ -779,14 +781,22 @@ watch([selectedDepartment, selectedStatus, currentPage], fetchEmployees);
                   <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                       <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employee</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Position</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employment</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Salary</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Start Date</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Employee</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Department</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Position</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Employment</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Salary</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Start
+                          Date</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Actions</th>
                       </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
@@ -801,7 +811,8 @@ watch([selectedDepartment, selectedStatus, currentPage], fetchEmployees);
                               </div>
                             </div>
                             <div class="ml-4">
-                              <div class="text-sm font-medium text-gray-900">{{ employee.firstName }} {{ employee.lastName }}</div>
+                              <div class="text-sm font-medium text-gray-900">{{ employee.firstName }} {{
+                                employee.lastName }}</div>
                               <div class="text-sm text-gray-500">{{ employee.employeeId }}</div>
                               <div class="text-sm text-gray-500">{{ employee.email }}</div>
                             </div>
@@ -811,7 +822,8 @@ watch([selectedDepartment, selectedStatus, currentPage], fetchEmployees);
                           <div class="flex items-center">
                             <span class="text-lg mr-2">{{ getDepartmentIcon(employee.department) }}</span>
                             <span class="text-sm font-medium text-gray-900">
-                              {{ departments.find(dept => dept.value === employee.department)?.label || employee.department }}
+                              {{departments.find(dept => dept.value === employee.department)?.label ||
+                              employee.department }}
                             </span>
                           </div>
                         </td>
@@ -822,23 +834,27 @@ watch([selectedDepartment, selectedStatus, currentPage], fetchEmployees);
                           </div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                          <div class="text-sm text-gray-900">{{ employmentTypes.find(type => type.value === employee.employmentType)?.label }}</div>
+                          <div class="text-sm text-gray-900">{{employmentTypes.find(type => type.value ===
+                            employee.employmentType)?.label }}</div>
                           <div class="text-xs text-gray-500">{{ getYearsOfService(employee.startDate) }} years</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                          <div class="text-sm font-semibold text-gray-900">{{ formatCurrency(employee.salary.amount) }}</div>
+                          <div class="text-sm font-semibold text-gray-900">{{ formatCurrency(employee.salary.amount) }}
+                          </div>
                           <div class="text-xs text-gray-500">{{ employee.salary.payFrequency }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                          <span :class="['px-2 py-1 text-xs font-medium rounded-full', getStatusClass(employee.status)]">
-                            {{ statusOptions.find(opt => opt.value === employee.status)?.label || employee.status }}
+                          <span
+                            :class="['px-2 py-1 text-xs font-medium rounded-full', getStatusClass(employee.status)]">
+                            {{statusOptions.find(opt => opt.value === employee.status)?.label || employee.status}}
                           </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                           <div class="text-sm text-gray-900">{{ formatDate(employee.startDate) }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                          <button @click="openEmployeeModal(employee)" class="text-indigo-600 hover:text-indigo-900 mr-3">
+                          <button @click="openEmployeeModal(employee)"
+                            class="text-indigo-600 hover:text-indigo-900 mr-3">
                             Edit
                           </button>
                           <button @click="deleteEmployee(employee._id)" class="text-red-600 hover:text-red-900">
@@ -849,19 +865,19 @@ watch([selectedDepartment, selectedStatus, currentPage], fetchEmployees);
                     </tbody>
                   </table>
                 </div>
-                
+
                 <!-- Pagination -->
                 <div v-if="totalPages > 1" class="flex items-center justify-between px-6 py-3 bg-gray-50 border-t">
                   <div class="text-sm text-gray-700">
                     Page {{ currentPage }} of {{ totalPages }}
                   </div>
                   <div class="flex gap-2">
-                    <button @click="prevPage" :disabled="currentPage === 1" 
-                            class="px-3 py-1 text-sm border rounded-md disabled:opacity-50 disabled:cursor-not-allowed">
+                    <button @click="prevPage" :disabled="currentPage === 1"
+                      class="px-3 py-1 text-sm border rounded-md disabled:opacity-50 disabled:cursor-not-allowed">
                       Previous
                     </button>
-                    <button @click="nextPage" :disabled="currentPage === totalPages" 
-                            class="px-3 py-1 text-sm border rounded-md disabled:opacity-50 disabled:cursor-not-allowed">
+                    <button @click="nextPage" :disabled="currentPage === totalPages"
+                      class="px-3 py-1 text-sm border rounded-md disabled:opacity-50 disabled:cursor-not-allowed">
                       Next
                     </button>
                   </div>
@@ -872,7 +888,7 @@ watch([selectedDepartment, selectedStatus, currentPage], fetchEmployees);
             <!-- Departments Tab -->
             <div v-if="activeTab === 'departments'" class="space-y-6">
               <h3 class="text-xl font-semibold text-secondary-900">Department Overview</h3>
-              
+
               <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div v-for="dept in departmentStats" :key="dept.department" class="card p-6">
                   <div class="flex items-center justify-between mb-4">
@@ -880,13 +896,13 @@ watch([selectedDepartment, selectedStatus, currentPage], fetchEmployees);
                       <span class="text-2xl mr-3">{{ getDepartmentIcon(dept.department) }}</span>
                       <div>
                         <h4 class="text-lg font-semibold text-gray-900">
-                          {{ departments.find(d => d.value === dept.department)?.label || dept.department }}
+                          {{departments.find(d => d.value === dept.department)?.label || dept.department}}
                         </h4>
                         <p class="text-sm text-gray-600">{{ dept.employeeCount }} employees</p>
                       </div>
                     </div>
                   </div>
-                  
+
                   <div class="space-y-2">
                     <div class="flex justify-between text-sm">
                       <span class="text-gray-600">Average Salary:</span>
@@ -912,11 +928,12 @@ watch([selectedDepartment, selectedStatus, currentPage], fetchEmployees);
             <!-- Payroll Tab -->
             <div v-if="activeTab === 'payroll'" class="space-y-6">
               <h3 class="text-xl font-semibold text-secondary-900">Payroll Summary</h3>
-              
+
               <!-- Payroll Overview -->
               <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="card p-6 text-center">
-                  <div class="text-2xl font-bold text-green-600 mb-2">{{ formatCurrency(payrollSummary.totalMonthlyPayroll) }}</div>
+                  <div class="text-2xl font-bold text-green-600 mb-2">{{
+                    formatCurrency(payrollSummary.totalMonthlyPayroll) }}</div>
                   <div class="text-sm text-secondary-600">Total Monthly Payroll</div>
                 </div>
                 <div class="card p-6 text-center">
@@ -925,7 +942,8 @@ watch([selectedDepartment, selectedStatus, currentPage], fetchEmployees);
                 </div>
                 <div class="card p-6 text-center">
                   <div class="text-2xl font-bold text-purple-600 mb-2">
-                    {{ payrollSummary.employeeCount > 0 ? formatCurrency(payrollSummary.totalMonthlyPayroll / payrollSummary.employeeCount) : '$0' }}
+                    {{ payrollSummary.employeeCount > 0 ? formatCurrency(payrollSummary.totalMonthlyPayroll /
+                      payrollSummary.employeeCount) : '$0' }}
                   </div>
                   <div class="text-sm text-secondary-600">Average Monthly Salary</div>
                 </div>
@@ -935,12 +953,13 @@ watch([selectedDepartment, selectedStatus, currentPage], fetchEmployees);
               <div class="card p-6">
                 <h4 class="text-lg font-semibold text-secondary-900 mb-4">Department Payroll Breakdown</h4>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div v-for="(amount, department) in payrollSummary.departmentPayroll" :key="department" 
-                       class="border border-gray-200 rounded-lg p-4">
+                  <div v-for="(amount, department) in payrollSummary.departmentPayroll" :key="department"
+                    class="border border-gray-200 rounded-lg p-4">
                     <div class="flex items-center justify-between">
                       <div class="flex items-center">
                         <span class="text-lg mr-2">{{ getDepartmentIcon(department) }}</span>
-                        <span class="font-medium">{{ departments.find(d => d.value === department)?.label || department }}</span>
+                        <span class="font-medium">{{departments.find(d => d.value === department)?.label || department
+                          }}</span>
                       </div>
                       <span class="font-bold text-lg">{{ formatCurrency(amount) }}</span>
                     </div>
@@ -952,14 +971,15 @@ watch([selectedDepartment, selectedStatus, currentPage], fetchEmployees);
             <!-- Reports Tab -->
             <div v-if="activeTab === 'reports'" class="space-y-6">
               <h3 class="text-xl font-semibold text-secondary-900">HR Reports & Analytics</h3>
-              
+
               <!-- Performance Distribution -->
               <div v-if="hrAnalytics.performanceStats?.length > 0" class="card p-6">
                 <h4 class="text-lg font-semibold text-secondary-900 mb-4">⭐ Performance Ratings Distribution</h4>
                 <div class="grid grid-cols-5 gap-4">
-                  <div v-for="rating in [1,2,3,4,5]" :key="rating" class="text-center">
-                    <div class="text-2xl font-bold mb-2" :class="rating >= 4 ? 'text-green-600' : rating >= 3 ? 'text-yellow-600' : 'text-red-600'">
-                      {{ hrAnalytics.performanceStats.find(p => p._id === rating)?.count || 0 }}
+                  <div v-for="rating in [1, 2, 3, 4, 5]" :key="rating" class="text-center">
+                    <div class="text-2xl font-bold mb-2"
+                      :class="rating >= 4 ? 'text-green-600' : rating >= 3 ? 'text-yellow-600' : 'text-red-600'">
+                      {{hrAnalytics.performanceStats.find(p => p._id === rating)?.count || 0}}
                     </div>
                     <div class="text-sm text-gray-600">{{ rating }} Star{{ rating !== 1 ? 's' : '' }}</div>
                   </div>
@@ -970,9 +990,11 @@ watch([selectedDepartment, selectedStatus, currentPage], fetchEmployees);
               <div class="card p-6">
                 <h4 class="text-lg font-semibold text-secondary-900 mb-4">👔 Employment Type Distribution</h4>
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <div v-for="type in hrAnalytics.employmentTypeBreakdown" :key="type._id" class="text-center p-4 border border-gray-200 rounded-lg">
+                  <div v-for="type in hrAnalytics.employmentTypeBreakdown" :key="type._id"
+                    class="text-center p-4 border border-gray-200 rounded-lg">
                     <div class="text-2xl font-bold text-blue-600 mb-2">{{ type.count }}</div>
-                    <div class="text-sm text-gray-600">{{ employmentTypes.find(t => t.value === type._id)?.label || type._id }}</div>
+                    <div class="text-sm text-gray-600">{{employmentTypes.find(t => t.value === type._id)?.label ||
+                      type._id }}</div>
                   </div>
                 </div>
               </div>
@@ -983,7 +1005,8 @@ watch([selectedDepartment, selectedStatus, currentPage], fetchEmployees);
     </div>
 
     <!-- Employee Modal -->
-    <div v-if="showEmployeeModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" @click="closeEmployeeModal">
+    <div v-if="showEmployeeModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      @click="closeEmployeeModal">
       <div class="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto" @click.stop>
         <div class="flex justify-between items-center mb-6">
           <h3 class="text-xl font-bold text-gray-900">
@@ -1003,8 +1026,8 @@ watch([selectedDepartment, selectedStatus, currentPage], fetchEmployees);
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Employee ID</label>
-                <input v-model="employeeForm.employeeId" type="text" class="form-input w-full" 
-                       :placeholder="editingEmployee ? '' : 'Auto-generated if empty'">
+                <input v-model="employeeForm.employeeId" type="text" class="form-input w-full"
+                  :placeholder="editingEmployee ? '' : 'Auto-generated if empty'">
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
@@ -1015,7 +1038,7 @@ watch([selectedDepartment, selectedStatus, currentPage], fetchEmployees);
                 <input v-model="employeeForm.lastName" type="text" class="form-input w-full" required>
               </div>
             </div>
-            
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
@@ -1061,7 +1084,7 @@ watch([selectedDepartment, selectedStatus, currentPage], fetchEmployees);
                 </select>
               </div>
             </div>
-            
+
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Start Date *</label>
@@ -1075,8 +1098,8 @@ watch([selectedDepartment, selectedStatus, currentPage], fetchEmployees);
                 <label class="block text-sm font-medium text-gray-700 mb-1">Manager</label>
                 <select v-model="employeeForm.manager" class="form-select w-full">
                   <option value="">No Manager</option>
-                  <option v-for="emp in employees.filter(e => e.status === 'active' && e._id !== editingEmployee?._id)" 
-                          :key="emp._id" :value="emp._id">
+                  <option v-for="emp in employees.filter(e => e.status === 'active' && e._id !== editingEmployee?._id)"
+                    :key="emp._id" :value="emp._id">
                     {{ emp.firstName }} {{ emp.lastName }} ({{ emp.employeeId }})
                   </option>
                 </select>
@@ -1090,7 +1113,8 @@ watch([selectedDepartment, selectedStatus, currentPage], fetchEmployees);
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Salary Amount *</label>
-                <input v-model="employeeForm.salary.amount" type="number" step="0.01" min="0" class="form-input w-full" required>
+                <input v-model="employeeForm.salary.amount" type="number" step="0.01" min="0" class="form-input w-full"
+                  required>
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Currency</label>
@@ -1115,8 +1139,8 @@ watch([selectedDepartment, selectedStatus, currentPage], fetchEmployees);
           <div class="border border-gray-200 rounded-lg p-4">
             <h4 class="text-lg font-semibold text-gray-900 mb-4">Skills</h4>
             <div class="flex flex-wrap gap-2 mb-4">
-              <span v-for="(skill, index) in employeeForm.skills" :key="index" 
-                    class="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full flex items-center gap-2">
+              <span v-for="(skill, index) in employeeForm.skills" :key="index"
+                class="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full flex items-center gap-2">
                 {{ skill }}
                 <button @click="removeSkill(index)" type="button" class="text-blue-600 hover:text-blue-800">
                   ×
@@ -1124,9 +1148,10 @@ watch([selectedDepartment, selectedStatus, currentPage], fetchEmployees);
               </span>
             </div>
             <div class="flex gap-2">
-              <input id="skillInput" type="text" placeholder="Add a skill..." class="form-input flex-1" 
-                     @keyup.enter="addSkill">
-              <button @click="addSkill" type="button" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+              <input id="skillInput" type="text" placeholder="Add a skill..." class="form-input flex-1"
+                @keyup.enter="addSkill">
+              <button @click="addSkill" type="button"
+                class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
                 Add
               </button>
             </div>
@@ -1200,13 +1225,14 @@ watch([selectedDepartment, selectedStatus, currentPage], fetchEmployees);
           <!-- Notes -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
-            <textarea v-model="employeeForm.notes" rows="3" class="form-input w-full" 
-                      placeholder="Additional notes about the employee..."></textarea>
+            <textarea v-model="employeeForm.notes" rows="3" class="form-input w-full"
+              placeholder="Additional notes about the employee..."></textarea>
           </div>
 
           <!-- Form Actions -->
           <div class="flex justify-end space-x-3 pt-4 border-t">
-            <button type="button" @click="closeEmployeeModal" class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
+            <button type="button" @click="closeEmployeeModal"
+              class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
               Cancel
             </button>
             <button type="submit" class="btn btn-primary">
@@ -1229,7 +1255,7 @@ watch([selectedDepartment, selectedStatus, currentPage], fetchEmployees);
 .card {
   background-color: white;
   border-radius: 0.75rem;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--secondary-100);
 }
 
 .form-input {
@@ -1244,7 +1270,6 @@ watch([selectedDepartment, selectedStatus, currentPage], fetchEmployees);
 
 .form-input:focus {
   outline: none;
-  border-color: #3b82f6;
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
 
@@ -1258,17 +1283,6 @@ watch([selectedDepartment, selectedStatus, currentPage], fetchEmployees);
   transition: all 0.2s;
 }
 
-.btn-primary {
-  background-color: #3b82f6;
-  color: white;
-  border: 1px solid #3b82f6;
-}
-
-.btn-primary:hover {
-  background-color: #2563eb;
-  border-color: #2563eb;
-}
-
 .form-select {
   display: block;
   width: 100%;
@@ -1280,7 +1294,6 @@ watch([selectedDepartment, selectedStatus, currentPage], fetchEmployees);
 
 .form-select:focus {
   outline: none;
-  border-color: #3b82f6;
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
 </style>

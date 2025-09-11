@@ -33,6 +33,9 @@
           <router-link :to="{ path: '/admin/advanced-finance' }" exact-active-class="router-link-exact-active" class="navbar-link">
             Advanced Finance
           </router-link>
+          <router-link :to="{ path: '/admin/hr' }" exact-active-class="router-link-exact-active" class="navbar-link">
+            Human Resources
+          </router-link>
           
           <!-- Language Switcher -->
           <div class="language-selector">
@@ -80,6 +83,9 @@
         </router-link>
         <router-link :to="{ path: '/admin/advanced-finance' }" exact-active-class="router-link-exact-active" class="block navbar-link py-2 px-3 rounded-lg hover:bg-secondary-50 transition-colors duration-200">
           Advanced Finance
+        </router-link>
+        <router-link :to="{ path: '/admin/hr' }" exact-active-class="router-link-exact-active" class="block navbar-link py-2 px-3 rounded-lg hover:bg-secondary-50 transition-colors duration-200">
+          Human Resources
         </router-link>
         
         <!-- Mobile Language Switcher -->

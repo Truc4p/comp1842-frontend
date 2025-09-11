@@ -28,6 +28,7 @@ import Users from '@/pages/admin/Users.vue';
 import Analytics from '@/pages/admin/Analytics.vue';
 import CashFlow from '@/pages/admin/CashFlow.vue';
 import AdvancedFinance from '@/pages/admin/AdvancedFinance.vue';
+import HumanResources from '@/pages/admin/HumanResources.vue';
 import TokenDebug from '@/pages/admin/TokenDebug.vue';
 
 import Orders from '@/pages/admin/Orders.vue';
@@ -78,6 +79,7 @@ const routes = [
       { path: "analytics", component: Analytics },
       { path: "cashflow", component: CashFlow },
       { path: "advanced-finance", component: AdvancedFinance },
+      { path: "hr", component: HumanResources },
       { path: "token-debug", component: TokenDebug },
 
       { path: "orders", component: Orders },

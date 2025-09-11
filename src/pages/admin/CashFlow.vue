@@ -149,7 +149,7 @@ const formattedCashBurnRate = computed(() => {
 });
 
 // Approximate Cash Conversion Cycle (CCC)
-// CCC ≈ Total Outflows ÷ Average Daily Inflows over the selected period
+// CCC = Total Outflows ÷ Average Daily Inflows over the selected period
 const cccApproxDays = computed(() => {
   const inflows = cashFlowData.value?.totalInflows || 0;
   const outflows = cashFlowData.value?.totalOutflows || 0;
@@ -903,17 +903,15 @@ onMounted(async () => {
               </div>
             </div>
             <!-- Debug formula -->
-            <div class="text-xs text-blue-600 mt-3 p-2 bg-blue-50 rounded">
-              <strong>Debug:</strong> All-time Total Inflows - All-time Total Outflows<br>
+            <div class="text-xs text-primary-600 mt-3 p-2 bg-primary-50 rounded">
+              = All-time Total Inflows - All-time Total Outflows<br>
               <div v-if="cashFlowData.balanceBreakdown">
-                Formula: ${{ cashFlowData.balanceBreakdown.totalInflows?.toLocaleString() || 0 }} - ${{ cashFlowData.balanceBreakdown.totalOutflows?.toLocaleString() || 0 }}<br>
-                Transactions: {{ cashFlowData.balanceBreakdown.inflowCount || 0 }} inflows, {{ cashFlowData.balanceBreakdown.outflowCount || 0 }} outflows<br>
-                Result: ${{ cashFlowData.balanceBreakdown.currentBalance?.toLocaleString() || 0 }}
+                = ${{ cashFlowData.balanceBreakdown.totalInflows?.toLocaleString() || 0 }} - ${{ cashFlowData.balanceBreakdown.totalOutflows?.toLocaleString() || 0 }} 
               </div>
               <div v-else>
                 <em>Calculated by backend from all CashFlowTransaction records</em>
               </div>
-              <button @click="showBalanceDetails" class="mt-2 px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200">
+              <button @click="showBalanceDetails" class="mt-2 px-2 py-1 bg-primary-200 text-primary-700 rounded text-xs hover:bg-primary-300">
                 Show Transactions ({{ selectedPeriod }} days)
               </button>
             </div>
@@ -938,10 +936,9 @@ onMounted(async () => {
               </div>
             </div>
             <!-- Debug formula -->
-            <div class="text-xs text-green-600 mt-3 p-2 bg-green-50 rounded">
-              <strong>Debug:</strong> Total Inflows - Total Outflows ({{ selectedPeriod }} days)<br>
-              Formula: ${{ cashFlowData.totalInflows?.toLocaleString() || 0 }} - ${{ cashFlowData.totalOutflows?.toLocaleString() || 0 }}<br>
-              Result: ${{ cashFlowData.netCashFlow?.toLocaleString() || 0 }}
+            <div class="text-xs text-primary-600 mt-3 p-2 bg-primary-50 rounded">
+              = Total Inflows - Total Outflows ({{ selectedPeriod }} days)<br>
+              = ${{ cashFlowData.totalInflows?.toLocaleString() || 0 }} - ${{ cashFlowData.totalOutflows?.toLocaleString() || 0 }}<br>
             </div>
           </div>
 
@@ -961,10 +958,9 @@ onMounted(async () => {
               </div>
             </div>
             <!-- Debug formula -->
-            <div class="text-xs text-orange-600 mt-3 p-2 bg-orange-50 rounded">
-              <strong>Debug:</strong> Total Outflows ÷ Period Days<br>
-              Formula: ${{ cashFlowData.totalOutflows?.toLocaleString() || 0 }} ÷ {{ selectedPeriod }} days<br>
-              Result: ${{ (cashFlowData.cashBurnRate || 0).toLocaleString() }}/day
+            <div class="text-xs text-primary-600 mt-3 p-2 bg-primary-50 rounded">
+              = Total Outflows ÷ Period Days<br>
+              = ${{ cashFlowData.totalOutflows?.toLocaleString() || 0 }} ÷ {{ selectedPeriod }} days<br>
             </div>
           </div>
 
@@ -982,16 +978,15 @@ onMounted(async () => {
               <div class="ml-4">
                 <p class="text-sm font-medium text-secondary-600">Runway</p>
                 <p class="text-2xl font-bold"
-                  :class="cashFlowData.runway > 90 ? 'text-red-600' : cashFlowData.runway > 30 ? 'text-yellow-600' : 'text-red-600'">
+                  :class="cashFlowData.runway > 90 ? 'text-green-600' : cashFlowData.runway > 30 ? 'text-yellow-600' : 'text-red-600'">
                   {{ Math.round(cashFlowData.runway) }} days
                 </p>
               </div>
             </div>
             <!-- Debug formula -->
-            <div class="text-xs text-red-600 mt-3 p-2 bg-red-50 rounded">
-              <strong>Debug:</strong> Current Balance ÷ Daily Burn Rate<br>
-              Formula: ${{ cashFlowData.currentBalance?.toLocaleString() || 0 }} ÷ ${{ (cashFlowData.cashBurnRate || 0).toLocaleString() }}/day<br>
-              Result: {{ Math.round(cashFlowData.runway || 0) }} days remaining
+            <div class="text-xs text-primary-600 mt-3 p-2 bg-primary-50 rounded">
+              = Current Balance ÷ Daily Burn Rate<br>
+              = ${{ cashFlowData.currentBalance?.toLocaleString() || 0 }} ÷ ${{ (cashFlowData.cashBurnRate || 0).toLocaleString() }}/day<br>
             </div>
           </div>
         </div>
@@ -1394,13 +1389,13 @@ onMounted(async () => {
           </div>
           
           <!-- Debug: Forecast Calculation Details -->
-          <div v-if="forecast.length > 0" class="mt-6 p-4 bg-purple-50 rounded-lg border border-purple-200">
-            <h4 class="text-sm font-semibold text-purple-800 mb-3">Forecast Calculation Details</h4>
+          <div v-if="forecast.length > 0" class="mt-6 p-4 bg-primary-50 rounded-lg">
+            <h4 class="text-sm font-semibold text-primary-800 mb-3">Forecast Calculation Details</h4>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
               <!-- Left Column: Assumptions -->
               <div class="space-y-2">
-                <div class="font-medium text-purple-700">Historical Analysis (30 days):</div>
-                <div class="text-purple-600 text-xs space-y-1">
+                <div class="font-medium text-primary-700">Historical Analysis (30 days):</div>
+                <div class="text-primary-600 text-xs space-y-1">
                   <div v-if="forecast[0]">• Avg Daily Inflow: ${{ forecast[0].projectedInflow?.toLocaleString() || 'N/A' }} (= Total Inflows ${{ cashFlowData.totalInflows?.toLocaleString() || 0 }} ÷ 30 days)</div> 
                   <div v-if="forecast[0]">• Avg Daily Outflow: ${{ forecast[0].projectedOutflow?.toLocaleString() || 'N/A' }} (= Total Outflows ${{ cashFlowData.totalOutflows?.toLocaleString() || 0 }} ÷ 30 days)</div>
                   <div v-if="forecast[0]">• Net Daily Flow: ${{ forecast[0].netProjectedFlow?.toLocaleString() || 'N/A' }} (= Avg Daily Inflow ${{ forecast[0].projectedInflow?.toLocaleString() || 'N/A' }} - Avg Daily Outflow ${{ forecast[0].projectedOutflow?.toLocaleString() || 'N/A' }})</div>
@@ -1410,21 +1405,16 @@ onMounted(async () => {
               
               <!-- Right Column: Projection -->
               <div class="space-y-2">
-                <div class="font-medium text-purple-700">Projection Logic:</div>
-                <div class="text-purple-600 text-xs space-y-1">
+                <div class="font-medium text-primary-700">Projection Logic:</div>
+                <div class="text-primary-600 text-xs space-y-1">
                   <div>• Starting Balance: ${{ cashFlowData.currentBalance?.toLocaleString() || 0 }}</div>
-                  <div>• Each Day: Balance += Net Daily Flow</div>
+                  <div>• Daily Balance = Previous Balance + Net Daily Flow</div>
                   <div>• Forecast Period: {{ forecast.length }} days</div>
                   <div v-if="forecast[forecast.length - 1]">• Projected End Balance: ${{ forecast[forecast.length - 1].projectedBalance?.toLocaleString() || 'N/A' }}</div>
                 </div>
               </div>
             </div>
             
-            <!-- Formula -->
-            <div class="mt-3 p-2 bg-purple-100 rounded text-xs text-purple-700">
-              <strong>Formula:</strong> Daily Balance = Previous Balance + (Avg Daily Inflow - Avg Daily Outflow)<br>
-              <strong>Note:</strong> Assumes consistent cash flow patterns based on recent 30-day history
-            </div>
           </div>
         </div>
 
@@ -1437,11 +1427,9 @@ onMounted(async () => {
               <div class="text-2xl font-bold text-blue-600">{{ cccApproxDays ?? 0 }} days</div>
               <div class="text-sm text-secondary-600">Approx. days to recover cash spent</div>
               <!-- Debug formula -->
-              <div class="text-xs text-blue-500 mt-2 p-2 bg-blue-50 rounded">
-                <strong>Debug:</strong> CCC ≈ Total Outflows ÷ Avg Daily Inflows ({{ selectedPeriod }} days)<br>
-                Total Outflows: ${{ (cashFlowData.totalOutflows || 0).toLocaleString() }}<br>
-                Avg Daily Inflows: ${{ ((cashFlowData.totalInflows || 0) / (selectedPeriod || 1)).toLocaleString(undefined, { maximumFractionDigits: 2 }) }}<br>
-                Result: {{ cccApproxDays ?? 'N/A' }} days
+              <div class="text-xs text-primary-500 mt-2 p-2 bg-primary-50 rounded">
+                = Total Outflows ÷ Avg Daily Inflows ({{ selectedPeriod }} days)<br>
+                = ${{ (cashFlowData.totalOutflows || 0).toLocaleString() }} ÷ ${{ ((cashFlowData.totalInflows || 0) / (selectedPeriod || 1)).toLocaleString(undefined, { maximumFractionDigits: 2 }) }}<br>
               </div>
             </div>
             <div class="text-center">
@@ -1452,10 +1440,9 @@ onMounted(async () => {
               </div>
               <div class="text-sm text-secondary-600">Net cash flow / Total inflows</div>
               <!-- Debug formula -->
-              <div class="text-xs text-green-600 mt-2 p-2 bg-green-50 rounded">
-                <strong>Debug:</strong> (Net Cash Flow ÷ Total Inflows) × 100<br>
-                Formula: ({{ cashFlowData.netCashFlow?.toLocaleString() || 0 }} ÷ {{ cashFlowData.totalInflows?.toLocaleString() || 0 }}) × 100<br>
-                Result: {{ ((cashFlowData.netCashFlow / cashFlowData.totalInflows) * 100).toFixed(1) }}%
+              <div class="text-xs text-primary-600 mt-2 p-2 bg-primary-50 rounded">
+                = (Net Cash Flow ÷ Total Inflows) × 100<br>
+                = ({{ cashFlowData.netCashFlow?.toLocaleString() || 0 }} ÷ {{ cashFlowData.totalInflows?.toLocaleString() || 0 }}) × 100<br>
               </div>
             </div>
             <div class="text-center">
@@ -1466,10 +1453,9 @@ onMounted(async () => {
               </div>
               <div class="text-sm text-secondary-600">Ability to cover expenses</div>
               <!-- Debug formula -->
-              <div class="text-xs text-purple-600 mt-2 p-2 bg-purple-50 rounded">
-                <strong>Debug:</strong> Total Inflows ÷ Total Outflows<br>
-                Formula: {{ cashFlowData.totalInflows?.toLocaleString() || 0 }} ÷ {{ cashFlowData.totalOutflows?.toLocaleString() || 0 }}<br>
-                Result: {{ (cashFlowData.totalInflows / cashFlowData.totalOutflows).toFixed(2) }}x
+              <div class="text-xs text-primary-600 mt-2 p-2 bg-primary-50 rounded">
+                = Total Inflows ÷ Total Outflows<br>
+                = {{ cashFlowData.totalInflows?.toLocaleString() || 0 }} ÷ {{ cashFlowData.totalOutflows?.toLocaleString() || 0 }}<br>
               </div>
             </div>
           </div>

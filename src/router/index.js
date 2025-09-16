@@ -11,41 +11,58 @@ import AdminLayout from "@/layout/AdminLayout.vue";
 import AdminPage from "@/pages/admin/AdminPage.vue";
 import CustomerPage from "@/pages/customer/CustomerPage.vue";
 
-// Admin
-import Categories from "@/pages/admin/Categories.vue";
-import CreateCategory from '@/pages/admin/CreateCategory.vue';
-import DetailCategory from '@/pages/admin/DetailCategory.vue';
-import EditCategory from '@/pages/admin/EditCategory.vue';
-import DeleteCategory from '@/pages/admin/DeleteCategory.vue';
+// Admin - Categories
+import Categories from "@/pages/admin/categories/Categories.vue";
+import CreateCategory from '@/pages/admin/categories/CreateCategory.vue';
+import DetailCategory from '@/pages/admin/categories/DetailCategory.vue';
+import EditCategory from '@/pages/admin/categories/EditCategory.vue';
+import DeleteCategory from '@/pages/admin/categories/DeleteCategory.vue';
 
-import Products from '@/pages/admin/Products.vue';
-import CreateProduct from '@/pages/admin/CreateProduct.vue';
-import DetailProductAdmin from '@/pages/admin/DetailProductAdmin.vue';
-import EditProduct from '@/pages/admin/EditProduct.vue';
-import DeleteProduct from '@/pages/admin/DeleteProduct.vue';
+// Admin - Products
+import Products from '@/pages/admin/products/Products.vue';
+import CreateProduct from '@/pages/admin/products/CreateProduct.vue';
+import DetailProductAdmin from '@/pages/admin/products/DetailProductAdmin.vue';
+import EditProduct from '@/pages/admin/products/EditProduct.vue';
+import DeleteProduct from '@/pages/admin/products/DeleteProduct.vue';
 
-import Users from '@/pages/admin/Users.vue';
-import Analytics from '@/pages/admin/Analytics.vue';
-import CashFlow from '@/pages/admin/CashFlow.vue';
-import AdvancedFinance from '@/pages/admin/AdvancedFinance.vue';
-import HumanResources from '@/pages/admin/HumanResources.vue';
-import TokenDebug from '@/pages/admin/TokenDebug.vue';
+// Admin - Orders
+import Orders from '@/pages/admin/orders/Orders.vue';
+import DetailOrder from '@/pages/admin/orders/DetailOrder.vue';
+import EditOrder from '@/pages/admin/orders/EditOrder.vue';
+import DeleteOrderByAdmin from '@/pages/admin/orders/DeleteOrderByAdmin.vue';
 
-import Orders from '@/pages/admin/Orders.vue';
-import DetailOrder from '@/pages/admin/DetailOrder.vue';
-import EditOrder from '@/pages/admin/EditOrder.vue';
-import DeleteOrderByAdmin from '@/pages/admin/DeleteOrderByAdmin.vue';
+// Admin - Users
+import Users from '@/pages/admin/users/Users.vue';
+
+// Admin - Finance
+import CashFlow from '@/pages/admin/finance/CashFlow.vue';
+import AdvancedFinance from '@/pages/admin/finance/AdvancedFinance.vue';
+import HumanResources from '@/pages/admin/finance/HumanResources.vue';
+
+// Admin - Analytics
+import Analytics from '@/pages/admin/analytics/Analytics.vue';
+
+// Admin - Debug
+import TokenDebug from '@/pages/admin/debug/TokenDebug.vue';
 
 
 // Customer
 import CustomerLayout from "@/layout/CustomerLayout.vue";
-import DetailProduct from '@/pages/customer/DetailProduct.vue';
-import Cart from '@/pages/customer/Cart.vue';
-import Checkout from '@/pages/customer/Checkout.vue';
-import OrderDetail from '@/pages/customer/OrderDetail.vue';
-import OrderHistory from '@/pages/customer/OrderHistory.vue';
-import Profile from '@/pages/customer/Profile.vue';
-import DeleteOrder from '@/pages/customer/DeleteOrder.vue';
+
+// Customer - Products
+import DetailProduct from '@/pages/customer/products/DetailProduct.vue';
+
+// Customer - Shopping
+import Cart from '@/pages/customer/shopping/Cart.vue';
+import Checkout from '@/pages/customer/shopping/Checkout.vue';
+
+// Customer - Orders
+import OrderDetail from '@/pages/customer/orders/OrderDetail.vue';
+import OrderHistory from '@/pages/customer/orders/OrderHistory.vue';
+import DeleteOrder from '@/pages/customer/orders/DeleteOrder.vue';
+
+// Customer - Account
+import Profile from '@/pages/customer/account/Profile.vue';
 
 const routes = [
   { path: "/", 

@@ -403,6 +403,9 @@ const closeEmployeeModal = () => {
 
 const saveEmployee = async () => {
   try {
+    // Clear any previous errors
+    error.value = null;
+    
     const token = localStorage.getItem("token");
     const employeeData = {
       ...employeeForm.value,
@@ -412,23 +415,44 @@ const saveEmployee = async () => {
       }
     };
 
+    // Clean empty manager field - don't send empty strings
+    if (employeeData.manager === '' || employeeData.manager === null) {
+      delete employeeData.manager;
+    }
+
     if (editingEmployee.value) {
       // Update existing employee
       await axios.put(`${API_URL}/hr/employees/${editingEmployee.value._id}`, employeeData, {
         headers: { "Authorization": `Bearer ${token}` }
       });
+      alert('Employee updated successfully!');
     } else {
       // Create new employee
       await axios.post(`${API_URL}/hr/employees`, employeeData, {
         headers: { "Authorization": `Bearer ${token}` }
       });
+      alert('Employee created successfully!');
     }
 
     closeEmployeeModal();
     await fetchAllData();
   } catch (err) {
     console.error("Error saving employee:", err);
-    error.value = err.response?.data?.message || "Failed to save employee";
+    
+    // Handle specific error types
+    if (err.response?.status === 400 && err.response?.data?.field) {
+      // Handle duplicate key errors with specific field information
+      const { message, field, value } = err.response.data;
+      alert(`Error: ${message}`);
+      // Don't set error.value for field-specific errors to avoid UI blocking
+    } else {
+      const errorMessage = err.response?.data?.message || "Failed to save employee";
+      alert(`Error: ${errorMessage}`);
+      // Only set error.value for serious errors that should block the UI
+      if (err.response?.status >= 500) {
+        error.value = errorMessage;
+      }
+    }
   }
 };
 
@@ -436,20 +460,28 @@ const deleteEmployee = async (employeeId) => {
   if (!confirm('Are you sure you want to delete this employee? This action cannot be undone.')) return;
 
   try {
+    error.value = null; // Clear any previous errors
     const token = localStorage.getItem("token");
     await axios.delete(`${API_URL}/hr/employees/${employeeId}`, {
       headers: { "Authorization": `Bearer ${token}` }
     });
+    alert('Employee deleted successfully!');
     await fetchAllData();
   } catch (err) {
     console.error("Error deleting employee:", err);
-    error.value = err.response?.data?.message || "Failed to delete employee";
+    const errorMessage = err.response?.data?.message || "Failed to delete employee";
+    alert(`Error: ${errorMessage}`);
+    // Only set error.value for serious errors
+    if (err.response?.status >= 500) {
+      error.value = errorMessage;
+    }
   }
 };
 
 // Fetch all data
 const fetchAllData = async () => {
   loading.value = true;
+  error.value = null; // Clear any previous errors
   try {
     await Promise.all([
       fetchEmployees(),
@@ -457,12 +489,19 @@ const fetchAllData = async () => {
       fetchDepartmentStats(),
       fetchPayrollSummary()
     ]);
+    // Data loaded successfully, ensure error is cleared
+    error.value = null;
   } catch (err) {
     error.value = "Failed to load HR data";
     console.error("Error loading HR data:", err);
   } finally {
     loading.value = false;
   }
+};
+
+// Clear error function
+const clearError = () => {
+  error.value = null;
 };
 
 // Utility functions
@@ -553,8 +592,16 @@ watch([selectedDepartment, selectedStatus, currentPage], fetchEmployees);
 
       <!-- Error State -->
       <div v-else-if="error" class="card p-8 text-center">
-        <div class="text-error text-lg font-medium mb-2">{{ error }}</div>
-        <p class="text-secondary-500">Please try refreshing the page</p>
+        <div class="text-red-600 text-lg font-medium mb-2">{{ error }}</div>
+        <p class="text-secondary-500 mb-4">Please try refreshing the page or clear this error</p>
+        <div class="flex justify-center gap-4">
+          <button @click="clearError" class="btn btn-primary">
+            Clear Error
+          </button>
+          <button @click="fetchAllData" class="btn bg-gray-500 hover:bg-gray-600 text-white">
+            Retry Loading
+          </button>
+        </div>
       </div>
 
       <!-- HR Content -->

@@ -66,6 +66,7 @@ const expenseForm = ref({
   status: 'pending',
   isRecurring: false,
   frequency: 'monthly',
+  date: new Date().toISOString().split('T')[0], // Default to today
   dueDate: '',
   notes: ''
 });
@@ -354,6 +355,7 @@ const openExpenseModal = (expense = null) => {
       status: expense.status,
       isRecurring: expense.isRecurring,
       frequency: expense.frequency || 'monthly',
+      date: expense.date ? new Date(expense.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
       dueDate: expense.dueDate ? new Date(expense.dueDate).toISOString().split('T')[0] : '',
       notes: expense.notes || ''
     };
@@ -369,6 +371,7 @@ const openExpenseModal = (expense = null) => {
       status: 'pending',
       isRecurring: false,
       frequency: 'monthly',
+      date: new Date().toISOString().split('T')[0],
       dueDate: '',
       notes: ''
     };
@@ -383,10 +386,14 @@ const closeExpenseModal = () => {
 
 const saveExpense = async () => {
   try {
+    // Clear any previous errors
+    error.value = null;
+    
     const token = localStorage.getItem("token");
     const expenseData = {
       ...expenseForm.value,
       amount: parseFloat(expenseForm.value.amount),
+      date: expenseForm.value.date || new Date().toISOString().split('T')[0],
       dueDate: expenseForm.value.dueDate || null
     };
 
@@ -395,18 +402,25 @@ const saveExpense = async () => {
       await axios.put(`${API_URL}/advanced-finance/expenses/${editingExpense.value._id}`, expenseData, {
         headers: { "Authorization": `Bearer ${token}` }
       });
+      alert('Business expense updated successfully!');
     } else {
       // Create new expense
       await axios.post(`${API_URL}/advanced-finance/expenses`, expenseData, {
         headers: { "Authorization": `Bearer ${token}` }
       });
+      alert('Business expense created successfully!');
     }
 
     closeExpenseModal();
     await fetchAllData();
   } catch (err) {
     console.error("Error saving expense:", err);
-    error.value = err.response?.data?.message || "Failed to save expense";
+    const errorMessage = err.response?.data?.message || "Failed to save expense";
+    alert(`Error: ${errorMessage}`);
+    // Only set error.value for serious errors that should block the UI
+    if (err.response?.status >= 500) {
+      error.value = errorMessage;
+    }
   }
 };
 
@@ -414,14 +428,21 @@ const deleteExpense = async (expenseId) => {
   if (!confirm('Are you sure you want to delete this expense?')) return;
 
   try {
+    error.value = null; // Clear any previous errors
     const token = localStorage.getItem("token");
     await axios.delete(`${API_URL}/advanced-finance/expenses/${expenseId}`, {
       headers: { "Authorization": `Bearer ${token}` }
     });
+    alert('Business expense deleted successfully!');
     await fetchAllData();
   } catch (err) {
     console.error("Error deleting expense:", err);
-    error.value = err.response?.data?.message || "Failed to delete expense";
+    const errorMessage = err.response?.data?.message || "Failed to delete expense";
+    alert(`Error: ${errorMessage}`);
+    // Only set error.value for serious errors
+    if (err.response?.status >= 500) {
+      error.value = errorMessage;
+    }
   }
 };
 
@@ -444,6 +465,7 @@ const handlePeriodChange = async () => {
 // Fetch all data
 const fetchAllData = async () => {
   loading.value = true;
+  error.value = null; // Clear any previous errors
   try {
     await Promise.all([
       fetchFinancialOverview(),
@@ -454,6 +476,8 @@ const fetchAllData = async () => {
       fetchPerformanceMetrics(),
       fetchExpenseTrends()
     ]);
+    // Data loaded successfully, ensure error is cleared
+    error.value = null;
   } catch (err) {
     error.value = "Failed to load financial data";
     console.error("Error loading financial data:", err);
@@ -468,6 +492,41 @@ const formatCurrency = (amount) => {
     style: 'currency',
     currency: 'USD'
   }).format(amount || 0);
+};
+
+// Function to determine expense growth color with special handling for zero-to-positive growth
+const getExpenseGrowthColor = (metrics) => {
+  if (!metrics) return 'text-gray-600';
+  
+  const expenseGrowth = metrics.growth?.expenses || 0;
+  const currentExpenses = metrics.current?.totalExpenses || 0;
+  const previousExpenses = metrics.previous?.totalExpenses || 0;
+  
+  // Special case: If previous was 0 and current > 0, it should be red (bad)
+  if (previousExpenses === 0 && currentExpenses > 0) {
+    return 'text-red-600';
+  }
+  
+  // Normal logic: expense increase = bad (red), expense decrease = good (green)
+  return expenseGrowth <= 0 ? 'text-green-600' : 'text-red-600';
+};
+
+// Function to display expense growth percentage with special handling
+const getExpenseGrowthDisplay = (metrics) => {
+  if (!metrics) return '0.0%';
+  
+  const expenseGrowth = metrics.growth?.expenses || 0;
+  const currentExpenses = metrics.current?.totalExpenses || 0;
+  const previousExpenses = metrics.previous?.totalExpenses || 0;
+  
+  // Special case: If previous was 0 and current > 0, show 100% regardless of backend calculation
+  if (previousExpenses === 0 && currentExpenses > 0) {
+    return '+100.0%';
+  }
+  
+  // Normal display
+  const prefix = expenseGrowth >= 0 ? '+' : '';
+  return `${prefix}${expenseGrowth.toFixed(1)}%`;
 };
 
 const formatDate = (date) => {
@@ -534,8 +593,16 @@ watch(selectedPeriod, handlePeriodChange);
 
       <!-- Error State -->
       <div v-else-if="error" class="card p-8 text-center">
-        <div class="text-error text-lg font-medium mb-2">{{ error }}</div>
-        <p class="text-secondary-500">Please try refreshing the page</p>
+        <div class="text-red-600 text-lg font-medium mb-2">{{ error }}</div>
+        <p class="text-secondary-500 mb-4">Please try refreshing the page or clear this error</p>
+        <div class="flex justify-center gap-4">
+          <button @click="error = null" class="btn btn-primary">
+            Clear Error
+          </button>
+          <button @click="fetchAllData" class="btn bg-gray-500 hover:bg-gray-600 text-white">
+            Retry Loading
+          </button>
+        </div>
       </div>
 
       <!-- Finance Content -->
@@ -595,7 +662,12 @@ watch(selectedPeriod, handlePeriodChange);
                     <div class="text-xs text-primary-600 p-2 bg-primary-50 rounded mb-3">
                       = Current Assets ÷ Current Liabilities<br>
                       <div v-if="financialOverview.healthIndicators">
-                        = ${{ (financialOverview.healthIndicators.currentAssets || 0).toLocaleString() }} ÷ ${{ (financialOverview.healthIndicators.currentLiabilities || 1).toLocaleString() }}
+                        <div v-if="financialOverview.healthIndicators.currentLiabilities > 0">
+                          = ${{ (financialOverview.healthIndicators.currentAssets || 0).toLocaleString() }} ÷ ${{ (financialOverview.healthIndicators.currentLiabilities).toLocaleString() }}
+                        </div>
+                        <div v-else>
+                          = ${{ (financialOverview.healthIndicators.currentAssets || 0).toLocaleString() }} ÷ $0 (no liabilities)
+                        </div>
                       </div>
                       <div v-else>
                         <em>Measures ability to pay short-term obligations</em>
@@ -630,7 +702,7 @@ watch(selectedPeriod, handlePeriodChange);
                     <div class="text-xs text-primary-600 p-2 bg-primary-50 rounded">
                       = Sum of all unpaid business expenses<br>
                       <div v-if="financialOverview.healthIndicators">
-                        = {{ financialOverview.healthIndicators.pendingExpenseCount || 0 }} pending expenses
+                        = {{ financialOverview.healthIndicators.pendingExpenseCount || 0 }} pending expense{{ (financialOverview.healthIndicators.pendingExpenseCount || 0) !== 1 ? 's' : '' }}
                       </div>
                       <div v-else>
                         <em>Outstanding obligations requiring payment</em>
@@ -925,12 +997,19 @@ watch(selectedPeriod, handlePeriodChange);
                   </div>
                   <!-- Formula explanation -->
                   <div class="text-xs text-primary-600 mt-4 p-2 bg-primary-50 rounded">
-                    = ((Current Revenue - Previous Revenue) ÷ Previous Revenue) × 100<br>
-                    <div v-if="performanceMetrics.current && performanceMetrics.previous">
-                      = ((${{ (performanceMetrics.current.revenue || 0).toLocaleString() }} - ${{ (performanceMetrics.previous.revenue || 0).toLocaleString() }}) ÷ ${{ (performanceMetrics.previous.revenue || 1).toLocaleString() }}) × 100
+                    <div v-if="performanceMetrics.previous?.revenue > 0">
+                      = ((Current Revenue - Previous Revenue) ÷ Previous Revenue) × 100<br>
+                      <div v-if="performanceMetrics.current && performanceMetrics.previous">
+                        = ((${{ (performanceMetrics.current.revenue || 0).toLocaleString() }} - ${{ (performanceMetrics.previous.revenue || 0).toLocaleString() }}) ÷ ${{ (performanceMetrics.previous.revenue).toLocaleString() }}) × 100
+                      </div>
+                    </div>
+                    <div v-else-if="performanceMetrics.current?.revenue > 0">
+                      = New revenue generated (no previous revenue to compare)<br>
+                      <div>Previous period: $0 → Current period: ${{ (performanceMetrics.current.revenue || 0).toLocaleString() }}</div>
+                      <div><strong>Growth: 100% (new revenue)</strong></div>
                     </div>
                     <div v-else>
-                      <em>Percentage change in revenue over periods</em>
+                      <em>No revenue in either period</em>
                     </div>
                   </div>
                 </div>
@@ -939,9 +1018,8 @@ watch(selectedPeriod, handlePeriodChange);
                   <h4 class="text-lg font-semibold text-secondary-900 mb-4">💸 Expense Growth</h4>
                   <div class="text-center">
                     <div class="text-3xl font-bold mb-2"
-                      :class="performanceMetrics.growth?.expenses <= 0 ? 'text-green-600' : 'text-red-600'">
-                      {{ performanceMetrics.growth?.expenses >= 0 ? '+' : '' }}{{ (performanceMetrics.growth?.expenses
-                      || 0).toFixed(1) }}%
+                      :class="getExpenseGrowthColor(performanceMetrics)">
+                      {{ getExpenseGrowthDisplay(performanceMetrics) }}
                     </div>
                     <div class="text-sm text-gray-600">vs Previous Period</div>
                     <div class="mt-4 text-sm">
@@ -959,12 +1037,19 @@ watch(selectedPeriod, handlePeriodChange);
                   </div>
                   <!-- Formula explanation -->
                   <div class="text-xs text-primary-600 mt-4 p-2 bg-primary-50 rounded">
-                    = ((Current Expenses - Previous Expenses) ÷ Previous Expenses) × 100<br>
-                    <div v-if="performanceMetrics.current && performanceMetrics.previous">
-                      = ((${{ (performanceMetrics.current.totalExpenses || 0).toLocaleString() }} - ${{ (performanceMetrics.previous.totalExpenses || 0).toLocaleString() }}) ÷ ${{ (performanceMetrics.previous.totalExpenses || 1).toLocaleString() }}) × 100
+                    <div v-if="performanceMetrics.previous?.totalExpenses > 0">
+                      = ((Current Expenses - Previous Expenses) ÷ Previous Expenses) × 100<br>
+                      <div v-if="performanceMetrics.current && performanceMetrics.previous">
+                        = ((${{ (performanceMetrics.current.totalExpenses || 0).toLocaleString() }} - ${{ (performanceMetrics.previous.totalExpenses || 0).toLocaleString() }}) ÷ ${{ (performanceMetrics.previous.totalExpenses).toLocaleString() }}) × 100
+                      </div>
+                    </div>
+                    <div v-else-if="performanceMetrics.current?.totalExpenses > 0">
+                      = New expenses introduced (no previous expenses to compare)<br>
+                      <div>Previous period: $0 → Current period: ${{ (performanceMetrics.current.totalExpenses || 0).toLocaleString() }}</div>
+                      <div><strong>Growth: 100% (new expenses)</strong></div>
                     </div>
                     <div v-else>
-                      <em>Percentage change in expenses over periods</em>
+                      <em>No expenses in either period</em>
                     </div>
                   </div>
                 </div>
@@ -992,12 +1077,24 @@ watch(selectedPeriod, handlePeriodChange);
                   </div>
                   <!-- Formula explanation -->
                   <div class="text-xs text-primary-600 mt-4 p-2 bg-primary-50 rounded">
-                    = ((Current Profit - Previous Profit) ÷ Previous Profit) × 100<br>
-                    <div v-if="performanceMetrics.current && performanceMetrics.previous">
-                      = ((${{ (performanceMetrics.current.grossProfit || 0).toLocaleString() }} - ${{ (performanceMetrics.previous.grossProfit || 0).toLocaleString() }}) ÷ ${{ (performanceMetrics.previous.grossProfit || 1).toLocaleString() }}) × 100
+                    <div v-if="performanceMetrics.previous?.grossProfit !== 0 && performanceMetrics.previous?.grossProfit">
+                      = ((Current Profit - Previous Profit) ÷ Previous Profit) × 100<br>
+                      <div v-if="performanceMetrics.current && performanceMetrics.previous">
+                        = ((${{ (performanceMetrics.current.grossProfit || 0).toLocaleString() }} - ${{ (performanceMetrics.previous.grossProfit || 0).toLocaleString() }}) ÷ ${{ Math.abs(performanceMetrics.previous.grossProfit).toLocaleString() }}) × 100
+                      </div>
+                    </div>
+                    <div v-else-if="performanceMetrics.current?.grossProfit > 0 && (!performanceMetrics.previous?.grossProfit || performanceMetrics.previous?.grossProfit === 0)">
+                      = New profit generated (no previous profit to compare)<br>
+                      <div>Previous period: $0 → Current period: ${{ (performanceMetrics.current.grossProfit || 0).toLocaleString() }}</div>
+                      <div><strong>Growth: 100% (new profit)</strong></div>
+                    </div>
+                    <div v-else-if="performanceMetrics.current?.grossProfit < 0 && (!performanceMetrics.previous?.grossProfit || performanceMetrics.previous?.grossProfit === 0)">
+                      = Loss incurred (no previous profit/loss to compare)<br>
+                      <div>Previous period: $0 → Current period: ${{ (performanceMetrics.current.grossProfit || 0).toLocaleString() }}</div>
+                      <div><strong>Change: -100% (new loss)</strong></div>
                     </div>
                     <div v-else>
-                      <em>Percentage change in gross profit over periods</em>
+                      <em>No significant profit/loss change to calculate percentage</em>
                     </div>
                   </div>
                 </div>
@@ -1135,7 +1232,7 @@ watch(selectedPeriod, handlePeriodChange);
             </div>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <!-- Payment Method -->
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Payment Method</label>
@@ -1154,6 +1251,12 @@ watch(selectedPeriod, handlePeriodChange);
                   {{ status.label }}
                 </option>
               </select>
+            </div>
+
+            <!-- Expense Date -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Expense Date *</label>
+              <input v-model="expenseForm.date" type="date" class="form-input w-full" required>
             </div>
 
             <!-- Due Date -->

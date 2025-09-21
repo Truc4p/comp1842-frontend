@@ -304,19 +304,19 @@ onMounted(async () => {
         <!-- Quick Overview Counts (moved from Admin page) -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div class="card p-6 text-center">
-            <div class="text-3xl font-bold text-blue-600 mb-2">{{ categoriesCount }}</div>
+            <div class="text-3xl font-bold text-primary-600 mb-2">{{ categoriesCount }}</div>
             <div class="text-sm text-secondary-600">Categories</div>
           </div>
           <div class="card p-6 text-center">
-            <div class="text-3xl font-bold text-success mb-2">{{ productsCount }}</div>
+            <div class="text-3xl font-bold text-primary-600 mb-2">{{ productsCount }}</div>
             <div class="text-sm text-secondary-600">Products</div>
           </div>
           <div class="card p-6 text-center">
-            <div class="text-3xl font-bold text-yellow-600 mb-2">{{ ordersCount }}</div>
+            <div class="text-3xl font-bold text-primary-600 mb-2">{{ ordersCount }}</div>
             <div class="text-sm text-secondary-600">Orders</div>
           </div>
           <div class="card p-6 text-center">
-            <div class="text-3xl font-bold text-orange-600 mb-2">{{ usersCount }}</div>
+            <div class="text-3xl font-bold text-primary-600 mb-2">{{ usersCount }}</div>
             <div class="text-sm text-secondary-600">Users</div>
           </div>
         </div>

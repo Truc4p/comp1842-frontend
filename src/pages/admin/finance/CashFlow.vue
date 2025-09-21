@@ -59,8 +59,7 @@ const forecast = ref([]);
 const loading = ref(true);
 const error = ref(null);
 
-// Balance details modal data
-const showingBalanceDetails = ref(false);
+// Balance details data for display on page  
 const balanceDetails = ref(null);
 // Toggle for collapsing Cash Balance Details table
 const showCashBalanceDetails = ref(true);
@@ -695,7 +694,8 @@ const handlePeriodChange = async () => {
       fetchCashFlowData(),
       fetchCategoryBreakdown(),
       fetchForecast(),
-      fetchTransactionDebugData()
+      fetchTransactionDebugData(),
+      fetchBalanceDetails()
     ]);
   } catch (err) {
     console.error("Error updating data for new period:", err);
@@ -748,8 +748,8 @@ const fetchTransactionDebugData = async () => {
   }
 };
 
-// Show detailed balance breakdown
-const showBalanceDetails = async () => {
+// Fetch detailed balance breakdown
+const fetchBalanceDetails = async () => {
   try {
     const token = localStorage.getItem("token");
     const response = await axios.get(`${API_URL}/cashflow/debug/balance?period=${selectedPeriod.value}`, {
@@ -757,19 +757,12 @@ const showBalanceDetails = async () => {
     });
     
     balanceDetails.value = response.data;
-    showingBalanceDetails.value = true;
     
     console.log("🔍 Balance Details:", response.data);
   } catch (err) {
     console.error("Error fetching balance details:", err);
-    alert("Failed to load balance details");
+    error.value = "Failed to load balance details";
   }
-};
-
-// Close balance details modal
-const closeBalanceDetails = () => {
-  showingBalanceDetails.value = false;
-  balanceDetails.value = null;
 };
 
 // Copy text to clipboard
@@ -814,7 +807,8 @@ const fetchAllData = async () => {
       fetchCashFlowData(),
       fetchCategoryBreakdown(),
       fetchForecast(),
-      fetchTransactionDebugData()
+      fetchTransactionDebugData(),
+      fetchBalanceDetails()
     ]);
   } catch (err) {
     error.value = "Failed to load cash flow data";
@@ -917,9 +911,6 @@ onMounted(async () => {
               <div v-else>
                 <em>Calculated by backend from all CashFlowTransaction records</em>
               </div>
-              <button @click="showBalanceDetails" class="mt-2 px-2 py-1 bg-primary-200 text-primary-700 rounded text-xs hover:bg-primary-300">
-                Show Transactions ({{ selectedPeriod }} days)
-              </button>
             </div>
           </div>
 
@@ -1374,46 +1365,6 @@ onMounted(async () => {
           </div>
         </div>
 
-        <!-- Cash Flow Forecast -->
-        <div class="card p-6">
-          <h3 class="text-lg font-semibold text-secondary-900 mb-4">🔮 3-Month Cash Flow Forecast</h3>
-          <div v-if="forecast.length > 0" class="h-72 mb-6">
-            <Line :data="forecastChartData" :options="forecastChartOptions" />
-          </div>
-          <div v-else class="text-center py-8 text-gray-500">
-            <p>No forecast data available</p>
-          </div>
-          
-          <!-- Debug: Forecast Calculation Details -->
-          <div v-if="forecast.length > 0" class="mt-6 p-4 bg-primary-50 rounded-lg">
-            <h4 class="text-sm font-semibold text-primary-800 mb-3">Forecast Calculation Details</h4>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-              <!-- Left Column: Assumptions -->
-              <div class="space-y-2">
-                <div class="font-medium text-primary-700">Historical Analysis (30 days):</div>
-                <div class="text-primary-600 text-xs space-y-1">
-                  <div v-if="forecast[0]">• Avg Daily Inflow: ${{ forecast[0].projectedInflow?.toLocaleString() || 'N/A' }} (= Total Inflows ${{ cashFlowData.totalInflows?.toLocaleString() || 0 }} ÷ 30 days)</div> 
-                  <div v-if="forecast[0]">• Avg Daily Outflow: ${{ forecast[0].projectedOutflow?.toLocaleString() || 'N/A' }} (= Total Outflows ${{ cashFlowData.totalOutflows?.toLocaleString() || 0 }} ÷ 30 days)</div>
-                  <div v-if="forecast[0]">• Net Daily Flow: ${{ forecast[0].netProjectedFlow?.toLocaleString() || 'N/A' }} (= Avg Daily Inflow ${{ forecast[0].projectedInflow?.toLocaleString() || 'N/A' }} - Avg Daily Outflow ${{ forecast[0].projectedOutflow?.toLocaleString() || 'N/A' }})</div>
-                  <div>• Based on: Last 30 days of transactions</div>
-                </div>
-              </div>
-              
-              <!-- Right Column: Projection -->
-              <div class="space-y-2">
-                <div class="font-medium text-primary-700">Projection Logic:</div>
-                <div class="text-primary-600 text-xs space-y-1">
-                  <div>• Starting Balance: ${{ cashFlowData.currentBalance?.toLocaleString() || 0 }}</div>
-                  <div>• Daily Balance = Previous Balance + Net Daily Flow</div>
-                  <div>• Forecast Period: {{ forecast.length }} days</div>
-                  <div v-if="forecast[forecast.length - 1]">• Projected End Balance: ${{ forecast[forecast.length - 1].projectedBalance?.toLocaleString() || 'N/A' }}</div>
-                </div>
-              </div>
-            </div>
-            
-          </div>
-        </div>
-
         <!-- Key Metrics Summary -->
         <div class="card p-6">
           <h3 class="text-lg font-semibold text-secondary-900 mb-4">📈 Key Performance Indicators</h3>
@@ -1539,24 +1490,13 @@ onMounted(async () => {
             </div>
           </div>
         </div>
-      </div>
-    </div>
-    
-    <!-- Balance Details Modal -->
-    <div v-if="showingBalanceDetails" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" @click="closeBalanceDetails">
-      <div class="bg-white rounded-lg p-6 max-w-4xl max-h-[80vh] overflow-y-auto m-4" @click.stop>
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="text-xl font-bold text-gray-900">💰 Current Balance Breakdown (${{ balanceDetails?.summary?.currentBalance?.toLocaleString() || 0 }})</h3>
-          <button @click="closeBalanceDetails" class="text-gray-500 hover:text-gray-700">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-            </svg>
-          </button>
-        </div>
-        
-        <div v-if="balanceDetails" class="space-y-6">
+
+        <!-- 💰 Current Balance Breakdown -->
+        <div v-if="balanceDetails" class="card p-6">
+          <h3 class="text-lg font-semibold text-secondary-900 mb-4">💰 Current Balance Breakdown (${{ balanceDetails?.summary?.currentBalance?.toLocaleString() || 0 }})</h3>
+          
           <!-- Summary -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center mb-6">
             <div class="bg-green-50 p-4 rounded-lg">
               <div class="text-green-700 font-medium">Total Inflows</div>
               <div class="text-2xl font-bold text-green-800">${{ balanceDetails.summary.totalInflows.toLocaleString() }}</div>
@@ -1579,7 +1519,7 @@ onMounted(async () => {
           </div>
 
           <!-- Category Breakdown -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <!-- Inflows by Category -->
             <div>
               <h4 class="text-lg font-semibold text-green-700 mb-3">💰 Inflows by Category</h4>
@@ -1646,6 +1586,46 @@ onMounted(async () => {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+
+        <!-- Cash Flow Forecast -->
+        <div class="card p-6">
+          <h3 class="text-lg font-semibold text-secondary-900 mb-4">🔮 3-Month Cash Flow Forecast</h3>
+          <div v-if="forecast.length > 0" class="h-72 mb-6">
+            <Line :data="forecastChartData" :options="forecastChartOptions" />
+          </div>
+          <div v-else class="text-center py-8 text-gray-500">
+            <p>No forecast data available</p>
+          </div>
+          
+          <!-- Debug: Forecast Calculation Details -->
+          <div v-if="forecast.length > 0" class="mt-6 p-4 bg-primary-50 rounded-lg">
+            <h4 class="text-sm font-semibold text-primary-800 mb-3">Forecast Calculation Details</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <!-- Left Column: Assumptions -->
+              <div class="space-y-2">
+                <div class="font-medium text-primary-700">Historical Analysis (30 days):</div>
+                <div class="text-primary-600 text-xs space-y-1">
+                  <div v-if="forecast[0]">• Avg Daily Inflow: ${{ forecast[0].projectedInflow?.toLocaleString() || 'N/A' }} (= Total Inflows ${{ cashFlowData.totalInflows?.toLocaleString() || 0 }} ÷ 30 days)</div> 
+                  <div v-if="forecast[0]">• Avg Daily Outflow: ${{ forecast[0].projectedOutflow?.toLocaleString() || 'N/A' }} (= Total Outflows ${{ cashFlowData.totalOutflows?.toLocaleString() || 0 }} ÷ 30 days)</div>
+                  <div v-if="forecast[0]">• Net Daily Flow: ${{ forecast[0].netProjectedFlow?.toLocaleString() || 'N/A' }} (= Avg Daily Inflow ${{ forecast[0].projectedInflow?.toLocaleString() || 'N/A' }} - Avg Daily Outflow ${{ forecast[0].projectedOutflow?.toLocaleString() || 'N/A' }})</div>
+                  <div>• Based on: Last 30 days of transactions</div>
+                </div>
+              </div>
+              
+              <!-- Right Column: Projection -->
+              <div class="space-y-2">
+                <div class="font-medium text-primary-700">Projection Logic:</div>
+                <div class="text-primary-600 text-xs space-y-1">
+                  <div>• Starting Balance: ${{ cashFlowData.currentBalance?.toLocaleString() || 0 }}</div>
+                  <div>• Daily Balance = Previous Balance + Net Daily Flow</div>
+                  <div>• Forecast Period: {{ forecast.length }} days</div>
+                  <div v-if="forecast[forecast.length - 1]">• Projected End Balance: ${{ forecast[forecast.length - 1].projectedBalance?.toLocaleString() || 'N/A' }}</div>
+                </div>
+              </div>
+            </div>
+            
           </div>
         </div>
       </div>

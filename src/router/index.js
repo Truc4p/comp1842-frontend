@@ -42,10 +42,6 @@ import HumanResources from '@/pages/admin/finance/HumanResources.vue';
 // Admin - Analytics
 import Analytics from '@/pages/admin/analytics/Analytics.vue';
 
-// Admin - Debug
-import TokenDebug from '@/pages/admin/debug/TokenDebug.vue';
-
-
 // Customer
 import CustomerLayout from "@/layout/CustomerLayout.vue";
 
@@ -97,7 +93,6 @@ const routes = [
       { path: "cashflow", component: CashFlow },
       { path: "advanced-finance", component: AdvancedFinance },
       { path: "hr", component: HumanResources },
-      { path: "token-debug", component: TokenDebug },
 
       { path: "orders", component: Orders },
       { path: "orders/order/:id", component: DetailOrder },

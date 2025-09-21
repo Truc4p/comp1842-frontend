@@ -65,6 +65,11 @@ const balanceDetails = ref(null);
 // Toggle for collapsing Cash Balance Details table
 const showCashBalanceDetails = ref(true);
 
+// Debug data modal state
+const showingDebugData = ref(false);
+const debugData = ref(null);
+const debugDataType = ref(''); // 'transactions'
+
 // 🚀 PHASE 2: Manual Transaction Entry Data
 const newTransaction = ref({
   type: 'inflow',
@@ -735,51 +740,14 @@ const debugTransactions = async () => {
     console.log("🐛 DEBUG: Transaction data:", response.data);
     console.table(response.data.recentTransactions);
 
-    alert(`Debug Info:
-Total Transactions: ${response.data.totalTransactions}
-Manual Transactions: ${response.data.manualTransactions}
-Automated Transactions: ${response.data.automatedTransactions}
-
-Check console for detailed transaction list.`);
+    // Store debug data and show in UI
+    debugData.value = response.data;
+    debugDataType.value = 'transactions';
+    showingDebugData.value = true;
 
   } catch (err) {
     console.error("Debug error:", err);
-    alert("Debug failed - check console for details");
-  }
-};
-
-// Compare orders vs transactions
-const compareOrdersVsTransactions = async () => {
-  try {
-    const token = localStorage.getItem("token");
-
-    const response = await axios.get(`${API_URL}/cashflow/debug/orders-vs-transactions`, {
-      headers: { "Authorization": `Bearer ${token}` }
-    });
-
-    console.log("🔍 Orders vs Transactions Analysis:", response.data);
-
-    const data = response.data;
-    
-    alert(`Orders vs Transactions Analysis:
-
-📦 Completed Orders: ${data.summary.completedOrders}
-💰 Product Sales Transactions: ${data.summary.productSalesTransactions}
-💵 Order Revenue: $${data.summary.totalOrderRevenue.toLocaleString()}
-💸 Transaction Revenue: $${data.summary.totalTransactionRevenue.toLocaleString()}
-📊 Difference: $${data.summary.revenueDifference.toLocaleString()}
-
-🔍 Analysis:
-✅ Orders with transactions: ${data.analysis.ordersWithTransactions}
-❌ Orders without transactions: ${data.analysis.ordersWithoutTransactions}
-🔄 Multiple transactions per order: ${data.analysis.multipleTransactionsPerOrder}
-⚠️ Transactions without orders: ${data.analysis.transactionsWithoutOrders}
-
-Check console for detailed breakdown.`);
-
-  } catch (err) {
-    console.error("Orders vs Transactions error:", err);
-    alert("Analysis failed - check console for details");
+    error.value = "Debug failed - check console for details";
   }
 };
 
@@ -805,6 +773,46 @@ const showBalanceDetails = async () => {
 const closeBalanceDetails = () => {
   showingBalanceDetails.value = false;
   balanceDetails.value = null;
+};
+
+// Close debug data modal
+const closeDebugData = () => {
+  showingDebugData.value = false;
+  debugData.value = null;
+  debugDataType.value = '';
+};
+
+// Copy text to clipboard
+const copyToClipboard = async (text, event) => {
+  try {
+    await navigator.clipboard.writeText(text);
+    // Show a brief success indication
+    const button = event.target;
+    const originalText = button.textContent;
+    button.textContent = '✅';
+    setTimeout(() => {
+      button.textContent = originalText;
+    }, 1000);
+  } catch (err) {
+    console.error('Failed to copy text: ', err);
+    // Fallback for older browsers
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    document.body.appendChild(textArea);
+    textArea.select();
+    try {
+      document.execCommand('copy');
+      const button = event.target;
+      const originalText = button.textContent;
+      button.textContent = '✅';
+      setTimeout(() => {
+        button.textContent = originalText;
+      }, 1000);
+    } catch (fallbackErr) {
+      console.error('Fallback copy failed: ', fallbackErr);
+    }
+    document.body.removeChild(textArea);
+  }
 };
 
 // Fetch all data
@@ -1023,11 +1031,6 @@ onMounted(async () => {
                 class="px-4 py-2 bg-orange-100 text-primary-700 rounded-lg hover:bg-orange-200 disabled:opacity-50 flex items-center gap-2">
                 <span>🐛</span>
                 Debug
-              </button>
-              <button @click="compareOrdersVsTransactions" :disabled="loading"
-                class="px-4 py-2 bg-purple-100 text-primary-700 rounded-lg hover:bg-purple-200 disabled:opacity-50 flex items-center gap-2">
-                <span>🔍</span>
-                Orders vs Sales
               </button>
             </div>
           </div>
@@ -1573,6 +1576,103 @@ onMounted(async () => {
                   <div class="text-xs text-red-600">{{ tx.automated ? 'Auto' : 'Manual' }}</div>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Debug Data Modal -->
+    <div v-if="showingDebugData" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" @click="closeDebugData">
+      <div class="bg-white rounded-lg p-6 max-w-6xl max-h-[90vh] overflow-y-auto m-4" @click.stop>
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-bold text-gray-900">
+            <span v-if="debugDataType === 'transactions'">🐛 Debug: Transaction Data</span>
+          </h3>
+          <button @click="closeDebugData" class="text-gray-500 hover:text-gray-700">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+        
+        <!-- Transaction Debug Data -->
+        <div v-if="debugDataType === 'transactions' && debugData" class="space-y-6">
+          <!-- Summary Stats -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+            <div class="bg-blue-50 p-4 rounded-lg">
+              <div class="text-blue-700 font-medium">Total Transactions</div>
+              <div class="text-2xl font-bold text-blue-800">{{ debugData.totalTransactions }}</div>
+            </div>
+            <div class="bg-green-50 p-4 rounded-lg">
+              <div class="text-green-700 font-medium">Manual Transactions</div>
+              <div class="text-2xl font-bold text-green-800">{{ debugData.manualTransactions }}</div>
+            </div>
+            <div class="bg-purple-50 p-4 rounded-lg">
+              <div class="text-purple-700 font-medium">Automated Transactions</div>
+              <div class="text-2xl font-bold text-purple-800">{{ debugData.automatedTransactions }}</div>
+            </div>
+          </div>
+
+          <!-- All Transactions Table -->
+          <div>
+            <div class="flex justify-between items-center mb-3">
+              <h4 class="text-lg font-semibold text-gray-900">All Transactions ({{ debugData.recentTransactions?.length || 0 }})</h4>
+              <div class="text-sm text-gray-500">Sorted by date (newest first) • Scroll to see all</div>
+            </div>
+            <div class="overflow-x-auto max-h-96 overflow-y-auto border border-gray-200 rounded-lg">
+              <table class="min-w-full bg-white">
+                <thead class="bg-gray-50 sticky top-0 z-10">
+                  <tr>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Source</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                  <tr v-for="(tx, index) in debugData.recentTransactions" :key="tx.id" class="hover:bg-gray-50">
+                    <td class="px-4 py-3 text-sm text-gray-900 font-medium">
+                      <div class="flex items-center">
+                        <span 
+                          class="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs font-mono cursor-help"
+                          :title="`Transaction ID: ${tx.id}`"
+                        >
+                          {{ index + 1 }}
+                        </span>
+                        <button 
+                          @click="copyToClipboard(tx.id, $event)" 
+                          class="ml-2 text-gray-400 hover:text-gray-600 text-xs transition-colors duration-150"
+                          title="Copy full ID to clipboard"
+                        >
+                          📋
+                        </button>
+                      </div>
+                    </td>
+                    <td class="px-4 py-3 text-sm">
+                      <span :class="tx.type === 'inflow' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+                            class="px-2 py-1 rounded-full text-xs font-medium">
+                        {{ tx.type === 'inflow' ? '💰 Inflow' : '💸 Outflow' }}
+                      </span>
+                    </td>
+                    <td class="px-4 py-3 text-sm font-semibold" :class="tx.type === 'inflow' ? 'text-green-600' : 'text-red-600'">
+                      ${{ tx.amount.toLocaleString() }}
+                    </td>
+                    <td class="px-4 py-3 text-sm text-gray-900">{{ getCategoryDisplayName(tx.category) }}</td>
+                    <td class="px-4 py-3 text-sm text-gray-600">{{ tx.description || '-' }}</td>
+                    <td class="px-4 py-3 text-sm text-gray-600">{{ new Date(tx.date).toLocaleDateString() }}</td>
+                    <td class="px-4 py-3 text-sm">
+                      <span :class="tx.automated ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'"
+                            class="px-2 py-1 rounded-full text-xs font-medium">
+                        {{ tx.automated ? '🤖 Auto' : '✋ Manual' }}
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>

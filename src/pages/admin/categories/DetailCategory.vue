@@ -9,7 +9,7 @@
       <div v-else>
         <p>Loading...</p>
       </div>
-      <ChatWidget />
+      <AdminChatWidget />
     </div>
   </template>
   
@@ -18,7 +18,7 @@
   import axios from 'axios';
   import { useRoute } from 'vue-router';
   import { API_URL } from '../../../utils/config';
-  import ChatWidget from '../../../components/ChatWidget.vue';
+  import AdminChatWidget from '../../../components/AdminChatWidget.vue';
 
   const category = ref(null);
   const route = useRoute();

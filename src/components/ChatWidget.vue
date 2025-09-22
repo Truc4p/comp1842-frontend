@@ -7,7 +7,7 @@ const isOpen = ref(false);
 const hasNewMessage = ref(false);
 const isLoading = ref(false);
 const sessionId = ref(null);
-const currentFlow = ref('menu'); // 'menu' or 'chat'
+const currentFlow = ref('menu'); // 'menu', 'chat', or 'staff-chat'
 
 // Messages and chat state
 const messages = ref([]);
@@ -22,15 +22,39 @@ const faqCategories = ref([
   "Questions about shipping",
   "Questions about products",
   "Questions about skincare",
+  "Chat with staff"
 ]);
 
 // Flow state
 const showCategories = ref(true);
 const selectedCategory = ref(null);
 
+// Staff chat state
+const isConnectedToStaff = ref(false);
+const waitingForStaff = ref(false);
+let staffChatPollingInterval = null;
+let lastStaffMessageTime = null;
+
 // Generate session ID
 function generateSessionId() {
   return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+}
+
+// Get customer auth headers (if logged in)
+function getCustomerAuthHeaders() {
+  const token = localStorage.getItem('token');
+  const headers = {
+    'Content-Type': 'application/json',
+  };
+  
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+    console.log('🔍 Customer chat: Adding auth token to request');
+  } else {
+    console.log('🔍 Customer chat: No auth token found, sending as anonymous');
+  }
+  
+  return headers;
 }
 
 // Format bot messages for better readability
@@ -154,12 +178,20 @@ function clearChat() {
   showCategories.value = true;
   selectedCategory.value = null;
   currentFlow.value = 'menu';
+  isConnectedToStaff.value = false;
+  waitingForStaff.value = false;
+  lastStaffMessageTime = null;
+  stopStaffChatPolling();
 }
 
 function backToMenu() {
   currentFlow.value = 'menu';
   showCategories.value = true;
   selectedCategory.value = null;
+  isConnectedToStaff.value = false;
+  waitingForStaff.value = false;
+  lastStaffMessageTime = null;
+  stopStaffChatPolling();
 }
 
 // Add message to chat
@@ -195,6 +227,12 @@ function addBotMessage(text, relatedProducts = [], faq = null) {
 function selectFAQCategory(category) {
   selectedCategory.value = category;
   showCategories.value = false;
+  
+  // Handle "Chat with staff" option
+  if (category === 'Chat with staff') {
+    currentFlow.value = 'staff-chat';
+    initializeStaffChat();
+  }
 }
 
 // Flow 1: Get FAQs filtered by category
@@ -217,6 +255,9 @@ const filteredFAQs = computed(() => {
       break;
     case 'Questions about skincare':
       categoryFilter = 'skincare';
+      break;
+    case 'Chat with staff':
+      categoryFilter = 'staff';
       break;
     default:
       return faqs.value;
@@ -253,6 +294,105 @@ async function selectFAQ(faq) {
   } catch (error) {
     console.error('Error getting FAQ answer:', error);
     addBotMessage("Sorry, I'm having trouble connecting. Please try again later.");
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+// Initialize staff chat
+async function initializeStaffChat() {
+  waitingForStaff.value = true;
+  addBotMessage("Connecting you to our staff team...");
+  
+  try {
+    const response = await fetch(`${API_BASE_URL}/chat/staff/connect`, {
+      method: 'POST',
+      headers: getCustomerAuthHeaders(),
+      body: JSON.stringify({
+        sessionId: sessionId.value
+      })
+    });
+
+    const result = await response.json();
+    if (result.success) {
+      isConnectedToStaff.value = true;
+      waitingForStaff.value = false;
+      lastStaffMessageTime = new Date().toISOString(); // Initialize with current time
+      addBotMessage("You are now connected to our staff team. They will respond shortly!");
+      startStaffChatPolling();
+    } else {
+      waitingForStaff.value = false;
+      addBotMessage("Sorry, our staff team is currently unavailable. Please try again later or use our AI assistant.");
+    }
+  } catch (error) {
+    console.error('Error connecting to staff:', error);
+    waitingForStaff.value = false;
+    addBotMessage("Sorry, we're having trouble connecting you to our staff team. Please try again later.");
+  }
+}
+
+// Start polling for staff messages
+function startStaffChatPolling() {
+  staffChatPollingInterval = setInterval(async () => {
+    if (!isConnectedToStaff.value) return;
+    
+    try {
+      const url = lastStaffMessageTime 
+        ? `${API_BASE_URL}/chat/staff/messages/${sessionId.value}?lastMessageTime=${lastStaffMessageTime}`
+        : `${API_BASE_URL}/chat/staff/messages/${sessionId.value}`;
+        
+      const response = await fetch(url);
+      const result = await response.json();
+      
+      if (result.success && result.data.newMessages && result.data.newMessages.length > 0) {
+        result.data.newMessages.forEach(msg => {
+          if (msg.role === 'assistant' && msg.messageType === 'staff') {
+            addBotMessage(msg.content);
+            // Update the last message time
+            lastStaffMessageTime = msg.timestamp;
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Error polling for staff messages:', error);
+    }
+  }, 2000); // Poll every 2 seconds
+}
+
+// Stop staff chat polling
+function stopStaffChatPolling() {
+  if (staffChatPollingInterval) {
+    clearInterval(staffChatPollingInterval);
+    staffChatPollingInterval = null;
+  }
+}
+
+// Send message to staff
+async function sendStaffMessage(message = null) {
+  const text = message || inputText.value.trim();
+  if (!text) return;
+
+  addUserMessage(text);
+  inputText.value = '';
+  isLoading.value = true;
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/chat/staff/message`, {
+      method: 'POST',
+      headers: getCustomerAuthHeaders(),
+      body: JSON.stringify({
+        sessionId: sessionId.value,
+        message: text
+      })
+    });
+
+    const result = await response.json();
+    if (!result.success) {
+      addBotMessage("Sorry, your message couldn't be sent. Please try again.");
+    }
+  } catch (error) {
+    console.error('Error sending staff message:', error);
+    addBotMessage("Sorry, there was an error sending your message. Please try again.");
   } finally {
     isLoading.value = false;
   }
@@ -301,7 +441,11 @@ async function sendAIMessage(message = null) {
 }
 
 function sendMessage() {
-  sendAIMessage();
+  if (currentFlow.value === 'staff-chat' && isConnectedToStaff.value) {
+    sendStaffMessage();
+  } else {
+    sendAIMessage();
+  }
 }
 
 function onKeydown(e) {
@@ -324,6 +468,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   document.removeEventListener('click', outsideClose);
+  stopStaffChatPolling();
 });
 </script>
 
@@ -349,6 +494,7 @@ onBeforeUnmount(() => {
           <div class="header-title">
             <h3 class="text-white">Assistant</h3>
             <span v-if="currentFlow === 'chat'" class="flow-indicator">AI Chat</span>
+            <span v-else-if="currentFlow === 'staff-chat'" class="flow-indicator">Staff Chat</span>
             <span v-else class="flow-indicator">Quick Help</span>
           </div>
           <div class="header-actions">
@@ -430,9 +576,10 @@ onBeforeUnmount(() => {
           </div>
         </div>
 
-        <!-- Flow 2: Chat Input -->
-        <div v-if="currentFlow === 'chat'" class="composer">
-          <input v-model="inputText" class="composer-input" type="text" placeholder="Ask me anything about skincare..."
+        <!-- Flow 2 & 3: Chat Input -->
+        <div v-if="currentFlow === 'chat' || currentFlow === 'staff-chat'" class="composer">
+          <input v-model="inputText" class="composer-input" type="text" 
+            :placeholder="currentFlow === 'staff-chat' ? 'Message our staff team...' : 'Ask me anything about skincare...'"
             @keydown="onKeydown" :disabled="isLoading" aria-label="Message input" />
           <button class="send-btn" @click="sendMessage" :disabled="isLoading || !inputText.trim()"
             aria-label="Send message">
@@ -580,7 +727,7 @@ onBeforeUnmount(() => {
   flex: 1 1 auto;
   overflow-y: auto;
   padding: 16px;
-  background: linear-gradient(180deg, #f8f9fa, #fff);
+  background: white;
   min-height: 0;
 }
 

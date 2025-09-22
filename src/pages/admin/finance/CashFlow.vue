@@ -19,7 +19,8 @@ import {
 import { useRouter } from "vue-router";
 import { useI18n } from 'vue-i18n';
 import { API_URL } from '../../../utils/config';
-import ChatWidget from '../../../components/ChatWidget.vue';
+import { isAdmin, isAuthenticated } from '../../../utils/auth';
+import AdminChatWidget from '../../../components/AdminChatWidget.vue';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -1779,7 +1780,7 @@ onMounted(async () => {
       </div>
     </div>
     
-    <ChatWidget />
+    <AdminChatWidget v-if="isAdmin() && isAuthenticated()" />
   </div>
 </template>
 

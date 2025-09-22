@@ -1356,7 +1356,7 @@ onMounted(async () => {
                     step="0.01" 
                     min="0" 
                     placeholder="0.00"
-                    class="form-input w-full pl-8 pr-3 py-3 text-lg font-medium rounded-lg border-2 focus:ring-2 focus:ring-primary-500 focus:border-primary-500" 
+                    class="form-input w-full pl-8 pr-3 py-3 text-lg font-medium rounded-lg border-1 focus:border-primary-500" 
                     required
                     @keyup.enter="addTransaction"
                   >
@@ -1364,7 +1364,7 @@ onMounted(async () => {
                 <!-- Quick Amount Buttons -->
                 <div class="flex gap-1 mt-2">
                   <button 
-                    v-for="amount in [10, 25, 50, 100, 500]" 
+                    v-for="amount in [10, 25, 50, 100, 500, 1000, 2000, 2500, 3000, 3500, 5000]" 
                     :key="amount"
                     type="button"
                     @click="newTransaction.amount = amount"
@@ -1385,7 +1385,7 @@ onMounted(async () => {
                   v-model="newTransaction.description" 
                   type="text" 
                   placeholder="What's this transaction for?"
-                  class="form-input w-full px-3 py-3 rounded-lg border-2 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  class="form-input w-full px-3 py-3 rounded-lg border-1"
                   @keyup.enter="addTransaction"
                 >
                 <!-- Common Description Suggestions -->

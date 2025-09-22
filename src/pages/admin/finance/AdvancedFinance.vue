@@ -75,8 +75,8 @@ const expenseForm = ref({
 const periods = [
   { value: 7, label: '7 Days' },
   { value: 15, label: '15 Days' },
-  { value: 30, label: '30 Days' },
-  { value: 90, label: '90 Days' },
+  { value: 30, label: '1 Month' },
+  { value: 90, label: '3 Months' },
   { value: 180, label: '6 Months' },
   { value: 365, label: '1 Year' }
 ];

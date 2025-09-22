@@ -80,38 +80,62 @@ const successMessage = ref('');
 
 // Available categories for transaction types
 const availableCategories = computed(() => {
+  const allCategories = [
+    // Income categories
+    { value: 'product_sales', label: 'Product Sales', shortLabel: 'Product Sales', icon: '🛍️', type: 'inflow' },
+    { value: 'service_revenue', label: 'Service Revenue', shortLabel: 'Services', icon: '⚙️', type: 'inflow' },
+    { value: 'investment_income', label: 'Investment Income', shortLabel: 'Investment', icon: '📈', type: 'inflow' },
+    { value: 'other_income', label: 'Other Income', shortLabel: 'Other Income', icon: '💎', type: 'inflow' },
+    
+    // Expense categories
+    { value: 'operating_expenses', label: 'Operating Expenses', shortLabel: 'Operations', icon: '🏢', type: 'outflow' },
+    { value: 'cost_of_goods_sold', label: 'Cost of Goods Sold', shortLabel: 'COGS', icon: '📦', type: 'outflow' },
+    { value: 'payroll', label: 'Payroll', shortLabel: 'Payroll', icon: '👥', type: 'outflow' },
+    { value: 'marketing', label: 'Marketing', shortLabel: 'Marketing', icon: '📢', type: 'outflow' },
+    { value: 'taxes', label: 'Taxes', shortLabel: 'Taxes', icon: '🏛️', type: 'outflow' },
+    { value: 'rent', label: 'Rent', shortLabel: 'Rent', icon: '🏠', type: 'outflow' },
+    { value: 'utilities', label: 'Utilities', shortLabel: 'Utilities', icon: '⚡', type: 'outflow' },
+    { value: 'shipping_costs', label: 'Shipping Costs', shortLabel: 'Shipping', icon: '🚚', type: 'outflow' },
+    { value: 'refunds', label: 'Refunds', shortLabel: 'Refunds', icon: '↩️', type: 'outflow' },
+    { value: 'other_expenses', label: 'Other Expenses', shortLabel: 'Other', icon: '📝', type: 'outflow' }
+  ];
+  
   if (newTransaction.value.type === 'inflow') {
-    return [
-      { value: 'product_sales', label: 'Product Sales' },
-      { value: 'service_revenue', label: 'Service Revenue' },
-      { value: 'investment_income', label: 'Investment Income' },
-      { value: 'other_income', label: 'Other Income' }
-    ];
+    return allCategories.filter(cat => cat.type === 'inflow');
   } else {
-    return [
-      { value: 'operating_expenses', label: 'Operating Expenses' },
-      { value: 'cost_of_goods_sold', label: 'Cost of Goods Sold' },
-      { value: 'payroll', label: 'Payroll' },
-      { value: 'marketing', label: 'Marketing' },
-      { value: 'taxes', label: 'Taxes' },
-      { value: 'rent', label: 'Rent' },
-      { value: 'utilities', label: 'Utilities' },
-      { value: 'shipping_costs', label: 'Shipping Costs' },
-      { value: 'refunds', label: 'Refunds' },
-      { value: 'other_expenses', label: 'Other Expenses' }
-    ];
+    return allCategories.filter(cat => cat.type === 'outflow');
   }
 });
+
+// Get common descriptions based on transaction type and category
+const getCommonDescriptions = () => {
+  const type = newTransaction.value.type;
+  const category = newTransaction.value.category;
+  
+  if (type === 'inflow') {
+    if (category === 'product_sales') return ['Online sale', 'In-store purchase', 'Bulk order'];
+    if (category === 'service_revenue') return ['Consulting fee', 'Service delivery', 'Monthly retainer'];
+    if (category === 'investment_income') return ['Dividend payment', 'Interest earned', 'Investment return'];
+    return ['Cash deposit', 'Transfer in', 'Other income'];
+  } else {
+    if (category === 'operating_expenses') return ['Office supplies', 'Software subscription', 'Equipment'];
+    if (category === 'marketing') return ['Google Ads', 'Social media', 'Print materials'];
+    if (category === 'payroll') return ['Salary payment', 'Contractor fee', 'Benefits'];
+    if (category === 'rent') return ['Office rent', 'Storage rent', 'Equipment lease'];
+    if (category === 'utilities') return ['Electricity', 'Internet', 'Phone bill'];
+    return ['Business expense', 'Payment', 'Purchase'];
+  }
+};
 
 // Period selection
 const selectedPeriod = ref(7);
 const periods = [
   { value: 7, label: '7 Days' },
   { value: 15, label: '15 Days' },
-  { value: 30, label: '30 Days' },
-  { value: 90, label: '90 Days' },
-  { value: 180, label: '180 Days' },
-  { value: 365, label: '365 Days' }
+  { value: 30, label: '1 Month' },
+  { value: 90, label: '3 Months' },
+  { value: 180, label: '6 Months' },
+  { value: 365, label: '1 Year' }
 ];
 
 // Computed properties for formatting
@@ -732,7 +756,7 @@ const fetchTransactionDebugData = async () => {
   try {
     const token = localStorage.getItem("token");
 
-    const response = await axios.get(`${API_URL}/cashflow/debug/recent`, {
+    const response = await axios.get(`${API_URL}/cashflow/debug/recent?period=${selectedPeriod.value}`, {
       headers: { "Authorization": `Bearer ${token}` }
     });
 
@@ -882,6 +906,32 @@ onMounted(async () => {
 
       <!-- Cash Flow Content -->
       <div v-else class="space-y-8">
+
+        <!-- Period Selector & Controls -->
+        <div class="card p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-secondary-900">Analysis Period</h3>
+            <div class="flex items-center gap-3">
+              <select v-model="selectedPeriod" @change="handlePeriodChange" class="form-select w-40">
+                <option v-for="period in periods" :key="period.value" :value="period.value">
+                  {{ period.label }}
+                </option>
+              </select>
+              <button @click="syncOrdersToTransactions" :disabled="loading"
+                class="px-4 py-2 bg-pink-100 text-primary-700 rounded-lg hover:bg-pink-200 disabled:opacity-50 flex items-center gap-2">
+                <svg v-if="loading" class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor"
+                    d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                  </path>
+                </svg>
+                <span v-else>🔄</span>
+                Sync Orders
+              </button>
+            </div>
+          </div>
+        </div>
+
         <!-- Current Cash Position (Top Section) -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <!-- Current Balance -->
@@ -898,7 +948,7 @@ onMounted(async () => {
                 <p class="text-sm font-medium text-secondary-600">Current Balance</p>
                 <p class="text-2xl font-bold"
                   :class="cashFlowData.currentBalance >= 0 ? 'text-blue-600' : 'text-red-600'">
-                  {{ formattedCurrentBalance }}
+                  ${{ (cashFlowData.currentBalance || 0) % 1 === 0 ? (cashFlowData.currentBalance || 0).toLocaleString() : (cashFlowData.currentBalance || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
                 </p>
               </div>
             </div>
@@ -906,7 +956,7 @@ onMounted(async () => {
             <div class="text-xs text-primary-600 mt-3 p-2 bg-primary-50 rounded">
               = All-time Total Inflows - All-time Total Outflows<br>
               <div v-if="cashFlowData.balanceBreakdown">
-                = ${{ cashFlowData.balanceBreakdown.totalInflows?.toLocaleString() || 0 }} - ${{ cashFlowData.balanceBreakdown.totalOutflows?.toLocaleString() || 0 }} 
+                = ${{ (cashFlowData.balanceBreakdown.totalInflows || 0) % 1 === 0 ? (cashFlowData.balanceBreakdown.totalInflows || 0).toLocaleString() : (cashFlowData.balanceBreakdown.totalInflows || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }} - ${{ (cashFlowData.balanceBreakdown.totalOutflows || 0) % 1 === 0 ? (cashFlowData.balanceBreakdown.totalOutflows || 0).toLocaleString() : (cashFlowData.balanceBreakdown.totalOutflows || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }} 
               </div>
               <div v-else>
                 <em>Calculated by backend from all CashFlowTransaction records</em>
@@ -928,14 +978,14 @@ onMounted(async () => {
               <div class="ml-4">
                 <p class="text-sm font-medium text-secondary-600">Net Cash Flow ({{ selectedPeriod }} days)</p>
                 <p class="text-2xl font-bold" :class="cashFlowData.netCashFlow >= 0 ? 'text-success' : 'text-red-600'">
-                  {{ formattedNetCashFlow }}
+                  ${{ (cashFlowData.netCashFlow || 0) % 1 === 0 ? (cashFlowData.netCashFlow || 0).toLocaleString() : (cashFlowData.netCashFlow || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
                 </p>
               </div>
             </div>
             <!-- Debug formula -->
             <div class="text-xs text-primary-600 mt-3 p-2 bg-primary-50 rounded">
               = Total Inflows - Total Outflows ({{ selectedPeriod }} days)<br>
-              = ${{ cashFlowData.totalInflows?.toLocaleString() || 0 }} - ${{ cashFlowData.totalOutflows?.toLocaleString() || 0 }}<br>
+              = ${{ (cashFlowData.totalInflows || 0) % 1 === 0 ? (cashFlowData.totalInflows || 0).toLocaleString() : (cashFlowData.totalInflows || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }} - ${{ (cashFlowData.totalOutflows || 0) % 1 === 0 ? (cashFlowData.totalOutflows || 0).toLocaleString() : (cashFlowData.totalOutflows || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}<br>
             </div>
           </div>
 
@@ -951,13 +1001,13 @@ onMounted(async () => {
               </div>
               <div class="ml-4">
                 <p class="text-sm font-medium text-secondary-600">Daily Burn Rate</p>
-                <p class="text-2xl font-bold text-orange-600">{{ formattedCashBurnRate }}/day</p>
+                <p class="text-2xl font-bold text-orange-600">${{ (cashFlowData.cashBurnRate || 0) % 1 === 0 ? (cashFlowData.cashBurnRate || 0).toLocaleString() : (cashFlowData.cashBurnRate || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}/day</p>
               </div>
             </div>
             <!-- Debug formula -->
             <div class="text-xs text-primary-600 mt-3 p-2 bg-primary-50 rounded">
               = Total Outflows ÷ Period Days<br>
-              = ${{ cashFlowData.totalOutflows?.toLocaleString() || 0 }} ÷ {{ selectedPeriod }} days<br>
+              = ${{ (cashFlowData.totalOutflows || 0) % 1 === 0 ? (cashFlowData.totalOutflows || 0).toLocaleString() : (cashFlowData.totalOutflows || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }} ÷ {{ selectedPeriod }} days<br>
             </div>
           </div>
 
@@ -988,107 +1038,6 @@ onMounted(async () => {
           </div>
         </div>
 
-        <!-- Period Selector & Controls -->
-        <div class="card p-6">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-semibold text-secondary-900">Analysis Period</h3>
-            <div class="flex items-center gap-3">
-              <select v-model="selectedPeriod" @change="handlePeriodChange" class="form-select w-40">
-                <option v-for="period in periods" :key="period.value" :value="period.value">
-                  {{ period.label }}
-                </option>
-              </select>
-              <button @click="syncOrdersToTransactions" :disabled="loading"
-                class="px-4 py-2 bg-pink-100 text-primary-700 rounded-lg hover:bg-pink-200 disabled:opacity-50 flex items-center gap-2">
-                <svg v-if="loading" class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor"
-                    d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                  </path>
-                </svg>
-                <span v-else>🔄</span>
-                Sync Orders
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- 🚀 PHASE 2: Manual Transaction Entry -->
-        <div class="card p-6">
-          <h3 class="text-lg font-semibold text-secondary-900 mb-4">➕ Add Manual Transaction</h3>
-
-          <!-- Success Message -->
-          <div v-if="successMessage" class="mb-4 p-3 bg-green-100 border border-green-400 text-success rounded-lg">
-            {{ successMessage }}
-          </div>
-
-          <!-- Error Message -->
-          <div v-if="error" class="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-            {{ error }}
-          </div>
-
-          <form @submit.prevent="addTransaction">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <!-- Transaction Type -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
-                <select v-model="newTransaction.type"
-                  class="form-select w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                  <option value="inflow">💰 Income</option>
-                  <option value="outflow">💸 Expense</option>
-                </select>
-              </div>
-
-              <!-- Category -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                <select v-model="newTransaction.category"
-                  class="form-select w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                  <option v-for="cat in availableCategories" :key="cat.value" :value="cat.value">
-                    {{ cat.label }}
-                  </option>
-                </select>
-              </div>
-
-              <!-- Amount -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Amount ($)</label>
-                <input v-model="newTransaction.amount" type="number" step="0.01" min="0" placeholder="0.00"
-                  class="form-input w-full px-3 py-2" required>
-              </div>
-
-              <!-- Description -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Description <span class="text-gray-400 text-xs">(Optional)</span></label>
-                <input v-model="newTransaction.description" type="text" placeholder="Transaction description"
-                  class="form-input w-full px-3 py-2">
-              </div>
-            </div>
-
-            <!-- Submit Button -->
-            <div class="mt-4 flex items-center gap-3">
-              <button type="submit" :disabled="isSubmitting || !newTransaction.amount"
-                class="px-6 py-2 btn btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
-                <svg v-if="isSubmitting" class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor"
-                    d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                  </path>
-                </svg>
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6">
-                  </path>
-                </svg>
-                {{ isSubmitting ? 'Adding...' : 'Add Transaction' }}
-              </button>
-
-              <p class="text-sm text-gray-500">
-                Add {{ newTransaction.type === 'inflow' ? 'income' : 'expense' }} transactions manually to track
-                non-automated cash flows
-              </p>
-            </div>
-          </form>
-        </div>
         <!-- Cash Position Trend (Middle Section) -->
         <div class="card p-6">
           <h3 class="text-lg font-semibold text-secondary-900 mb-4">💹 Cash Position Over Time</h3>
@@ -1114,29 +1063,41 @@ onMounted(async () => {
               <div class="bg-green-50 p-3 rounded-lg">
                 <div class="text-success font-medium">Total Inflows</div>
                 <div class="text-green-800 font-bold text-lg">
-                  ${{ cashBalanceTableData.reduce((sum, day) => sum + day.inflows, 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+                  ${{ cashBalanceTableData.reduce((sum, day) => sum + day.inflows, 0) % 1 === 0 ? 
+                       cashBalanceTableData.reduce((sum, day) => sum + day.inflows, 0).toLocaleString('en-US') :
+                       cashBalanceTableData.reduce((sum, day) => sum + day.inflows, 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
                 </div>
               </div>
               <div class="bg-red-50 p-3 rounded-lg">
                 <div class="text-red-700 font-medium">Total Outflows</div>
                 <div class="text-red-800 font-bold text-lg">
-                  ${{ cashBalanceTableData.reduce((sum, day) => sum + day.outflows, 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+                  ${{ cashBalanceTableData.reduce((sum, day) => sum + day.outflows, 0) % 1 === 0 ? 
+                       cashBalanceTableData.reduce((sum, day) => sum + day.outflows, 0).toLocaleString('en-US') :
+                       cashBalanceTableData.reduce((sum, day) => sum + day.outflows, 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
                 </div>
               </div>
               <div class="bg-blue-50 p-3 rounded-lg">
                 <div class="text-blue-700 font-medium">Net Flow</div>
                 <div class="text-blue-800 font-bold text-lg">
-                  ${{ cashBalanceTableData.reduce((sum, day) => sum + day.netFlow, 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+                  ${{ cashBalanceTableData.reduce((sum, day) => sum + day.netFlow, 0) % 1 === 0 ? 
+                       cashBalanceTableData.reduce((sum, day) => sum + day.netFlow, 0).toLocaleString('en-US') :
+                       cashBalanceTableData.reduce((sum, day) => sum + day.netFlow, 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
                 </div>
                 <!-- Debug info -->
                 <div class="text-xs text-blue-600 mt-1">
-                  = Total Inflows ${{ cashBalanceTableData.reduce((sum, day) => sum + day.inflows, 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }} - Total Outflows ${{ cashBalanceTableData.reduce((sum, day) => sum + day.outflows, 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+                  = Total Inflows ${{ cashBalanceTableData.reduce((sum, day) => sum + day.inflows, 0) % 1 === 0 ? 
+                                      cashBalanceTableData.reduce((sum, day) => sum + day.inflows, 0).toLocaleString('en-US') :
+                                      cashBalanceTableData.reduce((sum, day) => sum + day.inflows, 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }} - Total Outflows ${{ cashBalanceTableData.reduce((sum, day) => sum + day.outflows, 0) % 1 === 0 ? 
+                                      cashBalanceTableData.reduce((sum, day) => sum + day.outflows, 0).toLocaleString('en-US') :
+                                      cashBalanceTableData.reduce((sum, day) => sum + day.outflows, 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
                 </div>
               </div>
               <div class="bg-purple-50 p-3 rounded-lg">
                 <div class="text-purple-700 font-medium">Avg Daily Balance</div>
                 <div class="text-purple-800 font-bold text-lg">
-                  ${{ (cashBalanceTableData.reduce((sum, day) => sum + day.balance, 0) / cashBalanceTableData.length).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+                  ${{ (cashBalanceTableData.reduce((sum, day) => sum + day.balance, 0) / cashBalanceTableData.length) % 1 === 0 ? 
+                       (cashBalanceTableData.reduce((sum, day) => sum + day.balance, 0) / cashBalanceTableData.length).toLocaleString('en-US') :
+                       (cashBalanceTableData.reduce((sum, day) => sum + day.balance, 0) / cashBalanceTableData.length).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
                 </div>
                 <!-- Debug info -->
                 <div class="text-xs text-purple-600 mt-1">
@@ -1195,14 +1156,14 @@ onMounted(async () => {
                     <!-- Inflows Column -->
                     <td class="px-4 py-3 text-sm text-right">
                       <span class="font-medium text-success">
-                        ${{ day.inflows.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+                        ${{ day.inflows % 1 === 0 ? day.inflows.toLocaleString('en-US') : day.inflows.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
                       </span>
                     </td>
                     
                     <!-- Outflows Column -->
                     <td class="px-4 py-3 text-sm text-right">
                       <span class="font-medium text-red-600">
-                        ${{ day.outflows.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+                        ${{ day.outflows % 1 === 0 ? day.outflows.toLocaleString('en-US') : day.outflows.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
                       </span>
                     </td>
                     
@@ -1216,14 +1177,14 @@ onMounted(async () => {
                           'bg-gray-100 text-gray-800'
                         ]"
                       >
-                        {{ day.netFlow >= 0 ? '+' : '' }}${{ day.netFlow.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+                        {{ day.netFlow >= 0 ? '+' : '' }}${{ day.netFlow % 1 === 0 ? day.netFlow.toLocaleString('en-US') : day.netFlow.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
                       </span>
                     </td>
                     
                     <!-- Balance Column -->
                     <td class="px-4 py-3 text-sm text-right">
                       <div class="font-bold text-lg" :class="day.balance >= 0 ? 'text-blue-600' : 'text-red-600'">
-                        ${{ day.balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+                        ${{ day.balance % 1 === 0 ? day.balance.toLocaleString('en-US') : day.balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
                       </div>
                     </td>
                     
@@ -1289,150 +1250,218 @@ onMounted(async () => {
           </div>
         </div>
 
-        <!-- Inflows vs Outflows Chart -->
+        <!-- Manual Transaction Entry -->
         <div class="card p-6">
-          <h3 class="text-lg font-semibold text-secondary-900 mb-4">📊 Cash Inflows vs Outflows</h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div class="text-center">
-              <div class="text-2xl font-bold text-success">{{ formattedTotalInflows }}</div>
-              <div class="text-sm text-secondary-600">Total Inflows</div>
-            </div>
-            <div class="text-center">
-              <div class="text-2xl font-bold text-red-600">{{ formattedTotalOutflows }}</div>
-              <div class="text-sm text-secondary-600">Total Outflows</div>
-            </div>
-          </div>
-          <div class="h-72">
-            <Bar :data="inflowOutflowChartData" :options="inflowOutflowChartOptions" />
-          </div>
-        </div>
+          <h3 class="text-lg font-semibold text-secondary-900 mb-4">➕ Add Manual Transaction</h3>
 
-        <!-- Category Breakdown (Bottom Section) -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <!-- Inflow Categories -->
-          <div class="card p-6">
-            <h3 class="text-lg font-semibold text-secondary-900 mb-4">💰 Inflow Categories</h3>
-            <div v-if="categoryBreakdown.inflows.length > 0" class="h-64">
-              <Doughnut :data="inflowCategoryChartData" :options="categoryChartOptions" />
-            </div>
-            <div v-else class="text-center py-8 text-gray-500">
-              <p>No inflow data available</p>
-            </div>
+          <!-- Success Message -->
+          <div v-if="successMessage" class="mb-4 p-3 bg-green-100 border border-green-400 text-success rounded-lg">
+            {{ successMessage }}
           </div>
 
-          <!-- Outflow Categories -->
-          <div class="card p-6">
-            <h3 class="text-lg font-semibold text-secondary-900 mb-4">💸 Outflow Categories</h3>
-            <div v-if="categoryBreakdown.outflows.length > 0" class="h-64">
-              <Doughnut :data="outflowCategoryChartData" :options="categoryChartOptions" />
-            </div>
-            <div v-else class="text-center py-8 text-gray-500">
-              <p>No outflow data available</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Detailed Category Lists -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <!-- Inflow Details -->
-          <div class="card p-6">
-            <h3 class="text-lg font-semibold text-secondary-900 mb-4">Cash Inflows Breakdown</h3>
-            <div class="space-y-3">
-              <div v-for="(category, index) in categoryBreakdown.inflows" :key="index"
-                class="flex items-center justify-between">
-                <span class="text-sm font-medium text-secondary-900">{{ getCategoryDisplayName(category.category ||
-                  category.name) }}</span>
-                <span class="text-sm font-semibold text-success">
-                  ${{ category.amount.toLocaleString() }}
-                </span>
-              </div>
-            </div>
+          <!-- Error Message -->
+          <div v-if="error" class="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+            {{ error }}
           </div>
 
-          <!-- Outflow Details -->
-          <div class="card p-6">
-            <h3 class="text-lg font-semibold text-secondary-900 mb-4">Cash Outflows Breakdown</h3>
-            <div class="space-y-3">
-              <div v-for="(category, index) in categoryBreakdown.outflows" :key="index"
-                class="flex items-center justify-between">
-                <span class="text-sm font-medium text-secondary-900">{{ getCategoryDisplayName(category.category ||
-                  category.name) }}</span>
-                <span class="text-sm font-semibold text-red-600">
-                  ${{ category.amount.toLocaleString() }}
-                </span>
+          <form @submit.prevent="addTransaction">
+            <!-- Transaction Type Toggle -->
+            <div class="mb-6">
+              <label class="block text-sm font-medium text-gray-700 mb-3">Transaction Type</label>
+              <div class="flex gap-2">
+                <button 
+                  type="button"
+                  @click="newTransaction.type = 'inflow'"
+                  :class="[
+                    'flex-1 py-3 px-4 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-2',
+                    newTransaction.type === 'inflow' 
+                      ? 'bg-green-100 text-green-700' 
+                      : 'bg-gray-100 text-gray-700 hover:bg-green-100 hover:text-green-700'
+                  ]"
+                >
+                  <span class="text-xl">💰</span>
+                  Income
+                </button>
+                <button 
+                  type="button"
+                  @click="newTransaction.type = 'outflow'"
+                  :class="[
+                    'flex-1 py-3 px-4 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-2',
+                    newTransaction.type === 'outflow' 
+                      ? 'bg-red-100 text-red-700' 
+                      : 'bg-gray-100 text-gray-700 hover:bg-red-100 hover:text-red-700'
+                  ]"
+                >
+                  <span class="text-xl">💸</span>
+                  Expense
+                </button>
               </div>
             </div>
-          </div>
-        </div>
 
-        <!-- Key Metrics Summary -->
-        <div class="card p-6">
-          <h3 class="text-lg font-semibold text-secondary-900 mb-4">📈 Key Performance Indicators</h3>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="text-center">
-              <div class="text-lg font-semibold text-secondary-900">Cash Conversion Cycle</div>
-              <div class="text-2xl font-bold text-blue-600">{{ cccApproxDays ?? 0 }} days</div>
-              <div class="text-sm text-secondary-600">Approx. days to recover cash spent</div>
-              <!-- Debug formula -->
-              <div class="text-xs text-primary-500 mt-2 p-2 bg-primary-50 rounded">
-                = Total Outflows ÷ Avg Daily Inflows ({{ selectedPeriod }} days)<br>
-                = ${{ (cashFlowData.totalOutflows || 0).toLocaleString() }} ÷ ${{ ((cashFlowData.totalInflows || 0) / (selectedPeriod || 1)).toLocaleString(undefined, { maximumFractionDigits: 2 }) }}<br>
+            <!-- Quick Category Selection -->
+            <div class="mb-6">
+              <label class="block text-sm font-medium text-gray-700 mb-3">
+                {{ newTransaction.type === 'inflow' ? 'Income' : 'Expense' }} Category
+              </label>
+              
+              <!-- Income Categories -->
+              <div v-if="newTransaction.type === 'inflow'" class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                <button 
+                  type="button"
+                  v-for="cat in availableCategories.filter(c => c.type === 'inflow')" 
+                  :key="cat.value"
+                  @click="newTransaction.category = cat.value"
+                  :class="[
+                    'p-3 rounded-lg transition-all duration-200 text-sm font-medium flex flex-col items-center gap-1',
+                    newTransaction.category === cat.value 
+                      ? 'bg-green-50 text-green-700' 
+                      : 'bg-gray-50 hover:bg-green-50'
+                  ]"
+                >
+                  <span class="text-lg">{{ cat.icon }}</span>
+                  <span class="text-center leading-tight">{{ cat.shortLabel || cat.label }}</span>
+                </button>
+              </div>
+
+              <!-- Expense Categories -->
+              <div v-else class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                <button 
+                  type="button"
+                  v-for="cat in availableCategories.filter(c => c.type === 'outflow')" 
+                  :key="cat.value"
+                  @click="newTransaction.category = cat.value"
+                  :class="[
+                    'p-3 rounded-lg transition-all duration-200 text-sm font-medium flex flex-col items-center gap-1',
+                    newTransaction.category === cat.value 
+                      ? 'bg-red-50 text-red-700' 
+                      : 'bg-gray-50 hover:border-red-300 hover:bg-red-50'
+                  ]"
+                >
+                  <span class="text-lg">{{ cat.icon }}</span>
+                  <span class="text-center leading-tight">{{ cat.shortLabel || cat.label }}</span>
+                </button>
               </div>
             </div>
-            <div class="text-center">
-              <div class="text-lg font-semibold text-secondary-900">Net Cash Flow Ratio</div>
-              <div class="text-2xl font-bold"
-                :class="cashFlowData.netCashFlow / cashFlowData.totalInflows > 0.15 ? 'text-success' : 'text-yellow-600'">
-                {{ ((cashFlowData.netCashFlow / cashFlowData.totalInflows) * 100).toFixed(1) }}%
+
+            <!-- Amount and Description -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <!-- Amount -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Amount</label>
+                <div class="relative">
+                  <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">$</span>
+                  <input 
+                    v-model="newTransaction.amount" 
+                    type="number" 
+                    step="0.01" 
+                    min="0" 
+                    placeholder="0.00"
+                    class="form-input w-full pl-8 pr-3 py-3 text-lg font-medium rounded-lg border-2 focus:ring-2 focus:ring-primary-500 focus:border-primary-500" 
+                    required
+                    @keyup.enter="addTransaction"
+                  >
+                </div>
+                <!-- Quick Amount Buttons -->
+                <div class="flex gap-1 mt-2">
+                  <button 
+                    v-for="amount in [10, 25, 50, 100, 500]" 
+                    :key="amount"
+                    type="button"
+                    @click="newTransaction.amount = amount"
+                    class="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded transition-colors"
+                  >
+                    ${{ amount }}
+                  </button>
+                </div>
               </div>
-              <div class="text-sm text-secondary-600">Net cash flow / Total inflows</div>
-              <!-- Debug formula -->
-              <div class="text-xs text-primary-600 mt-2 p-2 bg-primary-50 rounded">
-                = (Net Cash Flow ÷ Total Inflows) × 100<br>
-                = ({{ cashFlowData.netCashFlow?.toLocaleString() || 0 }} ÷ {{ cashFlowData.totalInflows?.toLocaleString() || 0 }}) × 100<br>
+
+              <!-- Description -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Description 
+                  <span class="text-gray-400 text-xs">(Optional)</span>
+                </label>
+                <input 
+                  v-model="newTransaction.description" 
+                  type="text" 
+                  placeholder="What's this transaction for?"
+                  class="form-input w-full px-3 py-3 rounded-lg border-2 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  @keyup.enter="addTransaction"
+                >
+                <!-- Common Description Suggestions -->
+                <div class="flex flex-wrap gap-1 mt-2">
+                  <button 
+                    v-for="desc in getCommonDescriptions()" 
+                    :key="desc"
+                    type="button"
+                    @click="newTransaction.description = desc"
+                    class="px-2 py-1 text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 rounded transition-colors"
+                  >
+                    {{ desc }}
+                  </button>
+                </div>
               </div>
             </div>
-            <div class="text-center">
-              <div class="text-lg font-semibold text-secondary-900">Cash Flow Coverage</div>
-              <div class="text-2xl font-bold"
-                :class="cashFlowData.totalInflows / cashFlowData.totalOutflows > 1.2 ? 'text-success' : 'text-red-600'">
-                {{ (cashFlowData.totalInflows / cashFlowData.totalOutflows).toFixed(2) }}x
-              </div>
-              <div class="text-sm text-secondary-600">Ability to cover expenses</div>
-              <!-- Debug formula -->
-              <div class="text-xs text-primary-600 mt-2 p-2 bg-primary-50 rounded">
-                = Total Inflows ÷ Total Outflows<br>
-                = {{ cashFlowData.totalInflows?.toLocaleString() || 0 }} ÷ {{ cashFlowData.totalOutflows?.toLocaleString() || 0 }}<br>
+
+            <!-- Submit Button -->
+            <div class="flex items-center gap-4">
+              <button 
+                type="submit" 
+                :disabled="isSubmitting || !newTransaction.amount"
+                :class="[
+                  'px-8 py-3 rounded-lg font-medium transition-all duration-200 flex items-center gap-2 text-lg',
+                  newTransaction.type === 'inflow' 
+                    ? 'bg-green-100 text-green-700' 
+                    : 'bg-red-100 text-red-700',
+                  (isSubmitting || !newTransaction.amount) ? 'opacity-50 cursor-not-allowed' : '',
+                ]"
+              >
+                <svg v-if="isSubmitting" class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor"
+                    d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                  </path>
+                </svg>
+                <span class="text-xl">{{ newTransaction.type === 'inflow' ? '💰' : '💸' }}</span>
+                {{ isSubmitting ? 'Adding...' : `Add ${newTransaction.type === 'inflow' ? 'Income' : 'Expense'}` }}
+              </button>
+
+              <div class="text-sm text-gray-500">
+                <div class="font-medium">{{ (newTransaction.amount || 0) > 0 ? `$${newTransaction.amount}` : '$0' }}</div>
+                <div>{{ availableCategories.find(c => c.value === newTransaction.category)?.label || 'Select category' }}</div>
               </div>
             </div>
-          </div>
+          </form>
         </div>
 
         <!-- 🐛 Transaction Debug Data -->
         <div v-if="debugData" class="card p-6">
-          <h3 class="text-lg font-semibold text-secondary-900 mb-4">🐛 Transaction Data</h3>
+          <h3 class="text-lg font-semibold text-secondary-900 mb-4">🐛 Transaction Data ({{ selectedPeriod }} days)</h3>
           
           <!-- Summary Stats -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center mb-6">
             <div class="bg-blue-50 p-4 rounded-lg">
               <div class="text-blue-700 font-medium">Total Transactions</div>
               <div class="text-2xl font-bold text-blue-800">{{ debugData.totalTransactions }}</div>
+              <div class="text-sm text-blue-600">in {{ selectedPeriod }} days</div>
             </div>
             <div class="bg-green-50 p-4 rounded-lg">
               <div class="text-green-700 font-medium">Manual Transactions</div>
               <div class="text-2xl font-bold text-green-800">{{ debugData.manualTransactions }}</div>
+              <div class="text-sm text-green-600">user-entered</div>
             </div>
             <div class="bg-purple-50 p-4 rounded-lg">
               <div class="text-purple-700 font-medium">Automated Transactions</div>
               <div class="text-2xl font-bold text-purple-800">{{ debugData.automatedTransactions }}</div>
+              <div class="text-sm text-purple-600">system-generated</div>
             </div>
           </div>
 
           <!-- All Transactions Table -->
           <div>
             <div class="flex justify-between items-center mb-3">
-              <h4 class="text-lg font-semibold text-gray-900">All Transactions ({{ debugData.recentTransactions?.length || 0 }})</h4>
-              <div class="text-sm text-gray-500">Sorted by date (newest first) • Scroll to see all</div>
+              <h4 class="text-lg font-semibold text-gray-900">Transactions in Period ({{ debugData.recentTransactions?.length || 0 }})</h4>
+              <div class="text-sm text-gray-500">Last {{ selectedPeriod }} days • Sorted by date (newest first)</div>
             </div>
             <div class="overflow-x-auto max-h-96 overflow-y-auto border border-gray-200 rounded-lg">
               <table class="min-w-full bg-white">
@@ -1584,6 +1613,125 @@ onMounted(async () => {
                   <div v-if="tx.description" class="text-red-600">{{ tx.description }}</div>
                   <div class="text-xs text-red-600">{{ tx.automated ? 'Auto' : 'Manual' }}</div>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Inflows vs Outflows Chart -->
+        <div class="card p-6">
+          <h3 class="text-lg font-semibold text-secondary-900 mb-4">📊 Cash Inflows vs Outflows</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div class="text-center">
+              <div class="text-2xl font-bold text-success">{{ formattedTotalInflows }}</div>
+              <div class="text-sm text-secondary-600">Total Inflows</div>
+            </div>
+            <div class="text-center">
+              <div class="text-2xl font-bold text-red-600">{{ formattedTotalOutflows }}</div>
+              <div class="text-sm text-secondary-600">Total Outflows</div>
+            </div>
+          </div>
+          <div class="h-72">
+            <Bar :data="inflowOutflowChartData" :options="inflowOutflowChartOptions" />
+          </div>
+        </div>
+
+        <!-- Category Breakdown (Bottom Section) -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <!-- Inflow Categories -->
+          <div class="card p-6">
+            <h3 class="text-lg font-semibold text-secondary-900 mb-4">💰 Inflow Categories</h3>
+            <div v-if="categoryBreakdown.inflows.length > 0" class="h-64">
+              <Doughnut :data="inflowCategoryChartData" :options="categoryChartOptions" />
+            </div>
+            <div v-else class="text-center py-8 text-gray-500">
+              <p>No inflow data available</p>
+            </div>
+          </div>
+
+          <!-- Outflow Categories -->
+          <div class="card p-6">
+            <h3 class="text-lg font-semibold text-secondary-900 mb-4">💸 Outflow Categories</h3>
+            <div v-if="categoryBreakdown.outflows.length > 0" class="h-64">
+              <Doughnut :data="outflowCategoryChartData" :options="categoryChartOptions" />
+            </div>
+            <div v-else class="text-center py-8 text-gray-500">
+              <p>No outflow data available</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detailed Category Lists -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <!-- Inflow Details -->
+          <div class="card p-6">
+            <h3 class="text-lg font-semibold text-secondary-900 mb-4">Cash Inflows Breakdown</h3>
+            <div class="space-y-3">
+              <div v-for="(category, index) in categoryBreakdown.inflows" :key="index"
+                class="flex items-center justify-between">
+                <span class="text-sm font-medium text-secondary-900">{{ getCategoryDisplayName(category.category ||
+                  category.name) }}</span>
+                <span class="text-sm font-semibold text-success">
+                  ${{ category.amount.toLocaleString() }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Outflow Details -->
+          <div class="card p-6">
+            <h3 class="text-lg font-semibold text-secondary-900 mb-4">Cash Outflows Breakdown</h3>
+            <div class="space-y-3">
+              <div v-for="(category, index) in categoryBreakdown.outflows" :key="index"
+                class="flex items-center justify-between">
+                <span class="text-sm font-medium text-secondary-900">{{ getCategoryDisplayName(category.category ||
+                  category.name) }}</span>
+                <span class="text-sm font-semibold text-red-600">
+                  ${{ category.amount.toLocaleString() }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Key Metrics Summary -->
+        <div class="card p-6">
+          <h3 class="text-lg font-semibold text-secondary-900 mb-4">📈 Key Performance Indicators</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="text-center">
+              <div class="text-lg font-semibold text-secondary-900">Cash Conversion Cycle</div>
+              <div class="text-2xl font-bold text-blue-600">{{ cccApproxDays ?? 0 }} days</div>
+              <div class="text-sm text-secondary-600">Approx. days to recover cash spent</div>
+              <!-- Debug formula -->
+              <div class="text-xs text-primary-500 mt-2 p-2 bg-primary-50 rounded">
+                = Total Outflows ÷ Avg Daily Inflows ({{ selectedPeriod }} days)<br>
+                = ${{ (cashFlowData.totalOutflows || 0).toLocaleString() }} ÷ ${{ ((cashFlowData.totalInflows || 0) / (selectedPeriod || 1)).toLocaleString(undefined, { maximumFractionDigits: 2 }) }}<br>
+              </div>
+            </div>
+            <div class="text-center">
+              <div class="text-lg font-semibold text-secondary-900">Net Cash Flow Ratio</div>
+              <div class="text-2xl font-bold"
+                :class="cashFlowData.netCashFlow / cashFlowData.totalInflows > 0.15 ? 'text-success' : 'text-yellow-600'">
+                {{ ((cashFlowData.netCashFlow / cashFlowData.totalInflows) * 100).toFixed(1) }}%
+              </div>
+              <div class="text-sm text-secondary-600">Net cash flow / Total inflows</div>
+              <!-- Debug formula -->
+              <div class="text-xs text-primary-600 mt-2 p-2 bg-primary-50 rounded">
+                = (Net Cash Flow ÷ Total Inflows) × 100<br>
+                = ({{ cashFlowData.netCashFlow?.toLocaleString() || 0 }} ÷ {{ cashFlowData.totalInflows?.toLocaleString() || 0 }}) × 100<br>
+              </div>
+            </div>
+            <div class="text-center">
+              <div class="text-lg font-semibold text-secondary-900">Cash Flow Coverage</div>
+              <div class="text-2xl font-bold"
+                :class="cashFlowData.totalInflows / cashFlowData.totalOutflows > 1.2 ? 'text-success' : 'text-red-600'">
+                {{ (cashFlowData.totalInflows / cashFlowData.totalOutflows).toFixed(2) }}x
+              </div>
+              <div class="text-sm text-secondary-600">Ability to cover expenses</div>
+              <!-- Debug formula -->
+              <div class="text-xs text-primary-600 mt-2 p-2 bg-primary-50 rounded">
+                = Total Inflows ÷ Total Outflows<br>
+                = {{ cashFlowData.totalInflows?.toLocaleString() || 0 }} ÷ {{ cashFlowData.totalOutflows?.toLocaleString() || 0 }}<br>
               </div>
             </div>
           </div>

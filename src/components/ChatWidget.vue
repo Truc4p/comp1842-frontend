@@ -6,13 +6,45 @@ const API_BASE_URL = 'http://localhost:3000';
 const isOpen = ref(false);
 const hasNewMessage = ref(false);
 const isLoading = ref(false);
-const sessionId = ref(null);
-const currentFlow = ref('menu'); // 'menu', 'chat', or 'staff-chat'
+const faqSessionId = ref(null);
+const aiChatSessionId = ref(null);
+const staffChatSessionId = ref(null);
+const currentFlow = ref('faq'); // 'faq', 'chat', or 'staff-chat'
 
-// Messages and chat state
-const messages = ref([]);
+// Computed property to get current session ID based on flow
+const sessionId = computed(() => {
+  switch (currentFlow.value) {
+    case 'faq':
+      return faqSessionId.value;
+    case 'chat':
+      return aiChatSessionId.value;
+    case 'staff-chat':
+      return staffChatSessionId.value;
+    default:
+      return faqSessionId.value;
+  }
+});
+
+// Messages and chat state - separate for each mode
+const faqMessages = ref([]);
+const aiChatMessages = ref([]);
+const staffChatMessages = ref([]);
 const inputText = ref('');
 const messagesWrap = ref(null);
+
+// Computed property to get current messages based on flow
+const messages = computed(() => {
+  switch (currentFlow.value) {
+    case 'faq':
+      return faqMessages.value;
+    case 'chat':
+      return aiChatMessages.value;
+    case 'staff-chat':
+      return staffChatMessages.value;
+    default:
+      return faqMessages.value;
+  }
+});
 
 // FAQs and suggestions
 const faqs = ref([]);
@@ -21,8 +53,7 @@ const faqCategories = ref([
   "Questions about returns",
   "Questions about shipping",
   "Questions about products",
-  "Questions about skincare",
-  "Chat with staff"
+  "Questions about skincare"
 ]);
 
 // Flow state
@@ -40,8 +71,8 @@ function generateSessionId() {
   return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 }
 
-// Get or create persistent session ID
-async function getOrCreateSessionId() {
+// Get or create persistent session ID for specific mode
+async function getOrCreateSessionId(mode = 'faq') {
   const token = localStorage.getItem('token');
   
   // For authenticated users, create a user-specific session key
@@ -49,16 +80,16 @@ async function getOrCreateSessionId() {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
       const userId = payload.id;
-      const sessionKey = `chatSession_user_${userId}`;
+      const sessionKey = `chatSession_user_${userId}_${mode}`;
       
       let storedSession = localStorage.getItem(sessionKey);
       if (storedSession) {
-        console.log('🔍 Found existing chat session for authenticated user:', storedSession);
+        console.log(`🔍 Found existing ${mode} session for authenticated user:`, storedSession);
         return storedSession;
       } else {
-        // Check if user has an existing conversation on the server
+        // Check if user has an existing conversation on the server for this mode
         try {
-          const response = await fetch(`${API_BASE_URL}/chat/find-user-conversation`, {
+          const response = await fetch(`${API_BASE_URL}/chat/find-user-conversation?mode=${mode}`, {
             headers: getCustomerAuthHeaders()
           });
           const result = await response.json();
@@ -66,7 +97,7 @@ async function getOrCreateSessionId() {
           if (result.success && result.data.conversation) {
             const existingSessionId = result.data.conversation.sessionId;
             localStorage.setItem(sessionKey, existingSessionId);
-            console.log('🔍 Recovered existing chat session from server:', existingSessionId);
+            console.log(`🔍 Recovered existing ${mode} session from server:`, existingSessionId);
             return existingSessionId;
           }
         } catch (e) {
@@ -76,7 +107,7 @@ async function getOrCreateSessionId() {
         // Create new session if no existing one found
         const newSession = generateSessionId();
         localStorage.setItem(sessionKey, newSession);
-        console.log('🔍 Created new chat session for authenticated user:', newSession);
+        console.log(`🔍 Created new ${mode} session for authenticated user:`, newSession);
         return newSession;
       }
     } catch (e) {
@@ -84,37 +115,42 @@ async function getOrCreateSessionId() {
     }
   }
   
-  // For anonymous users, use a global session key
-  const sessionKey = 'chatSession_anonymous';
+  // For anonymous users, use a mode-specific session key
+  const sessionKey = `chatSession_anonymous_${mode}`;
   let storedSession = localStorage.getItem(sessionKey);
   
   if (storedSession) {
-    console.log('🔍 Found existing anonymous chat session:', storedSession);
+    console.log(`🔍 Found existing anonymous ${mode} session:`, storedSession);
     return storedSession;
   } else {
     const newSession = generateSessionId();
     localStorage.setItem(sessionKey, newSession);
-    console.log('🔍 Created new anonymous chat session:', newSession);
+    console.log(`🔍 Created new anonymous ${mode} session:`, newSession);
     return newSession;
   }
 }
 
 // Clear session when user logs out or wants to start fresh
-function clearSessionId() {
+function clearSessionId(mode = null) {
   const token = localStorage.getItem('token');
+  const modes = mode ? [mode] : ['faq', 'chat', 'staff-chat'];
   
   if (token) {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
       const userId = payload.id;
-      const sessionKey = `chatSession_user_${userId}`;
-      localStorage.removeItem(sessionKey);
+      modes.forEach(m => {
+        const sessionKey = `chatSession_user_${userId}_${m}`;
+        localStorage.removeItem(sessionKey);
+      });
     } catch (e) {
       console.error('Error parsing token:', e);
     }
   }
   
-  localStorage.removeItem('chatSession_anonymous');
+  modes.forEach(m => {
+    localStorage.removeItem(`chatSession_anonymous_${m}`);
+  });
 }
 
 // Handle user login/logout - migrate sessions appropriately
@@ -122,14 +158,18 @@ function handleUserAuthChange() {
   const token = localStorage.getItem('token');
   
   if (token) {
-    // User just logged in - try to recover their authenticated session
-    // or keep current anonymous session
-    sessionId.value = null; // Reset so getOrCreateSessionId will handle properly
+    // User just logged in - try to recover their authenticated sessions
+    // or keep current anonymous sessions
+    faqSessionId.value = null;
+    aiChatSessionId.value = null;
+    staffChatSessionId.value = null;
     initializeChat();
   } else {
-    // User logged out - clear authenticated session and create anonymous one
+    // User logged out - clear authenticated sessions and create anonymous ones
     clearSessionId();
-    sessionId.value = null;
+    faqSessionId.value = null;
+    aiChatSessionId.value = null;
+    staffChatSessionId.value = null;
     initializeChat();
   }
 }
@@ -197,38 +237,35 @@ function formatBotMessage(text) {
 
 // Initialize chat
 async function initializeChat() {
-  if (!sessionId.value) {
-    sessionId.value = await getOrCreateSessionId();
+  // Initialize all session IDs
+  if (!faqSessionId.value) {
+    faqSessionId.value = await getOrCreateSessionId('faq');
+  }
+  if (!aiChatSessionId.value) {
+    aiChatSessionId.value = await getOrCreateSessionId('chat');
+  }
+  if (!staffChatSessionId.value) {
+    staffChatSessionId.value = await getOrCreateSessionId('staff-chat');
   }
 
-  // Load conversation history
-  await loadConversationHistory();
+  // Load conversation history for all modes
+  await Promise.all([
+    loadConversationHistory('faq'),
+    loadConversationHistory('chat'),
+    loadConversationHistory('staff-chat')
+  ]);
 
   // Load FAQs
   await loadFAQs();
 
-  // Add welcome message if no history
-  if (messages.value.length === 0) {
+  // Add welcome message to FAQ if no history
+  if (faqMessages.value.length === 0) {
     addBotMessage("Hi! I'm your Wrencos Beauty Assistant.\nHow can I help you today?");
-    showCategories.value = true;
-  } else {
-    // If we have history, determine the current flow state
-    const lastMessage = messages.value[messages.value.length - 1];
-    
-    // Check if this was a staff chat session
-    if (isConnectedToStaff.value || waitingForStaff.value) {
-      currentFlow.value = 'staff-chat';
-      showCategories.value = false;
-      
-      // Resume staff chat polling if connected
-      if (isConnectedToStaff.value) {
-        startStaffChatPolling();
-      }
-    } else {
-      currentFlow.value = 'chat';
-      showCategories.value = false;
-    }
   }
+
+  // Set initial state
+  showCategories.value = true;
+  currentFlow.value = 'faq';
 }
 
 // Load FAQs from backend
@@ -244,15 +281,19 @@ async function loadFAQs() {
   }
 }
 
-// Load conversation history
-async function loadConversationHistory() {
-  if (!sessionId.value) return;
+// Load conversation history for specific mode
+async function loadConversationHistory(mode = 'faq') {
+  const currentSessionId = mode === 'faq' ? faqSessionId.value : 
+                          mode === 'chat' ? aiChatSessionId.value : 
+                          staffChatSessionId.value;
+  
+  if (!currentSessionId) return;
 
   try {
-    const response = await fetch(`${API_BASE_URL}/chat/conversation/${sessionId.value}`);
+    const response = await fetch(`${API_BASE_URL}/chat/conversation/${currentSessionId}`);
     const result = await response.json();
     if (result.success && result.data.messages.length > 0) {
-      messages.value = result.data.messages.map((msg, index) => ({
+      const loadedMessages = result.data.messages.map((msg, index) => ({
         id: index + 1,
         sender: msg.role === 'user' ? 'user' : 'bot',
         text: msg.role === 'user' ? msg.content : formatBotMessage(msg.content),
@@ -261,17 +302,22 @@ async function loadConversationHistory() {
         faq: msg.faq
       }));
       
-      // Restore conversation state
-      const conversationState = result.data.conversationState || {};
-      isConnectedToStaff.value = conversationState.isStaffChat && !conversationState.waitingForStaff;
-      waitingForStaff.value = conversationState.waitingForStaff;
-      
-      showCategories.value = false;
-      if (conversationState.isStaffChat) {
-        currentFlow.value = 'staff-chat';
-        console.log('🔍 Restored staff chat session. Connected:', isConnectedToStaff.value, 'Waiting:', waitingForStaff.value);
-      } else {
-        currentFlow.value = 'chat';
+      // Load messages into the correct array based on mode
+      switch (mode) {
+        case 'faq':
+          faqMessages.value = loadedMessages;
+          break;
+        case 'chat':
+          aiChatMessages.value = loadedMessages;
+          break;
+        case 'staff-chat':
+          staffChatMessages.value = loadedMessages;
+          // Restore staff conversation state
+          const conversationState = result.data.conversationState || {};
+          isConnectedToStaff.value = conversationState.isStaffChat && !conversationState.waitingForStaff;
+          waitingForStaff.value = conversationState.waitingForStaff;
+          console.log(`🔍 Restored ${mode} session. Connected:`, isConnectedToStaff.value, 'Waiting:', waitingForStaff.value);
+          break;
       }
       
       // Auto-scroll to bottom after loading conversation history
@@ -279,7 +325,7 @@ async function loadConversationHistory() {
       scrollToBottom();
     }
   } catch (error) {
-    console.error('Error loading conversation:', error);
+    console.error(`Error loading ${mode} conversation:`, error);
   }
 }
 
@@ -291,6 +337,12 @@ function toggle() {
       // Scroll to bottom after initialization is complete
       scrollToBottom();
     });
+  } else {
+    // When closing chat, stop polling to save resources
+    if (currentFlow.value === 'staff-chat') {
+      console.log('🔌 Chat closed - stopping staff polling to save resources');
+      stopStaffChatPolling();
+    }
   }
 }
 
@@ -304,36 +356,190 @@ function outsideClose(e) {
 }
 
 async function clearChat() {
-  messages.value = [];
-  clearSessionId(); // Clear the persistent session
-  sessionId.value = await getOrCreateSessionId(); // Create a new one
-  showCategories.value = true;
-  selectedCategory.value = null;
-  currentFlow.value = 'menu';
-  isConnectedToStaff.value = false;
-  waitingForStaff.value = false;
-  lastStaffMessageTime = null;
-  stopStaffChatPolling();
+  try {
+    // Store current session IDs before clearing
+    const currentFaqSessionId = faqSessionId.value;
+    const currentAiChatSessionId = aiChatSessionId.value;
+    const currentStaffChatSessionId = staffChatSessionId.value;
+
+    // Clear conversations from server if session IDs exist
+    const clearPromises = [];
+    if (currentFaqSessionId) {
+      clearPromises.push(
+        fetch(`${API_BASE_URL}/chat/conversation/${currentFaqSessionId}`, {
+          method: 'DELETE',
+          headers: getCustomerAuthHeaders()
+        }).catch(err => console.error('Error clearing FAQ conversation:', err))
+      );
+    }
+    if (currentAiChatSessionId) {
+      clearPromises.push(
+        fetch(`${API_BASE_URL}/chat/conversation/${currentAiChatSessionId}`, {
+          method: 'DELETE',
+          headers: getCustomerAuthHeaders()
+        }).catch(err => console.error('Error clearing AI chat conversation:', err))
+      );
+    }
+    if (currentStaffChatSessionId) {
+      clearPromises.push(
+        fetch(`${API_BASE_URL}/chat/conversation/${currentStaffChatSessionId}`, {
+          method: 'DELETE',
+          headers: getCustomerAuthHeaders()
+        }).catch(err => console.error('Error clearing staff chat conversation:', err))
+      );
+    }
+
+    // Wait for all clear operations to complete
+    await Promise.all(clearPromises);
+
+    // Clear all message arrays
+    faqMessages.value = [];
+    aiChatMessages.value = [];
+    staffChatMessages.value = [];
+    
+    // Clear all persistent sessions from localStorage
+    clearSessionId(); 
+    
+    // Create new session IDs
+    faqSessionId.value = await getOrCreateSessionId('faq');
+    aiChatSessionId.value = await getOrCreateSessionId('chat');
+    staffChatSessionId.value = await getOrCreateSessionId('staff-chat');
+    
+    // Reset state
+    showCategories.value = true;
+    selectedCategory.value = null;
+    currentFlow.value = 'faq';
+    isConnectedToStaff.value = false;
+    waitingForStaff.value = false;
+    lastStaffMessageTime = null;
+    stopStaffChatPolling();
+    
+    // Add fresh welcome message to FAQ
+    addBotMessage("Hi! I'm your Wrencos Beauty Assistant.\nHow can I help you today?");
+    
+    console.log('✅ All chat conversations cleared successfully');
+  } catch (error) {
+    console.error('Error clearing chat conversations:', error);
+    // Still clear local data even if server clearing fails
+    faqMessages.value = [];
+    aiChatMessages.value = [];
+    staffChatMessages.value = [];
+    clearSessionId();
+    
+    // Reset to default state
+    showCategories.value = true;
+    selectedCategory.value = null;
+    currentFlow.value = 'faq';
+    isConnectedToStaff.value = false;
+    waitingForStaff.value = false;
+    lastStaffMessageTime = null;
+    stopStaffChatPolling();
+    
+    addBotMessage("Hi! I'm your Wrencos Beauty Assistant.\nHow can I help you today?");
+  }
 }
 
-function backToMenu() {
-  currentFlow.value = 'menu';
+// Switch to FAQ mode
+async function switchToFAQ() {
+  currentFlow.value = 'faq';
   showCategories.value = true;
   selectedCategory.value = null;
   isConnectedToStaff.value = false;
   waitingForStaff.value = false;
-  lastStaffMessageTime = null;
   stopStaffChatPolling();
+  
+  // Initialize FAQ session if not exists
+  if (!faqSessionId.value) {
+    faqSessionId.value = await getOrCreateSessionId('faq');
+    await loadConversationHistory('faq');
+  }
+  
+  // Add welcome message if no FAQ history
+  if (faqMessages.value.length === 0) {
+    addBotMessage("Hi! I'm your Wrencos Beauty Assistant.\nBrowse our FAQ categories to find quick answers to common questions.");
+  }
 }
 
-// Add message to chat
+// Switch to AI Chat mode
+async function switchToAIChat() {
+  currentFlow.value = 'chat';
+  showCategories.value = false;
+  selectedCategory.value = null;
+  isConnectedToStaff.value = false;
+  waitingForStaff.value = false;
+  stopStaffChatPolling();
+  
+  // Initialize AI chat session if not exists
+  if (!aiChatSessionId.value) {
+    aiChatSessionId.value = await getOrCreateSessionId('chat');
+    await loadConversationHistory('chat');
+  }
+  
+  // Add welcome message if no AI chat history
+  if (aiChatMessages.value.length === 0) {
+    addBotMessage("Hi! I'm your AI Beauty Assistant.\nAsk me anything about skincare, products, or beauty routines!");
+  }
+}
+
+// Switch to Staff Chat mode
+async function switchToStaffChat() {
+  currentFlow.value = 'staff-chat';
+  showCategories.value = false;
+  selectedCategory.value = null;
+  
+  // Initialize staff chat session if not exists
+  if (!staffChatSessionId.value) {
+    staffChatSessionId.value = await getOrCreateSessionId('staff-chat');
+    await loadConversationHistory('staff-chat');
+  }
+  
+  console.log('🔄 Switching to staff chat:', {
+    hasMessages: staffChatMessages.value.length > 0,
+    isConnected: isConnectedToStaff.value,
+    isWaiting: waitingForStaff.value
+  });
+  
+  // If no existing staff conversation, initiate staff connection
+  if (staffChatMessages.value.length === 0) {
+    initializeStaffChat();
+  } else {
+    // Check if we have an active staff connection
+    // If we have messages but no connection state, assume we're connected
+    if (!isConnectedToStaff.value && !waitingForStaff.value) {
+      isConnectedToStaff.value = true;
+    }
+    
+    // Start polling if connected
+    if (isConnectedToStaff.value && !waitingForStaff.value) {
+      startStaffChatPolling();
+    } else if (isOpen.value && currentFlow.value === 'staff-chat') {
+      // Restart polling when reopening if we were connected
+      startStaffChatPolling();
+    }
+  }
+}
+
+// Add message to chat - now adds to the correct flow's messages
 function addUserMessage(text) {
-  messages.value.push({
+  const newMessage = {
     id: Date.now(),
     sender: 'user',
     text: text,
     timestamp: new Date()
-  });
+  };
+  
+  switch (currentFlow.value) {
+    case 'faq':
+      faqMessages.value.push(newMessage);
+      break;
+    case 'chat':
+      aiChatMessages.value.push(newMessage);
+      break;
+    case 'staff-chat':
+      staffChatMessages.value.push(newMessage);
+      break;
+  }
+  
   scrollToBottom();
 }
 
@@ -344,14 +550,28 @@ function addBotMessage(text, relatedProducts = [], faq = null) {
   if (!isOpen.value) {
     hasNewMessage.value = true;
   }
-  messages.value.push({
+  
+  const newMessage = {
     id: Date.now(),
     sender: 'bot',
     text: formattedText,
     timestamp: new Date(),
     relatedProducts: relatedProducts,
     faq: faq
-  });
+  };
+  
+  switch (currentFlow.value) {
+    case 'faq':
+      faqMessages.value.push(newMessage);
+      break;
+    case 'chat':
+      aiChatMessages.value.push(newMessage);
+      break;
+    case 'staff-chat':
+      staffChatMessages.value.push(newMessage);
+      break;
+  }
+  
   scrollToBottom();
 }
 
@@ -359,12 +579,6 @@ function addBotMessage(text, relatedProducts = [], faq = null) {
 function selectFAQCategory(category) {
   selectedCategory.value = category;
   showCategories.value = false;
-  
-  // Handle "Chat with staff" option
-  if (category === 'Chat with staff') {
-    currentFlow.value = 'staff-chat';
-    initializeStaffChat();
-  }
 }
 
 // Flow 1: Get FAQs filtered by category
@@ -388,9 +602,6 @@ const filteredFAQs = computed(() => {
     case 'Questions about skincare':
       categoryFilter = 'skincare';
       break;
-    case 'Chat with staff':
-      categoryFilter = 'staff';
-      break;
     default:
       return faqs.value;
   }
@@ -404,7 +615,8 @@ async function selectFAQ(faq) {
   isLoading.value = true;
   showCategories.value = false;
   selectedCategory.value = null;
-  currentFlow.value = 'chat';
+  // Stay in FAQ mode instead of switching to chat mode
+  // currentFlow.value should remain 'faq'
 
   try {
     const response = await fetch(`${API_BASE_URL}/chat/faq/${faq._id}/answer`, {
@@ -465,8 +677,18 @@ async function initializeStaffChat() {
 
 // Start polling for staff messages
 function startStaffChatPolling() {
+  // Stop any existing polling first to avoid duplicates
+  stopStaffChatPolling();
+  
   staffChatPollingInterval = setInterval(async () => {
-    if (!isConnectedToStaff.value) return;
+    // Only poll if chat panel is open and we're in staff chat mode
+    if (!isOpen.value || currentFlow.value !== 'staff-chat') {
+      return;
+    }
+    
+    if (!isConnectedToStaff.value) {
+      return;
+    }
     
     try {
       const url = lastStaffMessageTime 
@@ -488,7 +710,7 @@ function startStaffChatPolling() {
     } catch (error) {
       console.error('Error polling for staff messages:', error);
     }
-  }, 2000); // Poll every 2 seconds
+  }, 5000); // Poll every 5 seconds when active
 }
 
 // Stop staff chat polling
@@ -506,6 +728,13 @@ async function sendStaffMessage(message = null) {
 
   addUserMessage(text);
   inputText.value = '';
+  
+  // If not connected or waiting, try to connect first
+  if (!isConnectedToStaff.value && !waitingForStaff.value) {
+    await initializeStaffChat();
+    // After connecting, the message will be queued and staff will see it
+  }
+  
   isLoading.value = true;
 
   try {
@@ -522,6 +751,7 @@ async function sendStaffMessage(message = null) {
     if (!result.success) {
       addBotMessage("Sorry, your message couldn't be sent. Please try again.");
     }
+    // Don't add any AI response here - only staff responses should appear from polling
   } catch (error) {
     console.error('Error sending staff message:', error);
     addBotMessage("Sorry, there was an error sending your message. Please try again.");
@@ -531,136 +761,19 @@ async function sendStaffMessage(message = null) {
 }
 
 // Flow 2: Send message to AI
-// Function to detect if customer wants to chat with staff
-function detectStaffChatIntent(message) {
-  const lowerMessage = message.toLowerCase().trim();
-  
-  console.log('🔍 Detecting staff intent for message:', lowerMessage);
-  
-  // Direct staff chat requests (high confidence)
-  const directRequests = [
-    'chat with staff',
-    'talk to staff',
-    'speak to staff',
-    'contact staff',
-    'connect me to staff',
-    'transfer to staff',
-    'staff chat',
-    'live chat',
-    'human support',
-    'human agent',
-    'human help',
-    'real person',
-    'customer service',
-    'customer support',
-    'live support'
-  ];
-  
-  // Conversational patterns that likely indicate staff request
-  const conversationalPatterns = [
-    'i want to talk to staff',
-    'i need to speak with staff',
-    'can i talk to staff',
-    'can i speak to staff',
-    'can i chat with staff',
-    'i would like to chat with staff',
-    'i would like to talk to staff',
-    'i would like to speak with staff',
-    'connect me to staff',
-    'transfer me to staff',
-    'i need help from staff',
-    'i need support from staff',
-    'i need assistance from staff',
-    'can staff help me',
-    'is there staff available',
-    'talk to a person',
-    'speak to a person',
-    'chat with a person',
-    'i want to talk to someone',
-    'can i talk to someone',
-    'can someone help me',
-    'is there someone who can help',
-    'can a person help me',
-    'i need human help',
-    'i need human support',
-    'i need human assistance',
-    'get me a human',
-    'connect me to a human',
-    'transfer me to a human'
-  ];
-  
-  // Check for direct matches first
-  const directMatch = directRequests.some(request => lowerMessage.includes(request));
-  if (directMatch) {
-    console.log('✅ Direct match found for staff intent');
-    return true;
-  }
-  
-  // Check for conversational patterns
-  const patternMatch = conversationalPatterns.some(pattern => lowerMessage.includes(pattern));
-  if (patternMatch) {
-    console.log('✅ Conversational pattern match found for staff intent');
-    return true;
-  }
-  
-  // Handle standalone words with context clues
-  const hasStaffWord = lowerMessage.includes('staff');
-  const hasHumanWord = lowerMessage.includes('human') || lowerMessage.includes('person');
-  const hasSupportWord = lowerMessage.includes('support') || lowerMessage.includes('service');
-  const hasActionWord = lowerMessage.includes('talk') || lowerMessage.includes('chat') || 
-                       lowerMessage.includes('speak') || lowerMessage.includes('connect') || 
-                       lowerMessage.includes('help') || lowerMessage.includes('need') ||
-                       lowerMessage.includes('want');
-  
-  // If they mention staff/human/support AND an action word, likely a staff request
-  if ((hasStaffWord || hasHumanWord || hasSupportWord) && hasActionWord) {
-    console.log('✅ Contextual match found for staff intent');
-    return true;
-  }
-  
-  console.log('❌ No staff intent detected');
-  return false;
-}
-
 async function sendAIMessage(message = null) {
   const text = message || inputText.value.trim();
   if (!text) return;
-
-  // Check if customer wants to chat with staff
-  if (detectStaffChatIntent(text)) {
-    addUserMessage(text);
-    inputText.value = '';
-    
-    // Generate contextual response based on what they asked
-    const lowerText = text.toLowerCase();
-    let response = "I understand you'd like to chat with our staff team. Let me connect you right away!";
-    
-    if (lowerText.includes('help') || lowerText.includes('problem') || lowerText.includes('issue')) {
-      response = "I see you need additional help. Let me connect you with our staff team who can assist you better!";
-    } else if (lowerText.includes('human') || lowerText.includes('person')) {
-      response = "Of course! I'll connect you with a human staff member right now.";
-    } else if (lowerText.includes('support') || lowerText.includes('service')) {
-      response = "Connecting you to our customer support team now. They'll be able to help you!";
-    }
-    
-    // Transition to staff chat
-    addBotMessage(response);
-    
-    // Small delay for better UX
-    setTimeout(() => {
-      currentFlow.value = 'staff-chat';
-      initializeStaffChat();
-    }, 1000);
-    
-    return;
-  }
 
   addUserMessage(text);
   inputText.value = '';
   isLoading.value = true;
   showCategories.value = false;
   selectedCategory.value = null;
-  currentFlow.value = 'chat';
+  // Don't change flow if we're already in FAQ mode and have messages
+  if (currentFlow.value !== 'faq' || faqMessages.value.length === 0) {
+    currentFlow.value = 'chat';
+  }
 
   try {
     const response = await fetch(`${API_BASE_URL}/chat/ai`, {
@@ -693,9 +806,11 @@ async function sendAIMessage(message = null) {
 }
 
 function sendMessage() {
-  if (currentFlow.value === 'staff-chat' && isConnectedToStaff.value) {
+  if (currentFlow.value === 'staff-chat') {
+    // Always use sendStaffMessage for staff chat mode
     sendStaffMessage();
   } else {
+    // AI chat mode
     sendAIMessage();
   }
 }
@@ -745,17 +860,36 @@ onBeforeUnmount(() => {
         <div class="chat-header">
           <div class="header-title">
             <h3 class="text-white">Assistant</h3>
-            <span v-if="currentFlow === 'chat'" class="flow-indicator">AI Chat</span>
+            <span v-if="currentFlow === 'faq'" class="flow-indicator">FAQ</span>
+            <span v-else-if="currentFlow === 'chat'" class="flow-indicator">AI Chat</span>
             <span v-else-if="currentFlow === 'staff-chat'" class="flow-indicator">Staff Chat</span>
-            <span v-else class="flow-indicator">Quick Help</span>
           </div>
-          <div class="header-actions">
-            <button class="icon-btn" @click="backToMenu" aria-label="Back to menu">
-              <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
-                fill="currentColor">
-                <path d="M120-240v-80h720v80H120Zm0-200v-80h720v80H120Zm0-200v-80h720v80H120Z" />
+          
+          <!-- Chat Mode Icons -->
+          <div class="chat-mode-icons">
+            <!-- FAQ Icon -->
+            <button class="mode-icon-btn" :class="{ active: currentFlow === 'faq' }" @click="switchToFAQ" aria-label="FAQ" title="Frequently Asked Questions">
+              <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="currentColor">
+                <path d="M424-320q0-81 14.5-116.5T500-514q41-36 62.5-62.5T584-637q0-41-27.5-68T480-732q-51 0-77.5 31T365-638l-103-44q21-64 77.5-121T480-860q109 0 184.5 75.5T740-600q0 44-24.5 84.5T666-438q-35 33-49.5 60.5T602-320H424Zm56 240q-33 0-56.5-23.5T400-160q0-33 23.5-56.5T480-240q33 0 56.5 23.5T560-160q0 33-23.5 56.5T480-80Z"/>
               </svg>
             </button>
+            
+            <!-- AI Chat Icon -->
+            <button class="mode-icon-btn" :class="{ active: currentFlow === 'chat' }" @click="switchToAIChat" aria-label="AI Chat" title="Chat with AI Assistant">
+              <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="currentColor">
+                <path d="M240-400h320v-80H240v80Zm0-120h480v-80H240v80Zm0-120h480v-80H240v80ZM80-80v-720q0-33 23.5-56.5T160-880h640q33 0 56.5 23.5T880-800v480q0 33-23.5 56.5T800-240H240L80-80Z"/>
+              </svg>
+            </button>
+            
+            <!-- Staff Chat Icon -->
+            <button class="mode-icon-btn" :class="{ active: currentFlow === 'staff-chat' }" @click="switchToStaffChat" aria-label="Staff Chat" title="Chat with Staff">
+              <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="currentColor">
+                <path d="M40-160v-112q0-34 17.5-62.5T104-378q62-31 126-46.5T360-440q66 0 130 15.5T616-378q29 15 46.5 43.5T680-272v112H40ZM720-40v-109q0-44-24.5-84.5T629-283q51 6 96 20.5t84 35.5q36 20 53.5 47t17.5 61v79H720ZM360-480q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47Zm400-160q0 66-47 113t-113 47q-11 0-28-2.5t-28-5.5q27-32 41.5-71t14.5-81q0-42-14.5-81T544-792q14-5 28-6.5t28-1.5q66 0 113 47t47 113Z"/>
+              </svg>
+            </button>
+          </div>
+          
+          <div class="header-actions">
             <button class="icon-btn" @click="clearChat" aria-label="Clear conversation">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="header-icon">
                 <path fill="currentColor"
@@ -765,8 +899,7 @@ onBeforeUnmount(() => {
           </div>
         </div>
 
-        <div class="chat-content-flex"
-          @click="currentFlow === 'menu' ? (currentFlow = 'chat', showCategories = false, selectedCategory = null) : null">
+        <div class="chat-content-flex">
           <!-- Messages -->
           <div ref="messagesWrap" class="messages" aria-live="polite">
             <div v-for="m in messages" :key="m.id" class="message"
@@ -796,14 +929,14 @@ onBeforeUnmount(() => {
               </div>
             </div>
           </div>
-          <!-- Menu/FAQ and Composer sections remain outside chat-content-flex for correct flex layout -->
+          <!-- FAQ and Composer sections remain outside chat-content-flex for correct flex layout -->
         </div>
 
-        <!-- Flow 1: Menu/FAQ Selection -->
-        <div v-if="currentFlow === 'menu'" class="menu-section">
+        <!-- Flow 1: FAQ Selection -->
+        <div v-if="currentFlow === 'faq'" class="faq-section">
           <!-- FAQ Categories -->
           <div v-if="showCategories" class="faq-categories">
-            <div class="suggestions-title">Frequently Asked Questions</div>
+            <div class="suggestions-title">Browse FAQ Categories</div>
             <button v-for="category in faqCategories" :key="category" class="suggestion-btn"
               @click="selectFAQCategory(category)">
               {{ category }}
@@ -828,7 +961,7 @@ onBeforeUnmount(() => {
           </div>
         </div>
 
-        <!-- Flow 2 & 3: Chat Input -->
+        <!-- Chat Input for AI and Staff chat modes only -->
         <div v-if="currentFlow === 'chat' || currentFlow === 'staff-chat'" class="composer">
           <input v-model="inputText" class="composer-input" type="text" 
             :placeholder="currentFlow === 'staff-chat' ? 'Message our staff team...' : 'Ask me anything about skincare...'"
@@ -935,6 +1068,7 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   gap: 10px;
+  flex: 1;
 }
 
 .header-title h3 {
@@ -948,6 +1082,39 @@ onBeforeUnmount(() => {
   background: rgba(255, 255, 255, 0.2);
   padding: 2px 8px;
   border-radius: 12px;
+}
+
+/* Chat Mode Icons */
+.chat-mode-icons {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0 16px;
+}
+
+.mode-icon-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mode-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.9);
+  transform: translateY(-1px);
+}
+
+.mode-icon-btn.active {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .header-actions {
@@ -1157,7 +1324,7 @@ onBeforeUnmount(() => {
   font-weight: 600;
 }
 
-.menu-section {
+.faq-section {
   padding: 16px;
   background: white;
 }
@@ -1217,10 +1384,6 @@ onBeforeUnmount(() => {
   font-size: 13px;
   font-weight: 500;
   margin-bottom: 2px;
-}
-
-.faq-categories {
-  margin-bottom: 16px;
 }
 
 .faq-category-section {

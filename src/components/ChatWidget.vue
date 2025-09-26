@@ -40,6 +40,103 @@ function generateSessionId() {
   return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 }
 
+// Get or create persistent session ID
+async function getOrCreateSessionId() {
+  const token = localStorage.getItem('token');
+  
+  // For authenticated users, create a user-specific session key
+  if (token) {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const userId = payload.id;
+      const sessionKey = `chatSession_user_${userId}`;
+      
+      let storedSession = localStorage.getItem(sessionKey);
+      if (storedSession) {
+        console.log('🔍 Found existing chat session for authenticated user:', storedSession);
+        return storedSession;
+      } else {
+        // Check if user has an existing conversation on the server
+        try {
+          const response = await fetch(`${API_BASE_URL}/chat/find-user-conversation`, {
+            headers: getCustomerAuthHeaders()
+          });
+          const result = await response.json();
+          
+          if (result.success && result.data.conversation) {
+            const existingSessionId = result.data.conversation.sessionId;
+            localStorage.setItem(sessionKey, existingSessionId);
+            console.log('🔍 Recovered existing chat session from server:', existingSessionId);
+            return existingSessionId;
+          }
+        } catch (e) {
+          console.error('Error checking for existing conversation:', e);
+        }
+        
+        // Create new session if no existing one found
+        const newSession = generateSessionId();
+        localStorage.setItem(sessionKey, newSession);
+        console.log('🔍 Created new chat session for authenticated user:', newSession);
+        return newSession;
+      }
+    } catch (e) {
+      console.error('Error parsing token:', e);
+    }
+  }
+  
+  // For anonymous users, use a global session key
+  const sessionKey = 'chatSession_anonymous';
+  let storedSession = localStorage.getItem(sessionKey);
+  
+  if (storedSession) {
+    console.log('🔍 Found existing anonymous chat session:', storedSession);
+    return storedSession;
+  } else {
+    const newSession = generateSessionId();
+    localStorage.setItem(sessionKey, newSession);
+    console.log('🔍 Created new anonymous chat session:', newSession);
+    return newSession;
+  }
+}
+
+// Clear session when user logs out or wants to start fresh
+function clearSessionId() {
+  const token = localStorage.getItem('token');
+  
+  if (token) {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const userId = payload.id;
+      const sessionKey = `chatSession_user_${userId}`;
+      localStorage.removeItem(sessionKey);
+    } catch (e) {
+      console.error('Error parsing token:', e);
+    }
+  }
+  
+  localStorage.removeItem('chatSession_anonymous');
+}
+
+// Handle user login/logout - migrate sessions appropriately
+function handleUserAuthChange() {
+  const token = localStorage.getItem('token');
+  
+  if (token) {
+    // User just logged in - try to recover their authenticated session
+    // or keep current anonymous session
+    sessionId.value = null; // Reset so getOrCreateSessionId will handle properly
+    initializeChat();
+  } else {
+    // User logged out - clear authenticated session and create anonymous one
+    clearSessionId();
+    sessionId.value = null;
+    initializeChat();
+  }
+}
+
+// Expose this function for external components to call when auth state changes
+window.chatHandleUserAuthChange = handleUserAuthChange;
+
 // Get customer auth headers (if logged in)
 function getCustomerAuthHeaders() {
   const token = localStorage.getItem('token');
@@ -101,7 +198,7 @@ function formatBotMessage(text) {
 // Initialize chat
 async function initializeChat() {
   if (!sessionId.value) {
-    sessionId.value = generateSessionId();
+    sessionId.value = await getOrCreateSessionId();
   }
 
   // Load conversation history
@@ -114,6 +211,23 @@ async function initializeChat() {
   if (messages.value.length === 0) {
     addBotMessage("Hi! I'm your Wrencos Beauty Assistant.\nHow can I help you today?");
     showCategories.value = true;
+  } else {
+    // If we have history, determine the current flow state
+    const lastMessage = messages.value[messages.value.length - 1];
+    
+    // Check if this was a staff chat session
+    if (isConnectedToStaff.value || waitingForStaff.value) {
+      currentFlow.value = 'staff-chat';
+      showCategories.value = false;
+      
+      // Resume staff chat polling if connected
+      if (isConnectedToStaff.value) {
+        startStaffChatPolling();
+      }
+    } else {
+      currentFlow.value = 'chat';
+      showCategories.value = false;
+    }
   }
 }
 
@@ -146,8 +260,23 @@ async function loadConversationHistory() {
         relatedProducts: msg.relatedProducts || [],
         faq: msg.faq
       }));
+      
+      // Restore conversation state
+      const conversationState = result.data.conversationState || {};
+      isConnectedToStaff.value = conversationState.isStaffChat && !conversationState.waitingForStaff;
+      waitingForStaff.value = conversationState.waitingForStaff;
+      
       showCategories.value = false;
-      currentFlow.value = 'chat';
+      if (conversationState.isStaffChat) {
+        currentFlow.value = 'staff-chat';
+        console.log('🔍 Restored staff chat session. Connected:', isConnectedToStaff.value, 'Waiting:', waitingForStaff.value);
+      } else {
+        currentFlow.value = 'chat';
+      }
+      
+      // Auto-scroll to bottom after loading conversation history
+      await nextTick();
+      scrollToBottom();
     }
   } catch (error) {
     console.error('Error loading conversation:', error);
@@ -158,8 +287,10 @@ function toggle() {
   isOpen.value = !isOpen.value;
   if (isOpen.value) {
     hasNewMessage.value = false;
-    initializeChat();
-    scrollToBottom();
+    initializeChat().then(() => {
+      // Scroll to bottom after initialization is complete
+      scrollToBottom();
+    });
   }
 }
 
@@ -172,9 +303,10 @@ function outsideClose(e) {
   }
 }
 
-function clearChat() {
+async function clearChat() {
   messages.value = [];
-  sessionId.value = generateSessionId();
+  clearSessionId(); // Clear the persistent session
+  sessionId.value = await getOrCreateSessionId(); // Create a new one
   showCategories.value = true;
   selectedCategory.value = null;
   currentFlow.value = 'menu';
@@ -399,9 +531,129 @@ async function sendStaffMessage(message = null) {
 }
 
 // Flow 2: Send message to AI
+// Function to detect if customer wants to chat with staff
+function detectStaffChatIntent(message) {
+  const lowerMessage = message.toLowerCase().trim();
+  
+  console.log('🔍 Detecting staff intent for message:', lowerMessage);
+  
+  // Direct staff chat requests (high confidence)
+  const directRequests = [
+    'chat with staff',
+    'talk to staff',
+    'speak to staff',
+    'contact staff',
+    'connect me to staff',
+    'transfer to staff',
+    'staff chat',
+    'live chat',
+    'human support',
+    'human agent',
+    'human help',
+    'real person',
+    'customer service',
+    'customer support',
+    'live support'
+  ];
+  
+  // Conversational patterns that likely indicate staff request
+  const conversationalPatterns = [
+    'i want to talk to staff',
+    'i need to speak with staff',
+    'can i talk to staff',
+    'can i speak to staff',
+    'can i chat with staff',
+    'i would like to chat with staff',
+    'i would like to talk to staff',
+    'i would like to speak with staff',
+    'connect me to staff',
+    'transfer me to staff',
+    'i need help from staff',
+    'i need support from staff',
+    'i need assistance from staff',
+    'can staff help me',
+    'is there staff available',
+    'talk to a person',
+    'speak to a person',
+    'chat with a person',
+    'i want to talk to someone',
+    'can i talk to someone',
+    'can someone help me',
+    'is there someone who can help',
+    'can a person help me',
+    'i need human help',
+    'i need human support',
+    'i need human assistance',
+    'get me a human',
+    'connect me to a human',
+    'transfer me to a human'
+  ];
+  
+  // Check for direct matches first
+  const directMatch = directRequests.some(request => lowerMessage.includes(request));
+  if (directMatch) {
+    console.log('✅ Direct match found for staff intent');
+    return true;
+  }
+  
+  // Check for conversational patterns
+  const patternMatch = conversationalPatterns.some(pattern => lowerMessage.includes(pattern));
+  if (patternMatch) {
+    console.log('✅ Conversational pattern match found for staff intent');
+    return true;
+  }
+  
+  // Handle standalone words with context clues
+  const hasStaffWord = lowerMessage.includes('staff');
+  const hasHumanWord = lowerMessage.includes('human') || lowerMessage.includes('person');
+  const hasSupportWord = lowerMessage.includes('support') || lowerMessage.includes('service');
+  const hasActionWord = lowerMessage.includes('talk') || lowerMessage.includes('chat') || 
+                       lowerMessage.includes('speak') || lowerMessage.includes('connect') || 
+                       lowerMessage.includes('help') || lowerMessage.includes('need') ||
+                       lowerMessage.includes('want');
+  
+  // If they mention staff/human/support AND an action word, likely a staff request
+  if ((hasStaffWord || hasHumanWord || hasSupportWord) && hasActionWord) {
+    console.log('✅ Contextual match found for staff intent');
+    return true;
+  }
+  
+  console.log('❌ No staff intent detected');
+  return false;
+}
+
 async function sendAIMessage(message = null) {
   const text = message || inputText.value.trim();
   if (!text) return;
+
+  // Check if customer wants to chat with staff
+  if (detectStaffChatIntent(text)) {
+    addUserMessage(text);
+    inputText.value = '';
+    
+    // Generate contextual response based on what they asked
+    const lowerText = text.toLowerCase();
+    let response = "I understand you'd like to chat with our staff team. Let me connect you right away!";
+    
+    if (lowerText.includes('help') || lowerText.includes('problem') || lowerText.includes('issue')) {
+      response = "I see you need additional help. Let me connect you with our staff team who can assist you better!";
+    } else if (lowerText.includes('human') || lowerText.includes('person')) {
+      response = "Of course! I'll connect you with a human staff member right now.";
+    } else if (lowerText.includes('support') || lowerText.includes('service')) {
+      response = "Connecting you to our customer support team now. They'll be able to help you!";
+    }
+    
+    // Transition to staff chat
+    addBotMessage(response);
+    
+    // Small delay for better UX
+    setTimeout(() => {
+      currentFlow.value = 'staff-chat';
+      initializeStaffChat();
+    }, 1000);
+    
+    return;
+  }
 
   addUserMessage(text);
   inputText.value = '';

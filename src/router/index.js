@@ -61,7 +61,8 @@ import DeleteOrder from '@/pages/customer/orders/DeleteOrder.vue';
 import Profile from '@/pages/customer/account/Profile.vue';
 
 const routes = [
-  { path: "/", 
+  {
+    path: "/",
     component: PublicLayout,
     children: [
       { path: "", component: PublicPage },
@@ -73,9 +74,10 @@ const routes = [
 
   {
     path: "/admin",
-    component: AdminLayout,  meta: { requiresAuth: true, role: 'admin' } ,
+    component: AdminLayout, meta: { requiresAuth: true, role: 'admin' },
     children: [
-      { path: "", component: AdminPage },
+      // { path: "", component: AdminPage },
+      { path: "", component: CashFlow },
       { path: "categories", component: Categories },
       { path: "create-category", component: CreateCategory },
       { path: "categories/:id", component: DetailCategory },
@@ -105,7 +107,7 @@ const routes = [
 
   {
     path: "/customer",
-    component: CustomerLayout, meta: { requiresAuth: true, role: 'customer' } ,
+    component: CustomerLayout, meta: { requiresAuth: true, role: 'customer' },
     children: [
       { path: "", component: CustomerPage },
       { path: "products/:id", component: DetailProduct },

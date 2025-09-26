@@ -136,7 +136,13 @@ async function loadChatMessages(sessionId) {
     
     const result = await response.json();
     if (result.success) {
-      messages.value = result.data.messages.map((msg, index) => ({
+      // Filter out AI messages - only show user messages and staff replies
+      const filteredMessages = result.data.messages.filter(msg => {
+        // Show user messages and staff messages, but not AI/predefined messages
+        return msg.role === 'user' || (msg.role === 'assistant' && msg.messageType === 'staff');
+      });
+      
+      messages.value = filteredMessages.map((msg, index) => ({
         id: index + 1,
         sender: msg.role === 'user' ? 'customer' : 'staff',
         text: msg.content,
@@ -253,10 +259,16 @@ async function checkForNewMessages(sessionId) {
     const result = await response.json();
     if (result.success) {
       const serverMessages = result.data.messages;
+      
+      // Filter out AI messages - only show user messages and staff replies
+      const filteredServerMessages = serverMessages.filter(msg => {
+        return msg.role === 'user' || (msg.role === 'assistant' && msg.messageType === 'staff');
+      });
+      
       const currentMessageIds = new Set(messages.value.map(msg => `${msg.timestamp.getTime()}_${msg.text}_${msg.sender}`));
       
       // Only add messages that aren't already in the UI
-      const newMessages = serverMessages.filter(msg => {
+      const newMessages = filteredServerMessages.filter(msg => {
         const messageKey = `${new Date(msg.timestamp).getTime()}_${msg.content}_${msg.role === 'user' ? 'customer' : 'staff'}`;
         return !currentMessageIds.has(messageKey);
       });

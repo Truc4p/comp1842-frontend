@@ -63,8 +63,9 @@ const selectedCategory = ref(null);
 // Staff chat state
 const isConnectedToStaff = ref(false);
 const waitingForStaff = ref(false);
-let staffChatPollingInterval = null;
-let lastStaffMessageTime = null;
+// WebSocket connection for real-time staff messaging
+let websocket = null;
+let wsReconnectInterval = null;
 
 // Generate session ID
 function generateSessionId() {
@@ -338,10 +339,10 @@ function toggle() {
       scrollToBottom();
     });
   } else {
-    // When closing chat, stop polling to save resources
+    // When closing chat, disconnect WebSocket to save resources
     if (currentFlow.value === 'staff-chat') {
-      console.log('🔌 Chat closed - stopping staff polling to save resources');
-      stopStaffChatPolling();
+      console.log('🔌 Chat closed - disconnecting WebSocket to save resources');
+      disconnectWebSocket();
     }
   }
 }
@@ -411,8 +412,7 @@ async function clearChat() {
     currentFlow.value = 'faq';
     isConnectedToStaff.value = false;
     waitingForStaff.value = false;
-    lastStaffMessageTime = null;
-    stopStaffChatPolling();
+    disconnectWebSocket();
     
     // Add fresh welcome message to FAQ
     addBotMessage("Hi! I'm your Wrencos Beauty Assistant.\nHow can I help you today?");
@@ -467,7 +467,7 @@ async function switchToAIChat() {
   selectedCategory.value = null;
   isConnectedToStaff.value = false;
   waitingForStaff.value = false;
-  stopStaffChatPolling();
+  disconnectWebSocket();
   
   // Initialize AI chat session if not exists
   if (!aiChatSessionId.value) {
@@ -509,12 +509,14 @@ async function switchToStaffChat() {
       isConnectedToStaff.value = true;
     }
     
-    // Start polling if connected
-    if (isConnectedToStaff.value && !waitingForStaff.value) {
-      startStaffChatPolling();
-    } else if (isOpen.value && currentFlow.value === 'staff-chat') {
-      // Restart polling when reopening if we were connected
-      startStaffChatPolling();
+    // Connect WebSocket if we have an active staff connection
+    if (isConnectedToStaff.value) {
+      connectWebSocket();
+    }
+    
+    // Connect WebSocket if in staff chat mode
+    if (currentFlow.value === 'staff-chat' && isOpen.value) {
+      connectWebSocket();
     }
   }
 }
@@ -661,9 +663,9 @@ async function initializeStaffChat() {
     if (result.success) {
       isConnectedToStaff.value = true;
       waitingForStaff.value = false;
-      lastStaffMessageTime = new Date().toISOString(); // Initialize with current time
       addBotMessage("You are now connected to our staff team. They will respond shortly!");
-      startStaffChatPolling();
+      // Connect WebSocket for real-time staff replies
+      connectWebSocket();
     } else {
       waitingForStaff.value = false;
       addBotMessage("Sorry, our staff team is currently unavailable. Please try again later or use our AI assistant.");
@@ -675,49 +677,85 @@ async function initializeStaffChat() {
   }
 }
 
-// Start polling for staff messages
-function startStaffChatPolling() {
-  // Stop any existing polling first to avoid duplicates
-  stopStaffChatPolling();
-  
-  staffChatPollingInterval = setInterval(async () => {
-    // Only poll if chat panel is open and we're in staff chat mode
-    if (!isOpen.value || currentFlow.value !== 'staff-chat') {
-      return;
-    }
+// WebSocket connection for real-time staff messaging
+function connectWebSocket() {
+  if (websocket && websocket.readyState === WebSocket.OPEN) {
+    return; // Already connected
+  }
+
+  try {
+    // Connect to WebSocket server
+    websocket = new WebSocket('ws://localhost:8080');
     
-    if (!isConnectedToStaff.value) {
-      return;
-    }
-    
-    try {
-      const url = lastStaffMessageTime 
-        ? `${API_BASE_URL}/chat/staff/messages/${sessionId.value}?lastMessageTime=${lastStaffMessageTime}`
-        : `${API_BASE_URL}/chat/staff/messages/${sessionId.value}`;
-        
-      const response = await fetch(url);
-      const result = await response.json();
+    websocket.onopen = () => {
+      console.log('🔌 WebSocket connected');
+      clearInterval(wsReconnectInterval);
       
-      if (result.success && result.data.newMessages && result.data.newMessages.length > 0) {
-        result.data.newMessages.forEach(msg => {
-          if (msg.role === 'assistant' && msg.messageType === 'staff') {
-            addBotMessage(msg.content);
-            // Update the last message time
-            lastStaffMessageTime = msg.timestamp;
+      // Register with current session if in staff chat mode
+      if (currentFlow.value === 'staff-chat' && sessionId.value) {
+        // Add a small delay to ensure connection is fully established
+        setTimeout(() => {
+          if (websocket && websocket.readyState === WebSocket.OPEN) {
+            websocket.send(JSON.stringify({
+              type: 'register',
+              sessionId: sessionId.value
+            }));
           }
-        });
+        }, 10);
       }
-    } catch (error) {
-      console.error('Error polling for staff messages:', error);
-    }
-  }, 5000); // Poll every 5 seconds when active
+    };
+    
+    websocket.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        console.log('📨 WebSocket message received:', data);
+        
+        if (data.type === 'staff_reply') {
+          // Add staff message to chat
+          addBotMessage(data.message);
+          console.log('✅ Staff reply received and displayed');
+        }
+      } catch (error) {
+        console.error('Error parsing WebSocket message:', error);
+      }
+    };
+    
+    websocket.onclose = () => {
+      console.log('🔌 WebSocket disconnected');
+      websocket = null;
+      
+      // Attempt to reconnect if we're still in staff chat mode
+      if (currentFlow.value === 'staff-chat' && isOpen.value) {
+        console.log('🔄 Attempting WebSocket reconnection...');
+        wsReconnectInterval = setInterval(() => {
+          if (currentFlow.value === 'staff-chat' && isOpen.value) {
+            connectWebSocket();
+          } else {
+            clearInterval(wsReconnectInterval);
+          }
+        }, 3000);
+      }
+    };
+    
+    websocket.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
+    
+  } catch (error) {
+    console.error('Error connecting WebSocket:', error);
+  }
 }
 
-// Stop staff chat polling
-function stopStaffChatPolling() {
-  if (staffChatPollingInterval) {
-    clearInterval(staffChatPollingInterval);
-    staffChatPollingInterval = null;
+// Disconnect WebSocket
+function disconnectWebSocket() {
+  if (wsReconnectInterval) {
+    clearInterval(wsReconnectInterval);
+    wsReconnectInterval = null;
+  }
+  
+  if (websocket) {
+    websocket.close();
+    websocket = null;
   }
 }
 
@@ -835,7 +873,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   document.removeEventListener('click', outsideClose);
-  stopStaffChatPolling();
+  disconnectWebSocket();
 });
 </script>
 

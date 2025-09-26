@@ -19,8 +19,9 @@ const selectedCustomer = ref(null);
 const isAuthenticated = ref(false);
 const authError = ref(null);
 
-// Polling for new messages
-let pollingInterval = null;
+// WebSocket connection for real-time admin messaging
+let adminWebSocket = null;
+let wsReconnectInterval = null;
 
 // Get selected chat data
 const selectedChat = computed(() => {
@@ -83,7 +84,7 @@ async function initializeAdminChat() {
     return;
   }
   await loadActiveChats();
-  startPolling();
+  connectAdminWebSocket();
 }
 
 // Load active customer chats
@@ -203,9 +204,9 @@ async function sendMessage() {
     if (!result.success) {
       addStaffMessage("Failed to send message. Please try again.");
     } else {
-      // Message will appear via polling mechanism
-      // Trigger immediate check for new messages
-      await checkForNewMessages(selectedChatId.value);
+      // Message sent successfully - add to UI immediately
+      addStaffMessage(text);
+      // Customer will receive it via their WebSocket connection
     }
   } catch (error) {
     console.error('Error sending message:', error);
@@ -227,77 +228,154 @@ function addStaffMessage(text) {
   scrollToBottom();
 }
 
-// Start polling for new messages
-function startPolling() {
-  pollingInterval = setInterval(async () => {
-    if (!isAuthenticated.value) return;
-    
-    await loadActiveChats();
-    
-    // Refresh current chat if selected
-    if (selectedChatId.value) {
-      await checkForNewMessages(selectedChatId.value);
-    }
-  }, 3000); // Poll every 3 seconds
-}
+// WebSocket connection for real-time admin messaging
+function connectAdminWebSocket() {
+  if (adminWebSocket && adminWebSocket.readyState === WebSocket.OPEN) {
+    return; // Already connected
+  }
 
-// Check for new messages without reloading everything
-async function checkForNewMessages(sessionId) {
+  if (!isAuthenticated.value) {
+    console.log('⚠️ Cannot connect admin WebSocket - not authenticated');
+    return;
+  }
+
   try {
-    const headers = getAuthHeaders();
-    if (!headers) return;
-
-    const response = await fetch(`${API_BASE_URL}/chat/admin/messages/${sessionId}`, {
-      headers
-    });
+    // Connect to WebSocket server
+    adminWebSocket = new WebSocket('ws://localhost:8080');
     
-    if (response.status === 401) {
-      authError.value = 'Unauthorized access';
-      return;
-    }
-    
-    const result = await response.json();
-    if (result.success) {
-      const serverMessages = result.data.messages;
+    adminWebSocket.onopen = () => {
+      console.log('🔌 Admin WebSocket connected');
+      clearInterval(wsReconnectInterval);
       
-      // Filter out AI messages - only show user messages and staff replies
-      const filteredServerMessages = serverMessages.filter(msg => {
-        return msg.role === 'user' || (msg.role === 'assistant' && msg.messageType === 'staff');
-      });
-      
-      const currentMessageIds = new Set(messages.value.map(msg => `${msg.timestamp.getTime()}_${msg.text}_${msg.sender}`));
-      
-      // Only add messages that aren't already in the UI
-      const newMessages = filteredServerMessages.filter(msg => {
-        const messageKey = `${new Date(msg.timestamp).getTime()}_${msg.content}_${msg.role === 'user' ? 'customer' : 'staff'}`;
-        return !currentMessageIds.has(messageKey);
-      });
-      
-      // Add new messages to the UI
-      newMessages.forEach((msg, index) => {
-        messages.value.push({
-          id: messages.value.length + index + 1,
-          sender: msg.role === 'user' ? 'customer' : 'staff',
-          text: msg.content,
-          timestamp: new Date(msg.timestamp),
-          messageType: msg.messageType
-        });
-      });
-      
-      if (newMessages.length > 0) {
-        scrollToBottom();
+      // Register as admin with token
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.error('⚠️ No admin token found');
+        adminWebSocket.close();
+        return;
       }
-    }
+
+      try {
+        // Decode the JWT token to get user ID
+        const parts = token.split('.');
+        if (parts.length !== 3) {
+          throw new Error('Invalid token format');
+        }
+        
+        const payload = parts[1];
+        // Add padding if needed for base64 decoding
+        const paddedPayload = payload + '='.repeat((4 - payload.length % 4) % 4);
+        const decoded = JSON.parse(atob(paddedPayload));
+        
+        if (!decoded.user || !decoded.user.id || !decoded.user.role) {
+          throw new Error('Token missing required fields');
+        }
+        
+        console.log('📝 Registering admin with WebSocket:', {
+          userId: decoded.user.id,
+          role: decoded.user.role,
+          username: decoded.user.username,
+          tokenPresent: !!token
+        });
+        
+        adminWebSocket.send(JSON.stringify({
+          type: 'register_admin',
+          userId: decoded.user.id,
+          token: token
+        }));
+      } catch (error) {
+        console.error('❌ Error decoding admin token:', error);
+        adminWebSocket.close();
+      }
+    };
+    
+    adminWebSocket.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        console.log('📨 Admin WebSocket message received:', data);
+        
+        if (data.type === 'customer_message') {
+          handleNewCustomerMessage(data);
+        } else if (data.type === 'admin_registered') {
+          console.log('✅ Admin WebSocket registered successfully');
+        }
+      } catch (error) {
+        console.error('Error parsing admin WebSocket message:', error);
+      }
+    };
+    
+    adminWebSocket.onclose = () => {
+      console.log('🔌 Admin WebSocket disconnected');
+      adminWebSocket = null;
+      
+      // Attempt to reconnect if still authenticated and open
+      if (isAuthenticated.value && isOpen.value) {
+        console.log('🔄 Attempting admin WebSocket reconnection...');
+        wsReconnectInterval = setInterval(() => {
+          if (isAuthenticated.value && isOpen.value) {
+            connectAdminWebSocket();
+          } else {
+            clearInterval(wsReconnectInterval);
+          }
+        }, 3000);
+      }
+    };
+    
+    adminWebSocket.onerror = (error) => {
+      console.error('Admin WebSocket error:', error);
+    };
+    
   } catch (error) {
-    console.error('Error checking for new messages:', error);
+    console.error('Error connecting admin WebSocket:', error);
   }
 }
 
-// Stop polling
-function stopPolling() {
-  if (pollingInterval) {
-    clearInterval(pollingInterval);
-    pollingInterval = null;
+// Disconnect admin WebSocket
+function disconnectAdminWebSocket() {
+  if (wsReconnectInterval) {
+    clearInterval(wsReconnectInterval);
+    wsReconnectInterval = null;
+  }
+  
+  if (adminWebSocket) {
+    adminWebSocket.close();
+    adminWebSocket = null;
+  }
+}
+
+// Handle incoming customer message via WebSocket
+function handleNewCustomerMessage(data) {
+  const { sessionId, message, timestamp } = data;
+  
+  // Find the chat session
+  const chatIndex = activeChats.value.findIndex(chat => chat.sessionId === sessionId);
+  if (chatIndex !== -1) {
+    // Update last activity
+    activeChats.value[chatIndex].lastActivity = new Date(timestamp);
+    activeChats.value[chatIndex].hasUnreadFromCustomer = true;
+    
+    // If this chat is currently selected, add the message to the UI
+    if (selectedChatId.value === sessionId) {
+      messages.value.push({
+        id: messages.value.length + 1,
+        sender: 'customer',
+        text: message,
+        timestamp: new Date(timestamp)
+      });
+      scrollToBottom();
+    }
+    
+    // Move this chat to the top of the list
+    const chat = activeChats.value.splice(chatIndex, 1)[0];
+    activeChats.value.unshift(chat);
+    
+    // Show notification if not currently viewing this chat
+    if (selectedChatId.value !== sessionId) {
+      hasNewMessage.value = true;
+    }
+  } else {
+    // New chat session - reload active chats to include it
+    loadActiveChats();
   }
 }
 
@@ -307,7 +385,7 @@ function toggle() {
     hasNewMessage.value = false;
     initializeAdminChat();
   } else {
-    stopPolling();
+    disconnectAdminWebSocket();
   }
 }
 
@@ -317,7 +395,7 @@ function outsideClose(e) {
   const button = document.getElementById('admin-chat-button');
   if (panel && !panel.contains(e.target) && button && !button.contains(e.target)) {
     isOpen.value = false;
-    stopPolling();
+    disconnectAdminWebSocket();
   }
 }
 
@@ -351,7 +429,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   document.removeEventListener('click', outsideClose);
-  stopPolling();
+  disconnectAdminWebSocket();
 });
 </script>
 

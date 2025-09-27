@@ -197,6 +197,7 @@ const payrollChartData = computed(() => {
 const chartOptions = {
   responsive: true,
   maintainAspectRatio: false,
+  animation: false,
   plugins: {
     legend: {
       position: 'bottom',
@@ -213,6 +214,7 @@ const chartOptions = {
 const barChartOptions = {
   responsive: true,
   maintainAspectRatio: false,
+  animation: false,
   plugins: {
     legend: { display: false }
   },
@@ -405,7 +407,7 @@ const saveEmployee = async () => {
   try {
     // Clear any previous errors
     error.value = null;
-    
+
     const token = localStorage.getItem("token");
     const employeeData = {
       ...employeeForm.value,
@@ -438,7 +440,7 @@ const saveEmployee = async () => {
     await fetchAllData();
   } catch (err) {
     console.error("Error saving employee:", err);
-    
+
     // Handle specific error types
     if (err.response?.status === 400 && err.response?.data?.field) {
       // Handle duplicate key errors with specific field information
@@ -580,7 +582,7 @@ watch([selectedDepartment, selectedStatus, currentPage], fetchEmployees);
     <div class="container mx-auto px-4 py-8">
       <!-- Page Header -->
       <div class="mb-8">
-        <h1 class="text-3xl font-bold text-primary-600 mb-2">👥 Human Resource Management</h1>
+        <h1 class="text-3xl font-bold text-primary-600 mb-2">Human Resource Management</h1>
         <p class="text-secondary-600 text-lg">Comprehensive employee management, analytics, and organizational insights
         </p>
       </div>
@@ -616,11 +618,11 @@ watch([selectedDepartment, selectedStatus, currentPage], fetchEmployees);
                 { id: 'departments', name: 'Departments', icon: '🏢' },
                 { id: 'payroll', name: 'Payroll', icon: '💰' }
               ]" :key="tab.id" @click="activeTab = tab.id" :class="[
-                  'py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2',
-                  activeTab === tab.id
-                    ? 'border-primary-500 text-primary-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                ]">
+                'py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2',
+                activeTab === tab.id
+                  ? 'border-primary-500 text-primary-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              ]">
                 <span>{{ tab.icon }}</span>
                 {{ tab.name }}
               </button>
@@ -639,7 +641,7 @@ watch([selectedDepartment, selectedStatus, currentPage], fetchEmployees);
                     <div class="p-3 rounded-full bg-blue-100 text-blue-600">
                       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z">
+                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z">
                         </path>
                       </svg>
                     </div>
@@ -729,13 +731,14 @@ watch([selectedDepartment, selectedStatus, currentPage], fetchEmployees);
                           class="flex items-center justify-between">
                           <div class="flex items-center">
                             <div class="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
-                            <span class="text-xs font-medium">{{employmentTypes.find(t => t.value === type._id)?.label || type._id }}</span>
+                            <span class="text-xs font-medium">{{employmentTypes.find(t => t.value === type._id)?.label
+                              || type._id}}</span>
                           </div>
                           <div class="text-xs font-bold text-blue-600">{{ type.count }}</div>
                         </div>
                       </div>
                     </div>
-                    
+
                     <!-- Employee Status -->
                     <div class="border-t pt-3">
                       <h5 class="text-sm font-semibold text-gray-700 mb-2">Employee Status</h5>
@@ -743,18 +746,17 @@ watch([selectedDepartment, selectedStatus, currentPage], fetchEmployees);
                         <div v-for="status in statusOptions" :key="status.value"
                           class="flex items-center justify-between">
                           <div class="flex items-center">
-                            <div :class="['w-3 h-3 rounded-full mr-2', 
+                            <div :class="['w-3 h-3 rounded-full mr-2',
                               status.value === 'active' ? 'bg-green-500' :
-                              status.value === 'inactive' ? 'bg-gray-500' :
-                              status.value === 'terminated' ? 'bg-red-500' : 'bg-yellow-500'
+                                status.value === 'inactive' ? 'bg-gray-500' :
+                                  status.value === 'terminated' ? 'bg-red-500' : 'bg-yellow-500'
                             ]"></div>
                             <span class="text-xs font-medium">{{ status.label }}</span>
                           </div>
-                          <div class="text-xs font-bold"
-                            :class="status.value === 'active' ? 'text-green-600' :
-                              status.value === 'inactive' ? 'text-gray-600' :
+                          <div class="text-xs font-bold" :class="status.value === 'active' ? 'text-green-600' :
+                            status.value === 'inactive' ? 'text-gray-600' :
                               status.value === 'terminated' ? 'text-red-600' : 'text-yellow-600'">
-                            {{ employees.filter(emp => emp.status === status.value).length }}
+                            {{employees.filter(emp => emp.status === status.value).length}}
                           </div>
                         </div>
                       </div>
@@ -795,620 +797,641 @@ watch([selectedDepartment, selectedStatus, currentPage], fetchEmployees);
                             <span class="text-xs font-medium">{{ range.label }}</span>
                           </div>
                           <div class="text-xs font-bold text-gray-800">
-                            {{ employees.filter(emp => {
+                            {{employees.filter(emp => {
                               const years = getYearsOfService(emp.startDate);
                               return years >= range.min && years < range.max;
-                            }).length }}
+                            }).length}} </div>
                           </div>
                         </div>
                       </div>
-                    </div>
 
-                    <!-- Salary Range -->
-                    <div class="border-t pt-3">
-                      <h5 class="text-sm font-semibold text-gray-700 mb-2">💰 Salary Distribution</h5>
-                      <div class="space-y-2">
-                        <div v-for="range in [
-                          { label: '< $50K', min: 0, max: 50000, color: 'bg-red-400' },
-                          { label: '$50K - $75K', min: 50000, max: 75000, color: 'bg-yellow-400' },
-                          { label: '$75K - $100K', min: 75000, max: 100000, color: 'bg-blue-400' },
-                          { label: '$100K+', min: 100000, max: 999999999, color: 'bg-green-400' }
-                        ]" :key="range.label" class="flex items-center justify-between">
-                          <div class="flex items-center">
-                            <div :class="['w-3 h-3 rounded-full mr-2', range.color]"></div>
-                            <span class="text-xs font-medium">{{ range.label }}</span>
-                          </div>
-                          <div class="text-xs font-bold text-gray-800">
-                            {{ employees.filter(emp => {
-                              const salary = emp.salary?.amount || 0;
-                              return salary >= range.min && salary < range.max;
-                            }).length }}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Department Analysis Table -->
-                <div class="card p-6">
-                  <h4 class="text-lg font-semibold text-secondary-900 mb-4">🏢 Department Performance</h4>
-                  <div class="overflow-x-auto">
-                    <table class="w-full text-sm">
-                      <thead>
-                        <tr class="border-b border-gray-200">
-                          <th class="text-left py-2 font-medium text-gray-700">Dept</th>
-                          <th class="text-right py-2 font-medium text-gray-700">Count</th>
-                          <th class="text-right py-2 font-medium text-gray-700">Avg Salary</th>
-                          <th class="text-right py-2 font-medium text-gray-700">%</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr v-for="dept in departmentStats.slice(0, 6)" :key="dept.department" class="border-b border-gray-100">
-                          <td class="py-2">
+                      <!-- Salary Range -->
+                      <div class="border-t pt-3">
+                        <h5 class="text-sm font-semibold text-gray-700 mb-2">💰 Salary Distribution</h5>
+                        <div class="space-y-2">
+                          <div v-for="range in [
+                            { label: '< $50K', min: 0, max: 50000, color: 'bg-red-400' },
+                            { label: '$50K - $75K', min: 50000, max: 75000, color: 'bg-yellow-400' },
+                            { label: '$75K - $100K', min: 75000, max: 100000, color: 'bg-blue-400' },
+                            { label: '$100K+', min: 100000, max: 999999999, color: 'bg-green-400' }
+                          ]" :key="range.label" class="flex items-center justify-between">
                             <div class="flex items-center">
-                              <span class="mr-1 text-sm">{{ getDepartmentIcon(dept.department) }}</span>
-                              <span class="text-xs font-medium truncate">
-                                {{ departments.find(d => d.value === dept.department)?.label?.substring(0, 10) || dept.department }}
-                              </span>
+                              <div :class="['w-3 h-3 rounded-full mr-2', range.color]"></div>
+                              <span class="text-xs font-medium">{{ range.label }}</span>
                             </div>
-                          </td>
-                          <td class="text-right py-2 font-semibold text-xs">{{ dept.employeeCount }}</td>
-                          <td class="text-right py-2 text-xs">{{ formatCurrency(dept.averageSalary).replace('$', '$').replace(',', 'K').replace('000', '') }}</td>
-                          <td class="text-right py-2 text-xs">
-                            {{ Math.round((dept.employeeCount / (hrAnalytics.overview?.totalEmployees || 1)) * 100) }}%
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Recent Activities -->
-              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Recent Hires -->
-                <div class="card p-6">
-                  <h4 class="text-lg font-semibold text-secondary-900 mb-4">🆕 Recent Hires (Last 30 days)</h4>
-                  <div v-if="hrAnalytics.recentHires?.length > 0" class="space-y-3 max-h-64 overflow-y-auto">
-                    <div v-for="employee in hrAnalytics.recentHires" :key="employee._id"
-                      class="border border-gray-200 rounded-lg p-4">
-                      <div class="flex items-center justify-between">
-                        <div>
-                          <div class="font-medium text-gray-900">{{ employee.firstName }} {{ employee.lastName }}</div>
-                          <div class="text-sm text-gray-600">{{ employee.position }} • {{ employee.department }}</div>
-                          <div class="text-xs text-gray-500">Started: {{ formatDate(employee.startDate) }}</div>
-                        </div>
-                        <span class="text-lg">{{ getDepartmentIcon(employee.department) }}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div v-else class="text-center py-8 text-gray-500">
-                    <p>No recent hires</p>
-                  </div>
-                </div>
-
-                <!-- Upcoming Anniversaries -->
-                <div class="card p-6">
-                  <h4 class="text-lg font-semibold text-secondary-900 mb-4">🎉 Upcoming Anniversaries</h4>
-                  <div v-if="hrAnalytics.upcomingAnniversaries?.length > 0" class="space-y-3 max-h-64 overflow-y-auto">
-                    <div v-for="employee in hrAnalytics.upcomingAnniversaries" :key="employee._id"
-                      class="border-l-4 border-purple-400 bg-purple-50 p-4 rounded-r-lg">
-                      <div class="flex items-center justify-between">
-                        <div>
-                          <div class="font-medium text-gray-900">{{ employee.firstName }} {{ employee.lastName }}</div>
-                          <div class="text-sm text-gray-600">{{ employee.position }}</div>
-                          <div class="text-xs text-purple-600">{{ getYearsOfService(employee.startDate) }} years of
-                            service</div>
-                        </div>
-                        <div class="text-right">
-                          <div class="text-sm font-semibold text-purple-600">Anniversary</div>
-                          <div class="text-xs text-gray-600">{{ formatDate(employee.startDate) }}</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div v-else class="text-center py-8 text-gray-500">
-                    <p>No upcoming anniversaries</p>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Performance Distribution (only show if data exists) -->
-              <div v-if="hrAnalytics.performanceStats?.length > 0" class="card p-6">
-                <h4 class="text-lg font-semibold text-secondary-900 mb-4">⭐ Performance Ratings Distribution</h4>
-                <div class="grid grid-cols-5 gap-4">
-                  <div v-for="rating in [1, 2, 3, 4, 5]" :key="rating" class="text-center">
-                    <div class="text-2xl font-bold mb-2"
-                      :class="rating >= 4 ? 'text-green-600' : rating >= 3 ? 'text-yellow-600' : 'text-red-600'">
-                      {{hrAnalytics.performanceStats.find(p => p._id === rating)?.count || 0}}
-                    </div>
-                    <div class="text-sm text-gray-600">{{ rating }} Star{{ rating !== 1 ? 's' : '' }}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Employees Tab -->
-            <div v-if="activeTab === 'employees'" class="space-y-6">
-              <!-- Employee Management Header -->
-              <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div class="flex flex-col md:flex-row gap-4">
-                  <!-- Search -->
-                  <div class="relative">
-                    <input v-model="searchQuery" type="text" placeholder="Search employees..."
-                      class="form-input w-full sm:w-96 md:w-[28rem]" style="padding-left:3.5rem; min-width: 280px;">
-                    <svg class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 transform" fill="none" stroke="currentColor"
-                      viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                    </svg>
-                  </div>
-
-                  <!-- Department Filter -->
-                  <select v-model="selectedDepartment" class="form-select w-48">
-                    <option value="">All Departments</option>
-                    <option v-for="dept in departments" :key="dept.value" :value="dept.value">
-                      {{ dept.icon }} {{ dept.label }}
-                    </option>
-                  </select>
-
-                  <!-- Status Filter -->
-                  <select v-model="selectedStatus" class="form-select w-40">
-                    <option value="">All Status</option>
-                    <option v-for="status in statusOptions" :key="status.value" :value="status.value">
-                      {{ status.label }}
-                    </option>
-                  </select>
-                </div>
-
-                <button @click="openEmployeeModal()" class="btn btn-primary flex items-center gap-2">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                  </svg>
-                  Add New Employee
-                </button>
-              </div>
-
-              <!-- Employees Table -->
-              <div class="card overflow-hidden">
-                <div class="overflow-x-auto">
-                  <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                      <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Employee</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Department</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Position</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Employment</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Salary</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Status</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Start
-                          Date</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                      <tr v-for="employee in filteredEmployees" :key="employee._id" class="hover:bg-gray-50">
-                        <td class="px-6 py-4 whitespace-nowrap">
-                          <div class="flex items-center">
-                            <div class="flex-shrink-0 h-10 w-10">
-                              <div class="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                                <span class="text-sm font-medium text-gray-700">
-                                  {{ employee.firstName.charAt(0) }}{{ employee.lastName.charAt(0) }}
-                                </span>
-                              </div>
-                            </div>
-                            <div class="ml-4">
-                              <div class="text-sm font-medium text-gray-900">{{ employee.firstName }} {{
-                                employee.lastName }}</div>
-                              <div class="text-sm text-gray-500">{{ employee.employeeId }}</div>
-                              <div class="text-sm text-gray-500">{{ employee.email }}</div>
+                            <div class="text-xs font-bold text-gray-800">
+                              {{employees.filter(emp => {
+                                const salary = emp.salary?.amount || 0;
+                                return salary >= range.min && salary < range.max;
+                              }).length}} </div>
                             </div>
                           </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                          <div class="flex items-center">
-                            <span class="text-lg mr-2">{{ getDepartmentIcon(employee.department) }}</span>
-                            <span class="text-sm font-medium text-gray-900">
-                              {{departments.find(dept => dept.value === employee.department)?.label ||
-                              employee.department }}
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Department Analysis Table -->
+                    <div class="card p-6">
+                      <h4 class="text-lg font-semibold text-secondary-900 mb-4">🏢 Department Performance</h4>
+                      <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                          <thead>
+                            <tr class="border-b border-gray-200">
+                              <th class="text-left py-2 font-medium text-gray-700">Dept</th>
+                              <th class="text-right py-2 font-medium text-gray-700">Count</th>
+                              <th class="text-right py-2 font-medium text-gray-700">Avg Salary</th>
+                              <th class="text-right py-2 font-medium text-gray-700">%</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr v-for="dept in departmentStats.slice(0, 6)" :key="dept.department"
+                              class="border-b border-gray-100">
+                              <td class="py-2">
+                                <div class="flex items-center">
+                                  <span class="mr-1 text-sm">{{ getDepartmentIcon(dept.department) }}</span>
+                                  <span class="text-xs font-medium truncate">
+                                    {{departments.find(d => d.value === dept.department)?.label?.substring(0, 10) ||
+                                      dept.department}}
+                                  </span>
+                                </div>
+                              </td>
+                              <td class="text-right py-2 font-semibold text-xs">{{ dept.employeeCount }}</td>
+                              <td class="text-right py-2 text-xs">{{ formatCurrency(dept.averageSalary).replace('$',
+                                '$').replace(',', 'K').replace('000', '') }}</td>
+                              <td class="text-right py-2 text-xs">
+                                {{ Math.round((dept.employeeCount / (hrAnalytics.overview?.totalEmployees || 1)) * 100)
+                                }}%
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Recent Activities -->
+                  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Recent Hires -->
+                    <div class="card p-6">
+                      <h4 class="text-lg font-semibold text-secondary-900 mb-4">🆕 Recent Hires (Last 30 days)</h4>
+                      <div v-if="hrAnalytics.recentHires?.length > 0" class="space-y-3 max-h-64 overflow-y-auto">
+                        <div v-for="employee in hrAnalytics.recentHires" :key="employee._id"
+                          class="border border-gray-200 rounded-lg p-4">
+                          <div class="flex items-center justify-between">
+                            <div>
+                              <div class="font-medium text-gray-900">{{ employee.firstName }} {{ employee.lastName }}
+                              </div>
+                              <div class="text-sm text-gray-600">{{ employee.position }} • {{ employee.department }}
+                              </div>
+                              <div class="text-xs text-gray-500">Started: {{ formatDate(employee.startDate) }}</div>
+                            </div>
+                            <span class="text-lg">{{ getDepartmentIcon(employee.department) }}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div v-else class="text-center py-8 text-gray-500">
+                        <p>No recent hires</p>
+                      </div>
+                    </div>
+
+                    <!-- Upcoming Anniversaries -->
+                    <div class="card p-6">
+                      <h4 class="text-lg font-semibold text-secondary-900 mb-4">🎉 Upcoming Anniversaries</h4>
+                      <div v-if="hrAnalytics.upcomingAnniversaries?.length > 0"
+                        class="space-y-3 max-h-64 overflow-y-auto">
+                        <div v-for="employee in hrAnalytics.upcomingAnniversaries" :key="employee._id"
+                          class="border-l-4 border-purple-400 bg-purple-50 p-4 rounded-r-lg">
+                          <div class="flex items-center justify-between">
+                            <div>
+                              <div class="font-medium text-gray-900">{{ employee.firstName }} {{ employee.lastName }}
+                              </div>
+                              <div class="text-sm text-gray-600">{{ employee.position }}</div>
+                              <div class="text-xs text-purple-600">{{ getYearsOfService(employee.startDate) }} years of
+                                service</div>
+                            </div>
+                            <div class="text-right">
+                              <div class="text-sm font-semibold text-purple-600">Anniversary</div>
+                              <div class="text-xs text-gray-600">{{ formatDate(employee.startDate) }}</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div v-else class="text-center py-8 text-gray-500">
+                        <p>No upcoming anniversaries</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Performance Distribution (only show if data exists) -->
+                  <div v-if="hrAnalytics.performanceStats?.length > 0" class="card p-6">
+                    <h4 class="text-lg font-semibold text-secondary-900 mb-4">⭐ Performance Ratings Distribution</h4>
+                    <div class="grid grid-cols-5 gap-4">
+                      <div v-for="rating in [1, 2, 3, 4, 5]" :key="rating" class="text-center">
+                        <div class="text-2xl font-bold mb-2"
+                          :class="rating >= 4 ? 'text-green-600' : rating >= 3 ? 'text-yellow-600' : 'text-red-600'">
+                          {{hrAnalytics.performanceStats.find(p => p._id === rating)?.count || 0}}
+                        </div>
+                        <div class="text-sm text-gray-600">{{ rating }} Star{{ rating !== 1 ? 's' : '' }}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Employees Tab -->
+                <div v-if="activeTab === 'employees'" class="space-y-6">
+
+                  <!-- Employee Modal -->
+                  <div v-if="showEmployeeModal"
+                    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+                    @click="closeEmployeeModal">
+                    <div class="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto" @click.stop>
+                      <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold text-gray-900">
+                          {{ editingEmployee ? 'Edit Employee' : 'Add New Employee' }}
+                        </h3>
+                        <button @click="closeEmployeeModal" class="text-gray-500 hover:text-gray-700">
+                          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M6 18L18 6M6 6l12 12"></path>
+                          </svg>
+                        </button>
+                      </div>
+
+                      <form @submit.prevent="saveEmployee" class="space-y-6">
+                        <!-- Basic Information -->
+                        <div class="border border-gray-200 rounded-lg p-4">
+                          <h4 class="text-lg font-semibold text-gray-900 mb-4">Basic Information</h4>
+                          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                              <label class="block text-sm font-medium text-gray-700 mb-1">Employee ID</label>
+                              <input v-model="employeeForm.employeeId" type="text" class="form-input w-full"
+                                :placeholder="editingEmployee ? '' : 'Auto-generated if empty'">
+                            </div>
+                            <div>
+                              <label class="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
+                              <input v-model="employeeForm.firstName" type="text" class="form-input w-full" required>
+                            </div>
+                            <div>
+                              <label class="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
+                              <input v-model="employeeForm.lastName" type="text" class="form-input w-full" required>
+                            </div>
+                          </div>
+
+                          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                            <div>
+                              <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                              <input v-model="employeeForm.email" type="email" class="form-input w-full" required>
+                            </div>
+                            <div>
+                              <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                              <input v-model="employeeForm.phone" type="tel" class="form-input w-full">
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Employment Details -->
+                        <div class="border border-gray-200 rounded-lg p-4">
+                          <h4 class="text-lg font-semibold text-gray-900 mb-4">Employment Details</h4>
+                          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div>
+                              <label class="block text-sm font-medium text-gray-700 mb-1">Department *</label>
+                              <select v-model="employeeForm.department" class="form-select w-full" required>
+                                <option v-for="dept in departments" :key="dept.value" :value="dept.value">
+                                  {{ dept.icon }} {{ dept.label }}
+                                </option>
+                              </select>
+                            </div>
+                            <div>
+                              <label class="block text-sm font-medium text-gray-700 mb-1">Position *</label>
+                              <input v-model="employeeForm.position" type="text" class="form-input w-full" required>
+                            </div>
+                            <div>
+                              <label class="block text-sm font-medium text-gray-700 mb-1">Employment Type</label>
+                              <select v-model="employeeForm.employmentType" class="form-select w-full">
+                                <option v-for="type in employmentTypes" :key="type.value" :value="type.value">
+                                  {{ type.label }}
+                                </option>
+                              </select>
+                            </div>
+                            <div>
+                              <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                              <select v-model="employeeForm.status" class="form-select w-full">
+                                <option v-for="status in statusOptions" :key="status.value" :value="status.value">
+                                  {{ status.label }}
+                                </option>
+                              </select>
+                            </div>
+                          </div>
+
+                          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                            <div>
+                              <label class="block text-sm font-medium text-gray-700 mb-1">Start Date *</label>
+                              <input v-model="employeeForm.startDate" type="date" class="form-input w-full" required>
+                            </div>
+                            <div>
+                              <label class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                              <input v-model="employeeForm.endDate" type="date" class="form-input w-full">
+                            </div>
+                            <div>
+                              <label class="block text-sm font-medium text-gray-700 mb-1">Manager</label>
+                              <select v-model="employeeForm.manager" class="form-select w-full">
+                                <option value="">No Manager</option>
+                                <option
+                                  v-for="emp in employees.filter(e => e.status === 'active' && e._id !== editingEmployee?._id)"
+                                  :key="emp._id" :value="emp._id">
+                                  {{ emp.firstName }} {{ emp.lastName }} ({{ emp.employeeId }})
+                                </option>
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Salary Information -->
+                        <div class="border border-gray-200 rounded-lg p-4">
+                          <h4 class="text-lg font-semibold text-gray-900 mb-4">Compensation</h4>
+                          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                              <label class="block text-sm font-medium text-gray-700 mb-1">Salary Amount *</label>
+                              <input v-model="employeeForm.salary.amount" type="number" step="0.01" min="0"
+                                class="form-input w-full" required>
+                            </div>
+                            <div>
+                              <label class="block text-sm font-medium text-gray-700 mb-1">Currency</label>
+                              <select v-model="employeeForm.salary.currency" class="form-select w-full">
+                                <option value="USD">USD</option>
+                                <option value="EUR">EUR</option>
+                                <option value="GBP">GBP</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label class="block text-sm font-medium text-gray-700 mb-1">Pay Frequency</label>
+                              <select v-model="employeeForm.salary.payFrequency" class="form-select w-full">
+                                <option v-for="freq in payFrequencies" :key="freq.value" :value="freq.value">
+                                  {{ freq.label }}
+                                </option>
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Skills -->
+                        <div class="border border-gray-200 rounded-lg p-4">
+                          <h4 class="text-lg font-semibold text-gray-900 mb-4">Skills</h4>
+                          <div class="flex flex-wrap gap-2 mb-4">
+                            <span v-for="(skill, index) in employeeForm.skills" :key="index"
+                              class="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full flex items-center gap-2">
+                              {{ skill }}
+                              <button @click="removeSkill(index)" type="button"
+                                class="text-blue-600 hover:text-blue-800">
+                                ×
+                              </button>
                             </span>
                           </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                          <div class="text-sm text-gray-900">{{ employee.position }}</div>
-                          <div v-if="employee.manager" class="text-xs text-gray-500">
-                            Manager: {{ employee.manager.firstName }} {{ employee.manager.lastName }}
+                          <div class="flex gap-2">
+                            <input id="skillInput" type="text" placeholder="Add a skill..." class="form-input flex-1"
+                              @keyup.enter="addSkill">
+                            <button @click="addSkill" type="button"
+                              class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                              Add
+                            </button>
                           </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                          <div class="text-sm text-gray-900">{{employmentTypes.find(type => type.value ===
-                            employee.employmentType)?.label }}</div>
-                          <div class="text-xs text-gray-500">{{ getYearsOfService(employee.startDate) }} years</div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                          <div class="text-sm font-semibold text-gray-900">{{ formatCurrency(employee.salary.amount) }}
+                        </div>
+
+                        <!-- Leave Balance -->
+                        <div class="border border-gray-200 rounded-lg p-4">
+                          <h4 class="text-lg font-semibold text-gray-900 mb-4">Leave Balance (Days)</h4>
+                          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                              <label class="block text-sm font-medium text-gray-700 mb-1">Vacation Days</label>
+                              <input v-model="employeeForm.leaveBalance.vacation" type="number" min="0"
+                                class="form-input w-full">
+                            </div>
+                            <div>
+                              <label class="block text-sm font-medium text-gray-700 mb-1">Sick Days</label>
+                              <input v-model="employeeForm.leaveBalance.sick" type="number" min="0"
+                                class="form-input w-full">
+                            </div>
+                            <div>
+                              <label class="block text-sm font-medium text-gray-700 mb-1">Personal Days</label>
+                              <input v-model="employeeForm.leaveBalance.personal" type="number" min="0"
+                                class="form-input w-full">
+                            </div>
                           </div>
-                          <div class="text-xs text-gray-500">{{ employee.salary.payFrequency }}</div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                          <span
-                            :class="['px-2 py-1 text-xs font-medium rounded-full', getStatusClass(employee.status)]">
-                            {{statusOptions.find(opt => opt.value === employee.status)?.label || employee.status}}
-                          </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                          <div class="text-sm text-gray-900">{{ formatDate(employee.startDate) }}</div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                          <button @click="openEmployeeModal(employee)"
-                            class="text-indigo-600 hover:text-indigo-900 mr-3">
-                            Edit
+                        </div>
+
+                        <!-- Benefits -->
+                        <div class="border border-gray-200 rounded-lg p-4">
+                          <h4 class="text-lg font-semibold text-gray-900 mb-4">Benefits</h4>
+                          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <label class="flex items-center">
+                              <input v-model="employeeForm.benefits.healthInsurance" type="checkbox" class="mr-2">
+                              <span class="text-sm text-gray-700">Health Insurance</span>
+                            </label>
+                            <label class="flex items-center">
+                              <input v-model="employeeForm.benefits.dentalInsurance" type="checkbox" class="mr-2">
+                              <span class="text-sm text-gray-700">Dental Insurance</span>
+                            </label>
+                            <label class="flex items-center">
+                              <input v-model="employeeForm.benefits.retirementPlan" type="checkbox" class="mr-2">
+                              <span class="text-sm text-gray-700">Retirement Plan</span>
+                            </label>
+                            <label class="flex items-center">
+                              <input v-model="employeeForm.benefits.lifeInsurance" type="checkbox" class="mr-2">
+                              <span class="text-sm text-gray-700">Life Insurance</span>
+                            </label>
+                          </div>
+                        </div>
+
+                        <!-- Emergency Contact -->
+                        <div class="border border-gray-200 rounded-lg p-4">
+                          <h4 class="text-lg font-semibold text-gray-900 mb-4">Emergency Contact</h4>
+                          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <label class="block text-sm font-medium text-gray-700 mb-1">Contact Name</label>
+                              <input v-model="employeeForm.emergencyContact.name" type="text" class="form-input w-full">
+                            </div>
+                            <div>
+                              <label class="block text-sm font-medium text-gray-700 mb-1">Relationship</label>
+                              <input v-model="employeeForm.emergencyContact.relationship" type="text"
+                                class="form-input w-full">
+                            </div>
+                            <div>
+                              <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                              <input v-model="employeeForm.emergencyContact.phone" type="tel" class="form-input w-full">
+                            </div>
+                            <div>
+                              <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                              <input v-model="employeeForm.emergencyContact.email" type="email"
+                                class="form-input w-full">
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Notes -->
+                        <div>
+                          <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                          <textarea v-model="employeeForm.notes" rows="3" class="form-input w-full"
+                            placeholder="Additional notes about the employee..."></textarea>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="flex justify-end space-x-3 pt-4 border-t">
+                          <button type="button" @click="closeEmployeeModal"
+                            class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
+                            Cancel
                           </button>
-                          <button @click="deleteEmployee(employee._id)" class="text-red-600 hover:text-red-900">
-                            Delete
+                          <button type="submit" class="btn btn-primary">
+                            {{ editingEmployee ? 'Update Employee' : 'Create Employee' }}
                           </button>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-
-                <!-- Pagination -->
-                <div v-if="totalPages > 1" class="flex items-center justify-between px-6 py-3 bg-gray-50 border-t">
-                  <div class="text-sm text-gray-700">
-                    Page {{ currentPage }} of {{ totalPages }}
+                        </div>
+                      </form>
+                    </div>
                   </div>
-                  <div class="flex gap-2">
-                    <button @click="prevPage" :disabled="currentPage === 1"
-                      class="px-3 py-1 text-sm border rounded-md disabled:opacity-50 disabled:cursor-not-allowed">
-                      Previous
-                    </button>
-                    <button @click="nextPage" :disabled="currentPage === totalPages"
-                      class="px-3 py-1 text-sm border rounded-md disabled:opacity-50 disabled:cursor-not-allowed">
-                      Next
+                  
+                  <!-- Employee Management Header -->
+                  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div class="flex flex-col md:flex-row gap-4">
+                      <!-- Search -->
+                      <div class="relative">
+                        <input v-model="searchQuery" type="text" placeholder="Search employees..."
+                          class="form-input w-full sm:w-96 md:w-[28rem]" style="padding-left:3.5rem; min-width: 280px;">
+                        <svg class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 transform"
+                          fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                      </div>
+
+                      <!-- Department Filter -->
+                      <select v-model="selectedDepartment" class="form-select w-48">
+                        <option value="">All Departments</option>
+                        <option v-for="dept in departments" :key="dept.value" :value="dept.value">
+                          {{ dept.icon }} {{ dept.label }}
+                        </option>
+                      </select>
+
+                      <!-- Status Filter -->
+                      <select v-model="selectedStatus" class="form-select w-40">
+                        <option value="">All Status</option>
+                        <option v-for="status in statusOptions" :key="status.value" :value="status.value">
+                          {{ status.label }}
+                        </option>
+                      </select>
+                    </div>
+
+                    <button @click="openEmployeeModal()" class="btn btn-primary flex items-center gap-2">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                      </svg>
+                      Add New Employee
                     </button>
                   </div>
-                </div>
-              </div>
-            </div>
 
-            <!-- Departments Tab -->
-            <div v-if="activeTab === 'departments'" class="space-y-6">
-              <h3 class="text-xl font-semibold text-secondary-900">Department Overview</h3>
+                  <!-- Employees Table -->
+                  <div class="card overflow-hidden">
+                    <div class="overflow-x-auto">
+                      <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                          <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Employee</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Department</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Position</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Employment</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Salary</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Start
+                              Date</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                          <tr v-for="employee in filteredEmployees" :key="employee._id" class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                              <div class="flex items-center">
+                                <div class="flex-shrink-0 h-10 w-10">
+                                  <div class="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                                    <span class="text-sm font-medium text-gray-700">
+                                      {{ employee.firstName.charAt(0) }}{{ employee.lastName.charAt(0) }}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div class="ml-4">
+                                  <div class="text-sm font-medium text-gray-900">{{ employee.firstName }} {{
+                                    employee.lastName }}</div>
+                                  <div class="text-sm text-gray-500">{{ employee.employeeId }}</div>
+                                  <div class="text-sm text-gray-500">{{ employee.email }}</div>
+                                </div>
+                              </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                              <div class="flex items-center">
+                                <span class="text-lg mr-2">{{ getDepartmentIcon(employee.department) }}</span>
+                                <span class="text-sm font-medium text-gray-900">
+                                  {{departments.find(dept => dept.value === employee.department)?.label ||
+                                    employee.department}}
+                                </span>
+                              </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                              <div class="text-sm text-gray-900">{{ employee.position }}</div>
+                              <div v-if="employee.manager" class="text-xs text-gray-500">
+                                Manager: {{ employee.manager.firstName }} {{ employee.manager.lastName }}
+                              </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                              <div class="text-sm text-gray-900">{{employmentTypes.find(type => type.value ===
+                                employee.employmentType)?.label}}</div>
+                              <div class="text-xs text-gray-500">{{ getYearsOfService(employee.startDate) }} years</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                              <div class="text-sm font-semibold text-gray-900">{{ formatCurrency(employee.salary.amount)
+                              }}
+                              </div>
+                              <div class="text-xs text-gray-500">{{ employee.salary.payFrequency }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                              <span
+                                :class="['px-2 py-1 text-xs font-medium rounded-full', getStatusClass(employee.status)]">
+                                {{statusOptions.find(opt => opt.value === employee.status)?.label || employee.status}}
+                              </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                              <div class="text-sm text-gray-900">{{ formatDate(employee.startDate) }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                              <button @click="openEmployeeModal(employee)"
+                                class="text-indigo-600 hover:text-indigo-900 mr-3">
+                                Edit
+                              </button>
+                              <button @click="deleteEmployee(employee._id)" class="text-red-600 hover:text-red-900">
+                                Delete
+                              </button>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
 
-              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div v-for="dept in departmentStats" :key="dept.department" class="card p-6">
-                  <div class="flex items-center justify-between mb-4">
-                    <div class="flex items-center">
-                      <span class="text-2xl mr-3">{{ getDepartmentIcon(dept.department) }}</span>
-                      <div>
-                        <h4 class="text-lg font-semibold text-gray-900">
-                          {{departments.find(d => d.value === dept.department)?.label || dept.department}}
-                        </h4>
-                        <p class="text-sm text-gray-600">{{ dept.employeeCount }} employees</p>
+                    <!-- Pagination -->
+                    <div v-if="totalPages > 1" class="flex items-center justify-between px-6 py-3 bg-gray-50 border-t">
+                      <div class="text-sm text-gray-700">
+                        Page {{ currentPage }} of {{ totalPages }}
+                      </div>
+                      <div class="flex gap-2">
+                        <button @click="prevPage" :disabled="currentPage === 1"
+                          class="px-3 py-1 text-sm border rounded-md disabled:opacity-50 disabled:cursor-not-allowed">
+                          Previous
+                        </button>
+                        <button @click="nextPage" :disabled="currentPage === totalPages"
+                          class="px-3 py-1 text-sm border rounded-md disabled:opacity-50 disabled:cursor-not-allowed">
+                          Next
+                        </button>
                       </div>
                     </div>
                   </div>
-
-                  <div class="space-y-2">
-                    <div class="flex justify-between text-sm">
-                      <span class="text-gray-600">Average Salary:</span>
-                      <span class="font-semibold">{{ formatCurrency(dept.averageSalary) }}</span>
-                    </div>
-                    <div class="flex justify-between text-sm">
-                      <span class="text-gray-600">Total Payroll:</span>
-                      <span class="font-semibold">{{ formatCurrency(dept.totalSalary) }}</span>
-                    </div>
-                    <div class="flex justify-between text-sm">
-                      <span class="text-gray-600">Full-time:</span>
-                      <span class="font-semibold">{{ dept.fullTimeCount || 0 }}</span>
-                    </div>
-                    <div class="flex justify-between text-sm">
-                      <span class="text-gray-600">Part-time:</span>
-                      <span class="font-semibold">{{ dept.partTimeCount || 0 }}</span>
-                    </div>
-                  </div>
                 </div>
-              </div>
-            </div>
 
-            <!-- Payroll Tab -->
-            <div v-if="activeTab === 'payroll'" class="space-y-6">
-              <h3 class="text-xl font-semibold text-secondary-900">Payroll Summary</h3>
+                <!-- Departments Tab -->
+                <div v-if="activeTab === 'departments'" class="space-y-6">
+                  <h3 class="text-xl font-semibold text-secondary-900">Department Overview</h3>
 
-              <!-- Payroll Overview -->
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="card p-6 text-center">
-                  <div class="text-2xl font-bold text-green-600 mb-2">{{
-                    formatCurrency(payrollSummary.totalMonthlyPayroll) }}</div>
-                  <div class="text-sm text-secondary-600">Total Monthly Payroll</div>
-                </div>
-                <div class="card p-6 text-center">
-                  <div class="text-2xl font-bold text-blue-600 mb-2">{{ payrollSummary.employeeCount || 0 }}</div>
-                  <div class="text-sm text-secondary-600">Active Employees</div>
-                </div>
-                <div class="card p-6 text-center">
-                  <div class="text-2xl font-bold text-purple-600 mb-2">
-                    {{ payrollSummary.employeeCount > 0 ? formatCurrency(payrollSummary.totalMonthlyPayroll /
-                      payrollSummary.employeeCount) : '$0' }}
-                  </div>
-                  <div class="text-sm text-secondary-600">Average Monthly Salary</div>
-                </div>
-              </div>
-
-              <!-- Department Payroll Breakdown -->
-              <div class="card p-6">
-                <h4 class="text-lg font-semibold text-secondary-900 mb-4">Department Payroll Breakdown</h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div v-for="(amount, department) in payrollSummary.departmentPayroll" :key="department"
-                    class="border border-gray-200 rounded-lg p-4">
-                    <div class="flex items-center justify-between">
-                      <div class="flex items-center">
-                        <span class="text-lg mr-2">{{ getDepartmentIcon(department) }}</span>
-                        <span class="font-medium">{{departments.find(d => d.value === department)?.label || department
-                          }}</span>
+                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div v-for="dept in departmentStats" :key="dept.department" class="card p-6">
+                      <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center">
+                          <span class="text-2xl mr-3">{{ getDepartmentIcon(dept.department) }}</span>
+                          <div>
+                            <h4 class="text-lg font-semibold text-gray-900">
+                              {{departments.find(d => d.value === dept.department)?.label || dept.department}}
+                            </h4>
+                            <p class="text-sm text-gray-600">{{ dept.employeeCount }} employees</p>
+                          </div>
+                        </div>
                       </div>
-                      <span class="font-bold text-lg">{{ formatCurrency(amount) }}</span>
+
+                      <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                          <span class="text-gray-600">Average Salary:</span>
+                          <span class="font-semibold">{{ formatCurrency(dept.averageSalary) }}</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                          <span class="text-gray-600">Total Payroll:</span>
+                          <span class="font-semibold">{{ formatCurrency(dept.totalSalary) }}</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                          <span class="text-gray-600">Full-time:</span>
+                          <span class="font-semibold">{{ dept.fullTimeCount || 0 }}</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                          <span class="text-gray-600">Part-time:</span>
+                          <span class="font-semibold">{{ dept.partTimeCount || 0 }}</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
+
+                <!-- Payroll Tab -->
+                <div v-if="activeTab === 'payroll'" class="space-y-6">
+                  <h3 class="text-xl font-semibold text-secondary-900">Payroll Summary</h3>
+
+                  <!-- Payroll Overview -->
+                  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="card p-6 text-center">
+                      <div class="text-2xl font-bold text-green-600 mb-2">{{
+                        formatCurrency(payrollSummary.totalMonthlyPayroll) }}</div>
+                      <div class="text-sm text-secondary-600">Total Monthly Payroll</div>
+                    </div>
+                    <div class="card p-6 text-center">
+                      <div class="text-2xl font-bold text-blue-600 mb-2">{{ payrollSummary.employeeCount || 0 }}</div>
+                      <div class="text-sm text-secondary-600">Active Employees</div>
+                    </div>
+                    <div class="card p-6 text-center">
+                      <div class="text-2xl font-bold text-purple-600 mb-2">
+                        {{ payrollSummary.employeeCount > 0 ? formatCurrency(payrollSummary.totalMonthlyPayroll /
+                          payrollSummary.employeeCount) : '$0' }}
+                      </div>
+                      <div class="text-sm text-secondary-600">Average Monthly Salary</div>
+                    </div>
+                  </div>
+
+                  <!-- Department Payroll Breakdown -->
+                  <div class="card p-6">
+                    <h4 class="text-lg font-semibold text-secondary-900 mb-4">Department Payroll Breakdown</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div v-for="(amount, department) in payrollSummary.departmentPayroll" :key="department"
+                        class="border border-gray-200 rounded-lg p-4">
+                        <div class="flex items-center justify-between">
+                          <div class="flex items-center">
+                            <span class="text-lg mr-2">{{ getDepartmentIcon(department) }}</span>
+                            <span class="font-medium">{{departments.find(d => d.value === department)?.label ||
+                              department
+                            }}</span>
+                          </div>
+                          <span class="font-bold text-lg">{{ formatCurrency(amount) }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
               </div>
             </div>
-
           </div>
         </div>
+
+
+        <AdminChatWidget />
       </div>
-    </div>
-    <!-- Employee Modal -->
-    <div v-if="showEmployeeModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-      @click="closeEmployeeModal">
-      <div class="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto" @click.stop>
-        <div class="flex justify-between items-center mb-6">
-          <h3 class="text-xl font-bold text-gray-900">
-            {{ editingEmployee ? 'Edit Employee' : 'Add New Employee' }}
-          </h3>
-          <button @click="closeEmployeeModal" class="text-gray-500 hover:text-gray-700">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-            </svg>
-          </button>
-        </div>
-
-        <form @submit.prevent="saveEmployee" class="space-y-6">
-          <!-- Basic Information -->
-          <div class="border border-gray-200 rounded-lg p-4">
-            <h4 class="text-lg font-semibold text-gray-900 mb-4">Basic Information</h4>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Employee ID</label>
-                <input v-model="employeeForm.employeeId" type="text" class="form-input w-full"
-                  :placeholder="editingEmployee ? '' : 'Auto-generated if empty'">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
-                <input v-model="employeeForm.firstName" type="text" class="form-input w-full" required>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
-                <input v-model="employeeForm.lastName" type="text" class="form-input w-full" required>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-                <input v-model="employeeForm.email" type="email" class="form-input w-full" required>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-                <input v-model="employeeForm.phone" type="tel" class="form-input w-full">
-              </div>
-            </div>
-          </div>
-
-          <!-- Employment Details -->
-          <div class="border border-gray-200 rounded-lg p-4">
-            <h4 class="text-lg font-semibold text-gray-900 mb-4">Employment Details</h4>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Department *</label>
-                <select v-model="employeeForm.department" class="form-select w-full" required>
-                  <option v-for="dept in departments" :key="dept.value" :value="dept.value">
-                    {{ dept.icon }} {{ dept.label }}
-                  </option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Position *</label>
-                <input v-model="employeeForm.position" type="text" class="form-input w-full" required>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Employment Type</label>
-                <select v-model="employeeForm.employmentType" class="form-select w-full">
-                  <option v-for="type in employmentTypes" :key="type.value" :value="type.value">
-                    {{ type.label }}
-                  </option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                <select v-model="employeeForm.status" class="form-select w-full">
-                  <option v-for="status in statusOptions" :key="status.value" :value="status.value">
-                    {{ status.label }}
-                  </option>
-                </select>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Start Date *</label>
-                <input v-model="employeeForm.startDate" type="date" class="form-input w-full" required>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
-                <input v-model="employeeForm.endDate" type="date" class="form-input w-full">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Manager</label>
-                <select v-model="employeeForm.manager" class="form-select w-full">
-                  <option value="">No Manager</option>
-                  <option v-for="emp in employees.filter(e => e.status === 'active' && e._id !== editingEmployee?._id)"
-                    :key="emp._id" :value="emp._id">
-                    {{ emp.firstName }} {{ emp.lastName }} ({{ emp.employeeId }})
-                  </option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <!-- Salary Information -->
-          <div class="border border-gray-200 rounded-lg p-4">
-            <h4 class="text-lg font-semibold text-gray-900 mb-4">Compensation</h4>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Salary Amount *</label>
-                <input v-model="employeeForm.salary.amount" type="number" step="0.01" min="0" class="form-input w-full"
-                  required>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Currency</label>
-                <select v-model="employeeForm.salary.currency" class="form-select w-full">
-                  <option value="USD">USD</option>
-                  <option value="EUR">EUR</option>
-                  <option value="GBP">GBP</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Pay Frequency</label>
-                <select v-model="employeeForm.salary.payFrequency" class="form-select w-full">
-                  <option v-for="freq in payFrequencies" :key="freq.value" :value="freq.value">
-                    {{ freq.label }}
-                  </option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <!-- Skills -->
-          <div class="border border-gray-200 rounded-lg p-4">
-            <h4 class="text-lg font-semibold text-gray-900 mb-4">Skills</h4>
-            <div class="flex flex-wrap gap-2 mb-4">
-              <span v-for="(skill, index) in employeeForm.skills" :key="index"
-                class="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full flex items-center gap-2">
-                {{ skill }}
-                <button @click="removeSkill(index)" type="button" class="text-blue-600 hover:text-blue-800">
-                  ×
-                </button>
-              </span>
-            </div>
-            <div class="flex gap-2">
-              <input id="skillInput" type="text" placeholder="Add a skill..." class="form-input flex-1"
-                @keyup.enter="addSkill">
-              <button @click="addSkill" type="button"
-                class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
-                Add
-              </button>
-            </div>
-          </div>
-
-          <!-- Leave Balance -->
-          <div class="border border-gray-200 rounded-lg p-4">
-            <h4 class="text-lg font-semibold text-gray-900 mb-4">Leave Balance (Days)</h4>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Vacation Days</label>
-                <input v-model="employeeForm.leaveBalance.vacation" type="number" min="0" class="form-input w-full">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Sick Days</label>
-                <input v-model="employeeForm.leaveBalance.sick" type="number" min="0" class="form-input w-full">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Personal Days</label>
-                <input v-model="employeeForm.leaveBalance.personal" type="number" min="0" class="form-input w-full">
-              </div>
-            </div>
-          </div>
-
-          <!-- Benefits -->
-          <div class="border border-gray-200 rounded-lg p-4">
-            <h4 class="text-lg font-semibold text-gray-900 mb-4">Benefits</h4>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <label class="flex items-center">
-                <input v-model="employeeForm.benefits.healthInsurance" type="checkbox" class="mr-2">
-                <span class="text-sm text-gray-700">Health Insurance</span>
-              </label>
-              <label class="flex items-center">
-                <input v-model="employeeForm.benefits.dentalInsurance" type="checkbox" class="mr-2">
-                <span class="text-sm text-gray-700">Dental Insurance</span>
-              </label>
-              <label class="flex items-center">
-                <input v-model="employeeForm.benefits.retirementPlan" type="checkbox" class="mr-2">
-                <span class="text-sm text-gray-700">Retirement Plan</span>
-              </label>
-              <label class="flex items-center">
-                <input v-model="employeeForm.benefits.lifeInsurance" type="checkbox" class="mr-2">
-                <span class="text-sm text-gray-700">Life Insurance</span>
-              </label>
-            </div>
-          </div>
-
-          <!-- Emergency Contact -->
-          <div class="border border-gray-200 rounded-lg p-4">
-            <h4 class="text-lg font-semibold text-gray-900 mb-4">Emergency Contact</h4>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Contact Name</label>
-                <input v-model="employeeForm.emergencyContact.name" type="text" class="form-input w-full">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Relationship</label>
-                <input v-model="employeeForm.emergencyContact.relationship" type="text" class="form-input w-full">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-                <input v-model="employeeForm.emergencyContact.phone" type="tel" class="form-input w-full">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                <input v-model="employeeForm.emergencyContact.email" type="email" class="form-input w-full">
-              </div>
-            </div>
-          </div>
-
-          <!-- Notes -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
-            <textarea v-model="employeeForm.notes" rows="3" class="form-input w-full"
-              placeholder="Additional notes about the employee..."></textarea>
-          </div>
-
-          <!-- Form Actions -->
-          <div class="flex justify-end space-x-3 pt-4 border-t">
-            <button type="button" @click="closeEmployeeModal"
-              class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
-              Cancel
-            </button>
-            <button type="submit" class="btn btn-primary">
-              {{ editingEmployee ? 'Update Employee' : 'Create Employee' }}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <AdminChatWidget/>
-  </div>
 </template>
 
 <style scoped>

@@ -611,11 +611,10 @@ watch([selectedDepartment, selectedStatus, currentPage], fetchEmployees);
           <div class="border-b border-gray-200">
             <nav class="flex space-x-8 px-6" aria-label="Tabs">
               <button v-for="tab in [
-                { id: 'dashboard', name: 'Dashboard', icon: '📊' },
+                { id: 'dashboard', name: 'Dashboard & Analytics', icon: '📊' },
                 { id: 'employees', name: 'Employee Directory', icon: '👥' },
                 { id: 'departments', name: 'Departments', icon: '🏢' },
-                { id: 'payroll', name: 'Payroll', icon: '💰' },
-                { id: 'reports', name: 'Reports', icon: '📈' }
+                { id: 'payroll', name: 'Payroll', icon: '💰' }
               ]" :key="tab.id" @click="activeTab = tab.id" :class="[
                   'py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2',
                   activeTab === tab.id
@@ -630,7 +629,7 @@ watch([selectedDepartment, selectedStatus, currentPage], fetchEmployees);
 
           <!-- Tab Content -->
           <div class="p-6">
-            <!-- Dashboard Tab -->
+            <!-- Dashboard & Analytics Tab -->
             <div v-if="activeTab === 'dashboard'" class="space-y-8">
               <!-- Key HR Metrics -->
               <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -705,9 +704,9 @@ watch([selectedDepartment, selectedStatus, currentPage], fetchEmployees);
                 </div>
               </div>
 
-              <!-- Charts Row -->
-              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Department Breakdown -->
+              <!-- Charts and Analytics Row -->
+              <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                <!-- Department Breakdown Chart -->
                 <div class="card p-6">
                   <h4 class="text-lg font-semibold text-secondary-900 mb-4">🏢 Employee Distribution by Department</h4>
                   <div v-if="hrAnalytics.departmentBreakdown?.length > 0" class="h-64">
@@ -718,14 +717,150 @@ watch([selectedDepartment, selectedStatus, currentPage], fetchEmployees);
                   </div>
                 </div>
 
-                <!-- Payroll by Department -->
+                <!-- Employment Type & Status -->
                 <div class="card p-6">
-                  <h4 class="text-lg font-semibold text-secondary-900 mb-4">💰 Payroll by Department</h4>
+                  <h4 class="text-lg font-semibold text-secondary-900 mb-4">👔 Employment Analysis</h4>
+                  <div class="space-y-4">
+                    <!-- Employment Types -->
+                    <div>
+                      <h5 class="text-sm font-semibold text-gray-700 mb-2">Employment Types</h5>
+                      <div v-if="hrAnalytics.employmentTypeBreakdown?.length > 0" class="space-y-2">
+                        <div v-for="type in hrAnalytics.employmentTypeBreakdown" :key="type._id"
+                          class="flex items-center justify-between">
+                          <div class="flex items-center">
+                            <div class="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
+                            <span class="text-xs font-medium">{{employmentTypes.find(t => t.value === type._id)?.label || type._id }}</span>
+                          </div>
+                          <div class="text-xs font-bold text-blue-600">{{ type.count }}</div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <!-- Employee Status -->
+                    <div class="border-t pt-3">
+                      <h5 class="text-sm font-semibold text-gray-700 mb-2">Employee Status</h5>
+                      <div class="space-y-2">
+                        <div v-for="status in statusOptions" :key="status.value"
+                          class="flex items-center justify-between">
+                          <div class="flex items-center">
+                            <div :class="['w-3 h-3 rounded-full mr-2', 
+                              status.value === 'active' ? 'bg-green-500' :
+                              status.value === 'inactive' ? 'bg-gray-500' :
+                              status.value === 'terminated' ? 'bg-red-500' : 'bg-yellow-500'
+                            ]"></div>
+                            <span class="text-xs font-medium">{{ status.label }}</span>
+                          </div>
+                          <div class="text-xs font-bold"
+                            :class="status.value === 'active' ? 'text-green-600' :
+                              status.value === 'inactive' ? 'text-gray-600' :
+                              status.value === 'terminated' ? 'text-red-600' : 'text-yellow-600'">
+                            {{ employees.filter(emp => emp.status === status.value).length }}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Payroll by Department Chart -->
+                <div class="card p-6">
+                  <h4 class="text-lg font-semibold text-secondary-900 mb-4">💰 Department Payroll</h4>
                   <div v-if="departmentStats.length > 0" class="h-64">
                     <Bar :data="payrollChartData" :options="barChartOptions" />
                   </div>
                   <div v-else class="text-center py-8 text-gray-500">
                     <p>No payroll data available</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Detailed Analytics -->
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Tenure & Salary Analysis -->
+                <div class="card p-6">
+                  <h4 class="text-lg font-semibold text-secondary-900 mb-4">📈 Workforce Analytics</h4>
+                  <div class="space-y-4">
+                    <!-- Tenure Distribution -->
+                    <div>
+                      <h5 class="text-sm font-semibold text-gray-700 mb-2">⏱️ Tenure Distribution</h5>
+                      <div class="space-y-2">
+                        <div v-for="range in [
+                          { label: '< 1 year', min: 0, max: 1, color: 'bg-red-400' },
+                          { label: '1-3 years', min: 1, max: 3, color: 'bg-yellow-400' },
+                          { label: '3-5 years', min: 3, max: 6, color: 'bg-blue-400' },
+                          { label: '5+ years', min: 5, max: 999, color: 'bg-green-400' }
+                        ]" :key="range.label" class="flex items-center justify-between">
+                          <div class="flex items-center">
+                            <div :class="['w-3 h-3 rounded-full mr-2', range.color]"></div>
+                            <span class="text-xs font-medium">{{ range.label }}</span>
+                          </div>
+                          <div class="text-xs font-bold text-gray-800">
+                            {{ employees.filter(emp => {
+                              const years = getYearsOfService(emp.startDate);
+                              return years >= range.min && years < range.max;
+                            }).length }}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Salary Range -->
+                    <div class="border-t pt-3">
+                      <h5 class="text-sm font-semibold text-gray-700 mb-2">💰 Salary Distribution</h5>
+                      <div class="space-y-2">
+                        <div v-for="range in [
+                          { label: '< $50K', min: 0, max: 50000, color: 'bg-red-400' },
+                          { label: '$50K - $75K', min: 50000, max: 75000, color: 'bg-yellow-400' },
+                          { label: '$75K - $100K', min: 75000, max: 100000, color: 'bg-blue-400' },
+                          { label: '$100K+', min: 100000, max: 999999999, color: 'bg-green-400' }
+                        ]" :key="range.label" class="flex items-center justify-between">
+                          <div class="flex items-center">
+                            <div :class="['w-3 h-3 rounded-full mr-2', range.color]"></div>
+                            <span class="text-xs font-medium">{{ range.label }}</span>
+                          </div>
+                          <div class="text-xs font-bold text-gray-800">
+                            {{ employees.filter(emp => {
+                              const salary = emp.salary?.amount || 0;
+                              return salary >= range.min && salary < range.max;
+                            }).length }}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Department Analysis Table -->
+                <div class="card p-6">
+                  <h4 class="text-lg font-semibold text-secondary-900 mb-4">🏢 Department Performance</h4>
+                  <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                      <thead>
+                        <tr class="border-b border-gray-200">
+                          <th class="text-left py-2 font-medium text-gray-700">Dept</th>
+                          <th class="text-right py-2 font-medium text-gray-700">Count</th>
+                          <th class="text-right py-2 font-medium text-gray-700">Avg Salary</th>
+                          <th class="text-right py-2 font-medium text-gray-700">%</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="dept in departmentStats.slice(0, 6)" :key="dept.department" class="border-b border-gray-100">
+                          <td class="py-2">
+                            <div class="flex items-center">
+                              <span class="mr-1 text-sm">{{ getDepartmentIcon(dept.department) }}</span>
+                              <span class="text-xs font-medium truncate">
+                                {{ departments.find(d => d.value === dept.department)?.label?.substring(0, 10) || dept.department }}
+                              </span>
+                            </div>
+                          </td>
+                          <td class="text-right py-2 font-semibold text-xs">{{ dept.employeeCount }}</td>
+                          <td class="text-right py-2 text-xs">{{ formatCurrency(dept.averageSalary).replace('$', '$').replace(',', 'K').replace('000', '') }}</td>
+                          <td class="text-right py-2 text-xs">
+                            {{ Math.round((dept.employeeCount / (hrAnalytics.overview?.totalEmployees || 1)) * 100) }}%
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               </div>
@@ -778,6 +913,20 @@ watch([selectedDepartment, selectedStatus, currentPage], fetchEmployees);
                   </div>
                 </div>
               </div>
+
+              <!-- Performance Distribution (only show if data exists) -->
+              <div v-if="hrAnalytics.performanceStats?.length > 0" class="card p-6">
+                <h4 class="text-lg font-semibold text-secondary-900 mb-4">⭐ Performance Ratings Distribution</h4>
+                <div class="grid grid-cols-5 gap-4">
+                  <div v-for="rating in [1, 2, 3, 4, 5]" :key="rating" class="text-center">
+                    <div class="text-2xl font-bold mb-2"
+                      :class="rating >= 4 ? 'text-green-600' : rating >= 3 ? 'text-yellow-600' : 'text-red-600'">
+                      {{hrAnalytics.performanceStats.find(p => p._id === rating)?.count || 0}}
+                    </div>
+                    <div class="text-sm text-gray-600">{{ rating }} Star{{ rating !== 1 ? 's' : '' }}</div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <!-- Employees Tab -->
@@ -788,8 +937,8 @@ watch([selectedDepartment, selectedStatus, currentPage], fetchEmployees);
                   <!-- Search -->
                   <div class="relative">
                     <input v-model="searchQuery" type="text" placeholder="Search employees..."
-                      class="form-input pl-10 w-64">
-                    <svg class="w-5 h-5 text-gray-400 absolute left-3 top-3" fill="none" stroke="currentColor"
+                      class="form-input w-full sm:w-96 md:w-[28rem]" style="padding-left:3.5rem; min-width: 280px;">
+                    <svg class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 transform" fill="none" stroke="currentColor"
                       viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -1015,42 +1164,10 @@ watch([selectedDepartment, selectedStatus, currentPage], fetchEmployees);
               </div>
             </div>
 
-            <!-- Reports Tab -->
-            <div v-if="activeTab === 'reports'" class="space-y-6">
-              <h3 class="text-xl font-semibold text-secondary-900">HR Reports & Analytics</h3>
-
-              <!-- Performance Distribution -->
-              <div v-if="hrAnalytics.performanceStats?.length > 0" class="card p-6">
-                <h4 class="text-lg font-semibold text-secondary-900 mb-4">⭐ Performance Ratings Distribution</h4>
-                <div class="grid grid-cols-5 gap-4">
-                  <div v-for="rating in [1, 2, 3, 4, 5]" :key="rating" class="text-center">
-                    <div class="text-2xl font-bold mb-2"
-                      :class="rating >= 4 ? 'text-green-600' : rating >= 3 ? 'text-yellow-600' : 'text-red-600'">
-                      {{hrAnalytics.performanceStats.find(p => p._id === rating)?.count || 0}}
-                    </div>
-                    <div class="text-sm text-gray-600">{{ rating }} Star{{ rating !== 1 ? 's' : '' }}</div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Employment Type Breakdown -->
-              <div class="card p-6">
-                <h4 class="text-lg font-semibold text-secondary-900 mb-4">👔 Employment Type Distribution</h4>
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <div v-for="type in hrAnalytics.employmentTypeBreakdown" :key="type._id"
-                    class="text-center p-4 border border-gray-200 rounded-lg">
-                    <div class="text-2xl font-bold text-blue-600 mb-2">{{ type.count }}</div>
-                    <div class="text-sm text-gray-600">{{employmentTypes.find(t => t.value === type._id)?.label ||
-                      type._id }}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
     </div>
-
     <!-- Employee Modal -->
     <div v-if="showEmployeeModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
       @click="closeEmployeeModal">
